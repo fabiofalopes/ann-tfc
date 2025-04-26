@@ -1,0 +1,125 @@
+.message-bubble {
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+  max-width: 80%;
+  /* width: auto; */
+  align-self: flex-end;
+  transition: transform 0.3s ease-in-out;
+  background-color: var(--card-background);
+  box-shadow: var(--card-shadow);
+  margin-left: auto;  /* This aligns messages to the right by default */
+  width: fit-content;
+  transition: margin 0.2s ease-in-out;
+  position: relative;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.8em;
+  opacity: 0.7;
+  color: var(--text-color);
+}
+
+.turn-id {
+  font-weight: bold;
+}
+
+.message-content {
+  margin-bottom: 8px;
+  word-wrap: break-word;
+}
+
+.see-more-container {
+  text-align: center;
+}
+
+.see-all-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9em;
+  padding: 0;
+  text-decoration: underline;
+  color: var(--primary-color);
+}
+
+.see-all-button:hover {
+  color: var(--secondary-color);
+}
+
+.user-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  margin-left: auto;
+}
+
+
+.user-id-label {
+  font-size: 0.85em;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 350;
+  /* font-weight: bold; */
+}
+
+.user-id-value {
+  /* font-weight: 500; */
+  font-weight: bold;
+}
+
+.user-id:hover {
+  background-color: color-mix(in srgb, var(--text-color) 5%, var(--card-background));
+}
+
+.user-selected .user-id {
+  background-color: color-mix(in srgb, var(--text-color) 10%, var(--card-background));
+}
+
+.turn-id-label {
+  font-size: 0.85em;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 350;
+}
+
+.turn-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 16px;
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+}
+
+.turn-id-value {
+  font-weight: 500;
+}
+
+.message-bubble.user-selected {
+  margin-left: 20px;  /* Add some padding from the left edge */
+  margin-right: auto;
+      background-color: color-mix(in srgb, var(--primary-color) 8%, var(--card-background));
+}
+
+.annotator-container {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  font-size: 0.8em;
+  opacity: 0.7;
+  color: var(--text-color);
+}
+
