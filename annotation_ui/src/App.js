@@ -7,11 +7,15 @@ import ThreadMenu from './components/ThreadMenu';
 import AuthMenu from './components/AuthMenu';
 import { auth, projects, annotations } from './utils/api';
 import AdminDashboard from './components/AdminDashboard';
+import AnnotatorDashboard from './components/AnnotatorDashboard';
 import ProjectList from './components/ProjectList';
 import ChatRoomList from './components/ChatRoomList';
 import MessageList from './components/MessageList';
 import ProjectPage from './components/ProjectPage';
 import ChatRoomPage from './components/ChatRoomPage';
+import AnnotatorProjectPage from './components/AnnotatorProjectPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import AnnotatorChatRoomPage from './components/AnnotatorChatRoomPage';
 
 function App() {
     const [messages, setMessages] = useState([]);
@@ -67,7 +71,8 @@ function App() {
     const handleLogin = async (userData) => {
         setIsAuthenticated(true);
         setCurrentUser(userData);
-        navigate('/');
+        // Redirect based on user role
+        navigate(userData.is_admin ? '/admin' : '/annotator');
     };
 
     const handleLogout = () => {
@@ -269,7 +274,11 @@ function App() {
                 <Routes>
                     <Route path="/" element={
                         isAuthenticated ? (
-                            <Navigate to="/admin" />
+                            currentUser?.is_admin ? (
+                                <Navigate to="/admin" />
+                            ) : (
+                                <Navigate to="/annotator" />
+                            )
                         ) : (
                             <AuthMenu onLogin={handleLogin} />
                         )
@@ -324,6 +333,29 @@ function App() {
                             <Navigate to="/" />
                         )
                     } />
+                    <Route path="/annotator" element={
+                        isAuthenticated ? (
+                            <AnnotatorDashboard currentUser={currentUser} />
+                        ) : (
+                            <Navigate to="/" />
+                        )
+                    } />
+                    <Route
+                        path="/annotator/projects/:projectId"
+                        element={
+                            <ProtectedRoute>
+                                <AnnotatorProjectPage currentUser={currentUser} />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/annotator/projects/:projectId/chat-rooms/:chatRoomId"
+                        element={
+                            <ProtectedRoute>
+                                <AnnotatorChatRoomPage currentUser={currentUser} />
+                            </ProtectedRoute>
+                        }
+                    />
                 </Routes>
             </main>
         </div>

@@ -29,16 +29,39 @@ const MessageBubble = ({
 
   const handleAnnotationSubmit = async (e) => {
     e.preventDefault();
-    if (!newAnnotation.trim()) return;
+    const threadId = newAnnotation.trim();
+    if (!threadId) return;
     
     try {
       setError(null);
-      await onAnnotationCreate(newAnnotation.trim());
+      await onAnnotationCreate(threadId);
       setNewAnnotation('');
       setShowAnnotationForm(false);
     } catch (err) {
       console.error('Error creating annotation:', err);
-      setError(err.response?.data?.detail || err.message || 'Failed to create annotation');
+      
+      // Handle FastAPI validation errors (422)
+      if (err.response?.status === 422 && Array.isArray(err.response.data.detail)) {
+        const validationErrors = err.response.data.detail
+          .map(error => error.msg)
+          .join(', ');
+        setError(validationErrors);
+      } else {
+        // Handle other types of errors
+        let errorMessage;
+        if (typeof err === 'string') {
+          errorMessage = err;
+        } else if (err.response?.data?.detail) {
+          errorMessage = err.response.data.detail;
+        } else if (typeof err.response?.data === 'string') {
+          errorMessage = err.response.data;
+        } else if (err.message) {
+          errorMessage = err.message;
+        } else {
+          errorMessage = 'Failed to create annotation';
+        }
+        setError(errorMessage);
+      }
     }
   };
 
@@ -48,7 +71,29 @@ const MessageBubble = ({
       await onAnnotationDelete(annotationId);
     } catch (err) {
       console.error('Error deleting annotation:', err);
-      setError(err.response?.data?.detail || err.message || 'Failed to delete annotation');
+      
+      // Handle FastAPI validation errors (422)
+      if (err.response?.status === 422 && Array.isArray(err.response.data.detail)) {
+        const validationErrors = err.response.data.detail
+          .map(error => error.msg)
+          .join(', ');
+        setError(validationErrors);
+      } else {
+        // Handle other types of errors
+        let errorMessage;
+        if (typeof err === 'string') {
+          errorMessage = err;
+        } else if (err.response?.data?.detail) {
+          errorMessage = err.response.data.detail;
+        } else if (typeof err.response?.data === 'string') {
+          errorMessage = err.response.data;
+        } else if (err.message) {
+          errorMessage = err.message;
+        } else {
+          errorMessage = 'Failed to delete annotation';
+        }
+        setError(errorMessage);
+      }
     }
   };
 

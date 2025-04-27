@@ -29,21 +29,25 @@ def get_my_annotations(
     _: None = Depends(verify_project_access)
 ):
     """Get all annotations made by the current user in a specific project"""
-    # Verify project exists (optional, access check implies existence)
-    # project = db.query(Project).filter(Project.id == project_id).first()
-    # if not project:
-    #     raise HTTPException(status_code=404, detail="Project not found")
-    
-    # The access check is now handled by the dependency
-    # if not current_user.is_admin:
-    #     pass 
-
-    annotations = db.query(Annotation).filter(
+    # Get all annotations for this user with annotator information
+    annotations = db.query(
+        Annotation,
+        User.email.label('annotator_email')
+    ).join(
+        User, Annotation.annotator_id == User.id
+    ).filter(
         Annotation.project_id == project_id,
         Annotation.annotator_id == current_user.id
     ).all()
     
-    return annotations
+    # Convert to list of dictionaries with annotator email
+    result = []
+    for annotation, annotator_email in annotations:
+        annotation_dict = annotation.__dict__
+        annotation_dict['annotator_email'] = annotator_email
+        result.append(annotation_dict)
+    
+    return result
 
 @message_annotation_router.get("/", response_model=List[AnnotationSchema])
 def get_message_annotations(

@@ -225,6 +225,10 @@ export const annotations = {
         const response = await api.get(`/projects/${projectId}/messages/${messageId}/annotations/`);
         return response.data;
     },
+    getChatRoomAnnotations: async (projectId, chatRoomId) => {
+        const response = await api.get(`/projects/${projectId}/chat-rooms/${chatRoomId}/annotations/`);
+        return response.data;
+    },
     createAnnotation: async (projectId, messageId, annotationData) => {
         const response = await api.post(`/projects/${projectId}/messages/${messageId}/annotations/`, annotationData);
         return response.data;

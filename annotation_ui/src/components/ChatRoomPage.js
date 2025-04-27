@@ -93,8 +93,8 @@ const ChatRoomPage = () => {
     try {
       setAnnotationInProgress(prev => ({ ...prev, [messageId]: true }));
       const newAnnotation = await annotations.createAnnotation(projectId, messageId, { 
-        thread_id: tag,
-        message_id: messageId
+        message_id: messageId,
+        thread_id: tag
       });
       
       setMessageAnnotations(prev => ({
