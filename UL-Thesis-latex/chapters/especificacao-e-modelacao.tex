@@ -7,29 +7,29 @@
 \subsubsection{Requisitos Gerais de Anotação}
 
 \begin{itemize}
-    \item \textbf{RF1:} Gestão de diferentes formatos de dados (CSV, TXT, JSON, etc.)
-    \item \textbf{RF2:} Sistema de organização hierárquica de datasets
-    \item \textbf{RF3:} Exportação de dados anotados em múltiplos formatos
-    \item \textbf{RF4:} Interface genérica para anotação de dados
-    \item \textbf{RF5:} Suporte a múltiplos anotadores por dataset
-    \item \textbf{RF6:} Distribuição automática de tarefas entre anotadores disponíveis
+    \item \textbf{RF1:} Suporte à importação de dados em formato CSV (com extensibilidade futura planeada para outros formatos, e.g. JSON).
+    \item \textbf{RF2:} Sistema de organização de dados por projetos.
+    \item \textbf{RF3:} Exportação dos dados anotados num formato estruturado (e.g., JSON, CSV).
+    \item \textbf{RF4:} Interface de utilizador clara e funcional, otimizada para tarefas de anotação.
+    \item \textbf{RF5:} Suporte a múltiplos anotadores por projeto.
+    \item \textbf{RF6:} Gestão de atribuição de tarefas a anotadores.
 \end{itemize}
 
 \subsubsection{Requisitos Específicos - Módulo Disentanglement}
 
 \begin{itemize}
-    \item \textbf{RF7:} Interface especializada para chat disentanglement
-    \item \textbf{RF8:} Sistema de tagging para classificação de mensagens em threads
-    \item \textbf{RF9:} Visualização sequencial dos turnos (mensagens)
-    \item \textbf{RF10:} Calculo de métricas de anotação
+    \item \textbf{RF7:} Interface especializada para \textit{chat disentanglement}.
+    \item \textbf{RF8:} Sistema de \textit{tagging} para classificação de mensagens em \textit{threads}.
+    \item \textbf{RF9:} Visualização sequencial dos turnos (mensagens).
+    \item \textbf{RF10:} Armazenamento das anotações de forma a possibilitar o cálculo futuro de métricas de qualidade e concordância.
 \end{itemize}
 
 \subsubsection{Gestão de Utilizadores}
 
 \begin{itemize}
-    \item \textbf{RF11:} Autenticação de utilizadores
-    \item \textbf{RF12:} Definição de papéis (administrador/anotador)
-    \item \textbf{RF13:} Controle de acesso baseado em permissões
+    \item \textbf{RF11:} Autenticação de utilizadores.
+    \item \textbf{RF12:} Definição de roles (administrador/anotador).
+    \item \textbf{RF13:} Controlo de acesso baseado em permissões.
 \end{itemize}
 
 \subsection{Requisitos Não Funcionais}
@@ -65,36 +65,32 @@ O modelo de dados da plataforma é organizado em três componentes principais: g
 \subsubsection{Componentes Principais}
 
 \paragraph{Gestão de Utilizadores}
-O sistema mantém informações básicas dos utilizadores, incluindo credenciais e roles (administrador/anotador). Cada utilizador pode ter acesso a diferentes módulos de anotação, dependendo das permissões atribuídas.
+O sistema mantém informações básicas dos utilizadores, incluindo credenciais e \textit{roles} (administrador/anotador). Cada utilizador pode ter acesso a diferentes projetos de anotação, dependendo das permissões atribuídas.
 
-\paragraph{Gestão de Dados}
-Para o módulo de disentanglement, os dados são organizados em chatrooms, onde cada chatroom contém uma sequência de turnos (mensagens). Cada turno possui atributos como timestamp, autor e conteúdo. O conjunto total de chatrooms forma a base de dados a ser anotada. A ferramenta permite que diferentes módulos possam trabalhar com diversos formatos de dados (CSV, TXT, JSON, etc.).
-
-\paragraph{Anotações}
-As anotações são armazenadas independentemente dos dados originais, mantendo referências para a chatroom, turno, utilizador e timestamp. No contexto do disentanglement, cada anotação associa turnos a threads específicas, permitindo a reconstrução das conversas paralelas.
+\paragraph{Gestão de Dados e Anotações}
+Atualmente, a plataforma está focada no módulo de \textit{chat disentanglement} e suporta a importação de dados neste contexto a partir de ficheiros CSV. Os dados importados (mensagens/turnos, com atributos como \textit{timestamp}, autor, conteúdo) e as anotações realizadas (associação de turnos a \textit{threads}) são armazenados de forma estruturada numa base de dados relacional. A arquitetura prevê a possibilidade de evolução futura para suportar outros formatos de dados e tipos de tarefas de anotação.
 
 \subsubsection{Fluxo de Dados}
 
 O fluxo de dados na plataforma segue o seguinte padrão:
 \begin{enumerate}
-    \item Importação de dados através da interface administrativa
-    \item Distribuição automática de tarefas aos anotadores
-    \item Processo de anotação no módulo específico
-    \item Armazenamento contínuo das anotações via backend
-    \item Cálculo de métricas e análise das anotações
+    \item Importação de dados (ficheiros CSV) por utilizador administrador.
+    \item Distribuição automática de tarefas aos anotadores.
+    \item Processo de anotação no módulo de \textit{disentanglement}.
+    \item Armazenamento contínuo das anotações via backend na base de dados.
+    \item Cálculo de métricas e análise das anotações.
 \end{enumerate}
 
 \subsubsection{Armazenamento}
 
-A solução proposta contempla:
+A solução implementada utiliza uma base de dados relacional, especificamente SQLite, gerida através do ORM (Object-Relational Mapper) SQLAlchemy no backend. Esta base de dados é responsável por persistir:
 \begin{itemize}
-    \item Sistema de arquivos estruturado para gestão de diferentes formatos de dados
-    \item Base de dados para gestão de utilizadores e estado da aplicação
-    \item Sistema de cache para otimização de performance
-    \item Armazenamento independente de anotações para facilitar análise e processamento
+    \item Informação sobre utilizadores e seus papéis/permissões.
+    \item Estrutura dos projetos de anotação.
+    \item Os dados importados (e.g., mensagens de \textit{chat}).
+    \item As anotações realizadas pelos utilizadores (e.g., mapeamento mensagem-thread).
 \end{itemize}
-
-Esta estrutura visa suportar diferentes tipos de dados e formatos, mantendo a flexibilidade necessária para implementação de novos módulos de anotação.
+Esta abordagem garante a integridade e a gestão estruturada dos dados essenciais para o módulo de \textit{chat disentanglement}. Embora focada nas necessidades atuais, a utilização de um ORM como o SQLAlchemy facilita potenciais migrações ou extensões futuras do modelo de dados.
 
 \section{Protótipos de Interface}
 
@@ -148,7 +144,7 @@ O sistema mantém um salvamento automático do progresso, permitindo que os anot
 
 \begin{figure}[p]
     \centering
-    \includegraphics[width=0.95\textwidth,height=0.95\textheight,keepaspectratio]{images/Modelo_Entidade-Relacao.drawio.png}
+    \includegraphics[width=0.95\textwidth,height=0.95\textheight,keepaspectratio]{images/2A-ERT-B.drawio.png}
     \caption{Modelo de Entidade-Relação do Sistema}
     \label{fig:modelo-er}
 \end{figure}

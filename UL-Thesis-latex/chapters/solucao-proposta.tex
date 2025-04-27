@@ -71,26 +71,45 @@ A arquitectura suporta evolução em várias dimensões:
 
 \section{Tecnologias e Ferramentas Utilizadas}
 
-A implementação assenta em tecnologias web estabelecidas, escolhidas conforme estado da arte e conforme os requisitos do projeto. O frontend utiliza React para a interface de anotação, enquanto o backend em Python gere o processamento de dados, permitindo integração eficiente com ferramentas de análise e processamento.
+A implementação assenta em tecnologias web estabelecidas, escolhidas conforme estado da arte e conforme os requisitos do projeto. O frontend utiliza React para a interface de anotação, enquanto o backend em Python, desenvolvido com FastAPI, gere o acesso aos dados e a lógica aplicacional.
 
 \paragraph{Frontend}
 A escolha do React como framework principal mantém-se desde o protótipo inicial, fundamentada por:
 
 \begin{itemize}
-    \item Gestão eficiente de estado através de Hooks
-    \item Componentes reutilizáveis para consistência da interface
-    \item Rendering optimizado para operações frequentes
-    \item Extensa documentação e comunidade activa
+    \item Gestão eficiente de estado através de Hooks e Context API.
+    \item Componentes reutilizáveis para consistência da interface.
+    \item Rendering optimizado para operações interativas na anotação.
+    \item Extensa documentação e comunidade ativa, facilitando o desenvolvimento.
 \end{itemize}
 
 \paragraph{Backend}
-O desenvolvimento em Python permite:
+O backend da aplicação foi desenvolvido em Python (3.11) utilizando a framework \textbf{FastAPI}. Esta escolha foi fundamentada pela performance, facilidade de criação de APIs REST e suporte assíncrono, permitindo uma comunicação eficiente com o frontend React.
+
+\paragraph{Arquitectura do Backend}
+O backend segue uma arquitectura em camadas padrão:
 
 \begin{itemize}
-    \item Integração com bibliotecas de processamento de dados
-    \item Implementação eficiente de métricas e análises
-    \item Alinhamento com o ecossistema do departamento
-    \item Extensibilidade para funcionalidades futuras
+    \item \textbf{API Layer}: Implementação dos endpoints REST utilizando FastAPI, responsáveis por receber pedidos do frontend e devolver respostas.
+    \item \textbf{Service Layer} (ou Lógica de Negócio): Onde reside a lógica principal da aplicação, orquestrando operações como gestão de projetos, utilizadores e o processo de anotação.
+    \item \textbf{Data Layer}: Camada de acesso a dados, utilizando \textbf{SQLAlchemy} para interagir com a base de dados \textbf{SQLite}, abstraindo as operações de persistência.
+\end{itemize}
+
+\paragraph{Processamento de Dados}
+No contexto atual, focado no \textit{chat disentanglement}, o backend implementa o seguinte processamento:
+
+\begin{itemize}
+    \item Parsing e validação de ficheiros CSV na importação.
+    \item Estruturação e armazenamento das conversas e mensagens na base de dados num formato adequado para a anotação.
+\end{itemize}
+
+\paragraph{Sistema de Persistência}
+A persistência de dados é garantida pela base de dados \textbf{SQLite}, interagindo através do ORM \textbf{SQLAlchemy}. Esta abordagem permite:
+
+\begin{itemize}
+    \item Gestão eficiente dos dados relacionais (utilizadores, projetos, mensagens, anotações).
+    \item Definição clara do esquema da base de dados através de modelos Python.
+    \item Abstração das queries SQL, facilitando o desenvolvimento e manutenção.
 \end{itemize}
 
 \section{Ambientes de Teste e de Produção}

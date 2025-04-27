@@ -8,7 +8,7 @@ O AISIC LAB, validou a necessidade desta ferramenta através de feedback direto 
 O desenvolvimento desta ferramenta promete uma redução significativa no tempo de anotação, além de proporcionar uma melhoria substancial na qualidade e consistência dos dados anotados. A solução também facilita a colaboração entre anotadores e oferece suporte flexível a múltiplos tipos de tarefas de anotação, adaptando-se às necessidades específicas de cada projeto.
 
 \section{Viabilidade}
-A implementação da solução demonstra-se viável em múltiplas dimensões. Do ponto de vista técnico, a experiência prévia com um protótipo funcional em React, combinada com a disponibilidade de frameworks modernos para desenvolvimento, fornece uma base sólida para o projeto. A arquitetura modular planeada permite um desenvolvimento incremental e sustentável, aproveitando a infraestrutura existente para deployment.
+A implementação da solução demonstra-se viável em múltiplas dimensões. Do ponto de vista técnico, a experiência prévia com um protótipo funcional em React, aliada à atual implementação utilizando FastAPI e SQLite, combinada com a disponibilidade de frameworks modernos para desenvolvimento, fornece uma base sólida para o projeto. A arquitetura modular planeada permite um desenvolvimento incremental e sustentável, aproveitando a infraestrutura existente para deployment.
 
 Quanto à viabilidade económica, o projeto beneficia de um baixo custo de desenvolvimento inicial, principalmente devido à utilização de tecnologias open-source. Além disso, apresenta potencial para comercialização futura e promete uma redução significativa nos custos operacionais relacionados à anotação de dados.
 
@@ -29,7 +29,7 @@ O BRAT é uma ferramenta estabelecida para anotação de texto, com foco em simp
 A Tabela~\ref{tab:tech-comparison} apresenta uma comparação detalhada das características técnicas de cada solução. Esta análise permitiu identificar pontos fortes e limitações de cada ferramenta, orientando o desenvolvimento da solução proposta.
 
 \section{Proposta de Inovação e Mais-Valias}
-A solução desenvolvida foca-se especificamente nas necessidades de anotação para a tarefa dedisentanglement de chat nesta fase inicial, permitindo uma implementação direta e eficiente deste tipo de tarefa. A abordagem modular facilita a adaptação para diferentes necessidades de anotação, com o objetivo futuro de suportar múltiplos tipos de tarefas de anotação, mantendo a simplicidade de uso.
+A solução desenvolvida foca-se especificamente nas necessidades de anotação para a tarefa de chat disentanglement nesta fase inicial, permitindo uma implementação direta e eficiente deste tipo de tarefa. A abordagem modular facilita a adaptação para diferentes necessidades de anotação, com o objetivo futuro de suportar múltiplos tipos de tarefas de anotação, mantendo a simplicidade de uso.
 
 \section{Identificação de Oportunidade de Negócio}
 O projeto apresenta potencial para aplicação em contextos acadêmicos e de pesquisa, especialmente em grupos que trabalham com processamento de linguagem natural. A capacidade de adaptação para diferentes tipos de anotação permite atender necessidades específicas de diversos projetos de pesquisa.
@@ -45,23 +45,23 @@ O projeto apresenta potencial para aplicação em contextos acadêmicos e de pes
 \hline
 Frontend & jQuery 1.7.1 + jQuery UI, SVG para visualização, JavaScript vanilla, XHTML templates & Nuxt.js framework, Vue.js (implícito via Nuxt), Modern JavaScript/TypeScript & React 18, TypeScript, Componentes funcionais, Hooks customizados \\
 \hline
-Backend & Python 2.5+, CGI/FastCGI, Bibliotecas JSON & Python 3.8+, Django 4.0+, REST API architecture & Express.js (protótipo), Migração planeada para Flask/FastAPI \\
+Backend & Python 2.5+, CGI/FastCGI, Bibliotecas JSON & Python 3.8+, Django 4.0+, REST API architecture & Python 3.x, FastAPI, Arquitectura REST API \\
 \hline
-Formato de Anotação & Arquivos .ann para anotações, Arquivos .txt para texto, JSON para comunicação & REST API endpoints, JSON para comunicação & REST API para comunicação e configuração, Suporte planeado para múltiplos formatos \\
+Formato de Anotação & Arquivos .ann para anotações, Arquivos .txt para texto, JSON para comunicação & REST API endpoints, JSON para comunicação & REST API para comunicação; anotações via base de dados; suporte atual a importação CSV (planeado para mais formatos) \\
 \hline
-Dados & Sistema de arquivos, Estrutura em diretórios, Sem banco de dados & Database (Django ORM), Suporte a PostgreSQL & Suporte planeado para múltiplos formatos (CSV, TXT, JSON, Markdown), Cache local opcional via SQLite \\
+Dados & Sistema de arquivos, Estrutura em diretórios, Sem banco de dados & Database (Django ORM), Suporte a PostgreSQL & Base de dados relacional SQLite gerida via ORM; armazenamento estruturado de dados e anotações. \\
 \hline
-Deployment & Apache/Lighttpd com CGI, Standalone Python server & Docker containers, Docker Compose support, Production/Development configs & Container Docker único, Setup simplificado \\
+Deployment & Apache/Lighttpd com CGI, Standalone Python server & Docker containers, Docker Compose support, Production/Development configs & Docker containers, Setup simplificado \\
 \hline
-Extensibilidade & Sistema via arquivos .conf, Arquitetura modular, Plugins jQuery & Modular Django architecture, REST API extensibility, Frontend component system & Componentes React modulares, Hooks customizáveis, API extensível \\
+Extensibilidade & Sistema via arquivos .conf, Arquitetura modular, Plugins jQuery & Modular Django architecture, REST API extensibility, Frontend component system & Componentes React modulares, API REST extensível (FastAPI) \\
 \hline
 Estado de Manutenção & Última atualização ~2012, Tecnologias desatualizadas, Projeto inativo & Projeto ativo, Tecnologias modernas, Atualizações regulares & Em desenvolvimento ativo, Stack moderna, Iterações frequentes \\
 \hline
 Documentação & README detalhado, Exemplos incluídos, Tutoriais no código & Documentação estruturada, Guias de desenvolvimento, Diagramas de arquitetura & Documentação focada, Exemplos práticos, Guias de desenvolvimento \\
 \hline
-Requisitos Sistema & Python 2.5+, Servidor Web com CGI, Browser com SVG & Python 3.8+, Docker (recomendado), Node.js para desenvolvimento & Node.js 18+ (atual), Python 3.x (planeado), Navegador moderno, Docker (opcional) \\
+Requisitos Sistema & Python 2.5+, Servidor Web com CGI, Browser com SVG & Python 3.8+, Docker (recomendado), Node.js para desenvolvimento & Node.js 18+, Python 3.x, Navegador moderno, Docker (opcional) \\
 \hline
-Segurança & Autenticação básica, Controle via arquivo & Django authentication, Modern security practices & Autenticação básica baseada em roles (administrador/anotador) \\
+Segurança & Autenticação básica, Controle via arquivo & Django authentication, Modern security practices & Autenticação baseada em roles (administrador/anotador) \\
 \hline
 \end{tabular}
 \caption{Comparação técnica detalhada das soluções}

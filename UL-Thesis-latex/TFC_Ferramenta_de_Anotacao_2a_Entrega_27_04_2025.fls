@@ -445,9 +445,9 @@ INPUT ./chapters/especificacao-e-modelacao.tex
 INPUT ./chapters/especificacao-e-modelacao.tex
 INPUT ./chapters/especificacao-e-modelacao.tex
 INPUT chapters/especificacao-e-modelacao.tex
-INPUT ./images/Modelo_Entidade-Relacao.drawio.png
-INPUT ./images/Modelo_Entidade-Relacao.drawio.png
-INPUT ./images/Modelo_Entidade-Relacao.drawio.png
+INPUT ./images/2A-ERT-B.drawio.png
+INPUT ./images/2A-ERT-B.drawio.png
+INPUT ./images/2A-ERT-B.drawio.png
 INPUT ./images/mapaDeNavegacaoSistema.drawio.png
 INPUT ./images/mapaDeNavegacaoSistema.drawio.png
 INPUT ./images/mapaDeNavegacaoSistema.drawio.png

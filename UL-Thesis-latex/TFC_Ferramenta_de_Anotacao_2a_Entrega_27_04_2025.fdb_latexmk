@@ -1,18 +1,18 @@
 # Fdb version 4
-["biber TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025"] 1745776028.39866 "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.bcf" "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.bbl" "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025" 1745777272.39811 0
-  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.bcf" 1745777272.16008 109365 38310a81427a35c92e90e2df2c5e8bc2 "pdflatex"
+["biber TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025"] 1745776028.39866 "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.bcf" "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.bbl" "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025" 1745787272.07601 0
+  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.bcf" 1745787271.89573 109365 38310a81427a35c92e90e2df2c5e8bc2 "pdflatex"
   "bibliography.bib" 1745771151.20732 1934 8feee92366384d83a4e3e35d6acb24d7 ""
   (generated)
   "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.bbl"
   "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.blg"
   (rewritten before read)
-["makeindex TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.idx"] 1745774117.15709 "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.idx" "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.ind" "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025" 1745777272.39506 0
-  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.idx" 1745777271.2261 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+["makeindex TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.idx"] 1745774117.15709 "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.idx" "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.ind" "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025" 1745787272.07593 0
+  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.idx" 1745787270.89719 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
   (generated)
   "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.ilg"
   "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.ind"
   (rewritten before read)
-["pdflatex"] 1745777269.89534 "/Users/fabiofalopes/Documents/projetos/rascunhos/vit/UL-Thesis-latex/main.tex" "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.pdf" "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025" 1745777272.39878 0
+["pdflatex"] 1745787269.92091 "/Users/fabiofalopes/Documents/projetos/rascunhos/vit/UL-Thesis-latex/main.tex" "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.pdf" "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025" 1745787272.07621 0
   "/Users/fabiofalopes/Documents/projetos/rascunhos/vit/UL-Thesis-latex/main.tex" 1745775687.50695 4008 878dcba1bc0b3350bf262eaf1e3c6532 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
@@ -215,26 +215,26 @@
   "/usr/local/texlive/2025/texmf-dist/web2c/texmf.cnf" 1739380943 42148 61becc7c670cd061bb319c643c27fdd4 ""
   "/usr/local/texlive/2025/texmf-var/web2c/xetex/xelatex.fmt" 1745772446 5639819 637c26849e6d52e629ffbbd1f163c053 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
-  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.aux" 1745777272.15405 16421 eba87015d7099ada607416998320be94 "pdflatex"
+  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.aux" 1745787271.88957 16513 e42dd9136ecf0baf8087008cf1ad59c5 "pdflatex"
   "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.bbl" 1745776029.77588 7105 4ecaae7b96566ea3011f7de42d113b7f "biber TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025"
   "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.gls" 0 -1 0 ""
   "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.ind" 1745774117.23764 0 d41d8cd98f00b204e9800998ecf8427e "makeindex TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.idx"
-  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.lof" 1745777272.16132 603 6d46d50acde212f347580b51032b0ded "pdflatex"
-  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.lot" 1745777272.16135 272 343d240615b5353e16e4e025e825036c "pdflatex"
-  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.out" 1745777272.15798 8998 099446cef12c0c88a6ca0cc2bca7c757 "pdflatex"
-  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.run.xml" 1745777272.16111 2659 b871fcab9fc99138a5d8ec415f1fb9bd "pdflatex"
-  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.toc" 1745777272.16127 8130 774e649e01ec0e703ad03955c5e84d7d "pdflatex"
+  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.lof" 1745787271.89685 623 9c4a974729176be5b7a6893876e01f83 "pdflatex"
+  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.lot" 1745787271.89687 272 343d240615b5353e16e4e025e825036c "pdflatex"
+  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.out" 1745787271.89348 9178 14a01643466aa6caa1245915103b59f6 "pdflatex"
+  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.run.xml" 1745787271.89671 2659 b871fcab9fc99138a5d8ec415f1fb9bd "pdflatex"
+  "TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.toc" 1745787271.89682 8182 a6cf155eaf370950e0b54121a791d5c5 "pdflatex"
   "abstract.tex" 1745771151.20394 997 2ec709e55b4b4fae7b9a4ed8684a3378 ""
-  "chapters/especificacao-e-modelacao.tex" 1745774960.75331 8212 f00570f3d68fc8aeb7ef6f4636f69d01 ""
-  "chapters/introducao.tex" 1745771151.1997 5900 853a6e1b786e77369b8e0b13263376ee ""
-  "chapters/metodo-e-planeamento.tex" 1745771151.19943 4925 5a706ed5c5bfcd9a74e4f2622f8b1973 ""
-  "chapters/pertinencia-e-viabilidade.tex" 1745771151.20158 6581 dcc6ada3a9050b35067c77bc09f9cae5 ""
-  "chapters/solucao-proposta.tex" 1745775006.51105 11660 04ba0f77002869b7652501340f531455 ""
-  "chapters/testes-e-validacao.tex" 1745777269.64674 6300 2404975882b462e21ae7572ba6543eb8 ""
+  "chapters/especificacao-e-modelacao.tex" 1745787269.7028 8568 999c66dc351fea9fa3abe5bc63b6be2c ""
+  "chapters/introducao.tex" 1745782170.73024 6090 d774312d7e1034cf3c236da534b22759 ""
+  "chapters/metodo-e-planeamento.tex" 1745787272.01858 7749 cff443ad4cdfb5ec3851d164a29d6cbd ""
+  "chapters/pertinencia-e-viabilidade.tex" 1745784015.06343 6610 4b7edac8567ff378d0336004389974a0 ""
+  "chapters/solucao-proposta.tex" 1745786904.51928 13160 cf5b36359f764d257a894f20d7230870 ""
+  "chapters/testes-e-validacao.tex" 1745777285.37679 6300 2404975882b462e21ae7572ba6543eb8 ""
   "copyright.tex" 1745771151.18829 1073 a783cde72c541412fee53810152c5a7a ""
   "cover.tex" 1745774164.61132 685 3810c9af4f9f1f0144b9124e2022bfc7 ""
+  "images/2A-ERT-B.drawio.png" 1745786281.60842 466111 dbec0485662a9ba2aba3e9f2d16782e5 ""
   "images/Gant.drawio.png" 1745771151.19443 157432 a7363d29ae4a74f7493821dce46e1a3f ""
-  "images/Modelo_Entidade-Relacao.drawio.png" 1745771151.1949 226844 2c8cd856ac6d4936d2196a5c67f8524b ""
   "images/diagramaArquitetura.drawio.png" 1745771151.19684 164696 f668a13db651563f8bc4c331ff649940 ""
   "images/home_background.jpg" 1745771151.1925 125404 2453ba8eec8d51d95ee291efd8a7b829 ""
   "images/mapaDeNavegacaoSistema.drawio.png" 1745771151.19397 165079 4082e0539dadeb41eba31d3fe742fa46 ""

@@ -78,42 +78,32 @@ Preparação para disponibilização:
 
 \section{Análise Crítica ao Planeamento}
 
-\subsection{Progresso Atual}
+A presente secção visa analisar o progresso do projeto face ao planeamento inicial, identificando os principais marcos alcançados, os desafios encontrados e as adaptações realizadas durante o desenvolvimento subsequente à primeira entrega.
 
-O desenvolvimento inicial centrou-se na validação do conceito através de um protótipo funcional, que permitiu:
+\subsection{Progresso Realizado}
+Desde a validação inicial do conceito através do protótipo, o desenvolvimento focou-se na construção da infraestrutura base e do módulo principal de \textit{chat disentanglement}. Os principais avanços incluem:
+\begin{itemize}
+    \item Implementação do \textit{backend} utilizando a framework FastAPI em Python, estabelecendo uma API REST para comunicação com o \textit{frontend}.
+    \item Configuração da persistência de dados com uma base de dados SQLite, gerida através do ORM SQLAlchemy.
+    \item Desenvolvimento e integração do sistema de autenticação e gestão de utilizadores com papéis (administrador/anotador).
+    \item Refinamento e desenvolvimento contínuo do \textit{frontend} em React, implementando as interfaces necessárias para a gestão de projetos e a anotação de \textit{disentanglement}.
+    \item Implementação da funcionalidade de importação de dados a partir de ficheiros CSV.
+\end{itemize}
+Este progresso permitiu obter uma versão funcional da ferramenta centrada na sua tarefa principal, conforme pode ser visualizado no cronograma atualizado (Figura~\ref{fig:gantt-chart}).
+
+\subsection{Desafios Encontrados e Adaptações ao Plano}
+Durante o desenvolvimento, alguns desafios e constrangimentos levaram a ajustes no plano e na abordagem inicial:
 
 \begin{itemize}
-    \item Validar a viabilidade técnica da solução proposta
-    \item Confirmar a adequação da interface para tarefas de disentanglement
-    \item Identificar pontos de melhoria no fluxo de trabalho
-    \item Recolher feedback inicial dos utilizadores
+    \item \textbf{Priorização vs. Generalidade:} A visão inicial de uma plataforma altamente modular e genérica, capaz de suportar diversos tipos de anotação de forma extensível, revelou-se demasiado ambiciosa para o âmbito temporal e os recursos disponíveis no TFC. Para garantir a entrega de uma solução funcional e útil para o caso de uso principal do AISIC Lab, foi tomada a decisão consciente de **priorizar o desenvolvimento do módulo de \textit{chat disentanglement}**. Isto implicou que a implementação do \textit{backend} e do modelo de dados fosse mais específica para esta tarefa, adiando a introdução das abstrações necessárias para uma generalização mais ampla a outros tipos de anotação.
+    \item \textbf{Foco no Formato CSV:} Pelas mesmas razões de priorização e alinhamento com as necessidades imediatas do caso de uso, o suporte à importação de dados foi, nesta fase, limitado ao formato CSV. O suporte a outros formatos (JSON, TXT, etc.) permanece como um objetivo para evolução futura.
+    \item \textbf{Complexidade Técnica:} A integração entre o frontend e o backend, a gestão do estado da aplicação e a implementação correta das interações de anotação apresentaram desafios técnicos que exigiram tempo e esforço de desenvolvimento significativo.
+    \item \textbf{Balanceamento de Funcionalidades:} Foi necessário balancear o desenvolvimento de novas funcionalidades com a necessidade de refinar e estabilizar as funcionalidades existentes, respondendo também a feedback e requisitos que emergiram durante o processo.
 \end{itemize}
+Estas adaptações, embora desviando parcialmente da visão mais abrangente inicial, foram consideradas necessárias para garantir a viabilidade da entrega de um produto funcional e relevante dentro do contexto do TFC. A modularidade e a extensibilidade continuam a ser princípios orientadores para o futuro da plataforma.
 
-\subsection{Desafios e Ajustes}
-
-\subsubsection{Desafios Técnicos}
-\begin{itemize}
-    \item Complexidade na implementação da arquitetura modular
-    \item Migração do backend para Python mantendo funcionalidade
-    \item Otimização do processamento para datasets extensos
-\end{itemize}
-
-\subsubsection{Desafios Operacionais}
-\begin{itemize}
-    \item Balanceamento entre funcionalidades desejadas e prazos
-    \item Adaptação a requisitos emergentes do AISIC LAB
-\end{itemize}
-
-\subsection{Adaptações ao Plano Original}
-
-Com base na experiência do desenvolvimento inicial, foram identificados ajustes necessários:
-
-\begin{itemize}
-    \item Maior ênfase em testes de usabilidade
-    \item Simplificação inicial de algumas funcionalidades
-    \item Foco aumentado na documentação técnica
-    \item Integração contínua de feedback dos utilizadores
-\end{itemize}
+\subsection{Implicações no Planeamento Futuro}
+As decisões de priorização refletem-se no estado atual da ferramenta e no planeamento subsequente. O foco continuará a ser a consolidação e teste do módulo de \textit{disentanglement}. A introdução de maior generalidade no backend e o suporte a outros formatos de dados são agora considerados trabalhos futuros, a serem abordados após a validação e estabilização da funcionalidade principal. A documentação técnica e os testes de usabilidade (Capítulo 5) ganham maior ênfase para garantir a qualidade da entrega atual.
 
 \begin{landscape}
     \begin{figure}[p]
@@ -121,7 +111,7 @@ Com base na experiência do desenvolvimento inicial, foram identificados ajustes
         \makebox[\textwidth][c]{%
             \includegraphics[width=0.98666\paperheight, angle=0, keepaspectratio]{images/Gant.drawio.png}
         }
-        \caption{Cronograma detalhado do projeto (Gantt Chart)}
+        \caption{Cronograma detalhado do projeto (Gantt Chart) - Estado Atualizado}
         \label{fig:gantt-chart}
     \end{figure}
 \end{landscape}
