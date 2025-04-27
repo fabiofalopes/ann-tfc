@@ -1,0 +1,61 @@
+%!TEX root = ../main.tex
+\chapter{Testes e Validação}
+
+\section{Introdução}
+
+Este capítulo descreve como a ferramenta de anotação será testada e validada. O objetivo é verificar se a ferramenta funciona corretamente, se é fácil de usar para a tarefa de \textit{chat disentanglement}, e se representa uma melhoria face a métodos de anotação mais manuais e sem suporte para a tarefa. A validação pretende confirmar a aplicabilidade prática da solução.
+
+\section{Plano de Testes}
+
+O plano de testes foca-se na experiência prática de utilizadores idealmente com diferentes perfis, avaliando tanto a funcionalidade como a usabilidade da ferramenta.
+
+\subsection{Participantes e Perfis de Teste}
+Os testes planeados envolverão dois grupos principais de utilizadores:
+\begin{itemize}
+    \item \textbf{Administradores:} Um pequeno grupo de utilizadores familiarizados com a gestão de sistemas ou projetos, que testará as funcionalidades administrativas da ferramenta.
+    \item \textbf{Anotadores:} Um grupo mais alargado de participantes (e.g., estudantes, investigadores) com interesse ou necessidade na análise de chats, que se focará na tarefa central de anotação para \textit{chat disentanglement}.
+\end{itemize}
+Será obtido consentimento informado dos participantes e os dados recolhidos serão tratados de forma anónima, garantindo a confidencialidade.
+
+\subsection{Cenários e Tarefas Principais}
+As tarefas de teste procurarão simular o ciclo de vida da utilização da ferramenta:
+\begin{itemize}
+    \item \textbf{Tarefas de Administração:} Executadas pelo grupo de administradores, incluirão:
+    \begin{itemize}
+        \item Criação e gestão de projetos de anotação.
+        \item Gestão de utilizadores (criação, atribuição de roles e permissões).
+        \item Carregamento de dados (ficheiros de \textit{chat}) para os projetos.
+        \item Verificação da correta importação e organização dos dados.
+    \end{itemize}
+    \item \textbf{Tarefas de Anotação:} Executadas pelo grupo de anotadores, incluirão:
+    \begin{itemize}
+        \item Navegação e visualização das conversas carregadas.
+        \item Utilização da interface para identificar e marcar diferentes \textit{threads}.
+        \item Atribuição de mensagens às \textit{threads} correspondentes.
+        \item Edição e correção de anotações realizadas.
+        \item Exportação das anotações finalizadas.
+    \end{itemize}
+\end{itemize}
+Um dos focos da avaliação será perceber se estas tarefas, especialmente as de anotação, são percebidas como mais eficientes ou intuitivas quando realizadas com a ferramenta, comparativamente a abordagens manuais.
+
+\subsection{Ambiente de Teste}
+Prevê-se que os testes decorram num ambiente controlado, como um laboratório, onde os participantes utilizarão a ferramenta em computadores disponibilizados. Esta abordagem simplifica a observação e o suporte durante os testes, focando na interação direta com a aplicação.
+
+\section{Recolha e Análise de Dados}
+
+A avaliação da ferramenta basear-se-á na recolha de dados sobre a execução das tarefas e na perceção dos utilizadores:
+
+\begin{itemize}
+    \item \textbf{Eficiência e Dificuldades:} Serão registados os tempos aproximados para completar tarefas chave e, através de observação e questionamento direto, identificar-se-ão os principais obstáculos ou pontos de fricção na utilização da ferramenta.
+    \item \textbf{Feedback de Usabilidade Detalhado:} Para além da observação, a opinião dos utilizadores será recolhida através de questionários pós-teste e, potencialmente, breves entrevistas. Estes instrumentos incluirão:
+        \begin{itemize}
+            \item \textbf{Escalas de Avaliação:} Perguntas utilizando escalas tipo Likert (e.g., de 1 a 5) para quantificar a perceção sobre aspetos específicos, como: "Quão fácil foi identificar as diferentes threads?", "Quão clara considerou a interface de anotação?", "Quão satisfeito ficou com a ferramenta para esta tarefa?".
+            \item \textbf{Perguntas Abertas:} Questões para recolher feedback qualitativo e sugestões, tais como: "Qual foi a maior dificuldade que sentiu ao usar a ferramenta?", "Que aspetos da ferramenta mais o(a) ajudaram na tarefa de anotação?", "Tem sugestões para melhorar a ferramenta?", "Considera que esta ferramenta torna o processo de disentanglement mais fácil ou rápido do que métodos manuais que conheça?".
+        \end{itemize}
+    Estes métodos têm como objetico capturar a satisfação geral, identificar pontos fortes e fracos específicos da interface e do fluxo de trabalho, e perceber se a ferramenta cumpre a promessa de facilitar a tarefa de anotação. Os questionários exatos serão definidos posteriormente, mas focar-se-ão nestes eixos de avaliação.
+    \item \textbf{Avaliação da Consistência da Anotação:} Um dos objetivos da ferramenta é promover a consistência entre múltiplos anotadores. Planeia-se incluir na versão final da ferramenta mecanismos para calcular métricas de concordância inter-anotador (IAA - \textit{Inter-Annotator Agreement}). Caso esta funcionalidade esteja operacional durante a fase de testes, será utilizada para avaliar quantitativamente a consistência das anotações produzidas por diferentes utilizadores nos mesmos dados. Se a implementação destas métricas automáticas não estiver concluída a tempo, a avaliação focará numa análise qualitativa, observando se a interface e o fluxo de trabalho da ferramenta parecem facilitar uma maior consistência em comparação com abordagens manuais.
+\end{itemize}
+
+A análise dos dados recolhidos procurará identificar padrões de eficiência, principais temas no feedback de usabilidade (pontos fortes e áreas a melhorar) e indicações sobre o potencial da ferramenta para melhorar a qualidade e consistência do processo de anotação. Os resultados destinam-se a validar a abordagem da solução e a informar o desenvolvimento futuro.
+
+Embora reconhecendo potenciais limitações relacionadas com o número de participantes ou a artificialidade do ambiente de teste, espera-se que esta validação forneça indicações claras sobre a pertinência e eficácia da ferramenta desenvolvida.

@@ -1,0 +1,95 @@
+\chapter{Introdução}
+
+No contexto atual do AISIC LAB - Artificial Intelligence, Social Interaction and Complexity, pertencente ao CICANT da Universidade Lusófona, surge a necessidade de desenvolver uma infraestrutura modular para anotação de dados, com particular incidência em aplicações de Processamento de Linguagem Natural (NLP). Este projeto visa responder aos desafios específicos encontrados no laboratório, nomeadamente na análise e processamento de interações em ambientes de chat.
+
+\section{Enquadramento}
+
+A anotação de dados é um processo fundamental no treino de modelos de Machine Learning, particularmente importante em aplicações de NLP. Este processo envolve a atribuição sistemática de etiquetas, categorias ou metadados a conjuntos de dados não processados, permitindo que os algoritmos aprendam padrões e características específicas. Os dados anotados funcionam como referência fundamental, possibilitando o treino de modelos para reconhecer e classificar informações de forma precisa.
+
+\section{Motivação e Identificação do Problema}
+
+A motivação principal deste projeto emerge das necessidades específicas identificadas no AISIC LAB, onde a análise de mensagens em grupos de chat, requer ferramentas especializadas de anotação. 
+Através de análises preliminares e feedback dos investigadores, identificámos três desafios fundamentais:
+
+\begin{enumerate}
+    \item \textbf{Complexidade das Tarefas de Anotação}:
+    \begin{itemize}
+        \item Necessidade de suporte a diferentes tipos de anotação
+        \item Gestão de múltiplos anotadores e controle de qualidade
+        \item Requisitos específicos para diferentes domínios de aplicação
+    \end{itemize}
+
+    \item \textbf{Limitações das Ferramentas Existentes}:
+    \begin{itemize}
+        \item Ferramentas estabelecidas como o BRAT\footnote{\cite{brat-repo,brat-about}} apresentam limitações tecnológicas e falta de evolução
+        \item Soluções atuais como o Doccano\footnote{\cite{doccano-repo,doccano-docs}}, que utiliza Django como framework backend, impõem uma estrutura mais rígida, o que limita a capacidade de realizar adaptações específicas às necessidades do projeto.
+        \item Necessidade de maior flexibilidade na modelação de dados e lógica aplicacional
+        \item Dificuldade de integração com fluxos de trabalho existentes e específicos
+    \end{itemize}
+
+    \item \textbf{Necessidade de Integração Completa do Workflow}:
+    \begin{itemize}
+        \item Gestão integrada das fases pré-anotação, anotação e pós-anotação
+        \item Necessidade de implementação de métricas e análises específicas
+        \item Suporte a fluxos customizados de processamento de dados
+        \item Integração com pipelines de NLP e análise de dados existentes
+    \end{itemize}
+\end{enumerate}
+
+A decisão de desenvolver uma solução dedicada, em vez de adaptar ferramentas existentes, fundamenta-se na necessidade de maior controlo sobre todo o processo de anotação. Esta abordagem permite-nos focar no desenvolvimento de funcionalidades específicas para o nosso caso de uso principal - a tarefa de disentanglement de chat - garantindo a flexibilidade necessária para implementar workflows customizados de pré-processamento, anotação e análise posterior dos dados.
+
+\section{Objetivos}
+
+O projeto tem como objetivos principais:
+
+\begin{enumerate}
+    \item \textbf{Desenvolvimento de Infraestrutura Modular}:
+    \begin{itemize}
+        \item Criar uma plataforma flexível e extensível para anotação de dados
+        \item Implementar sistema de plugins para diferentes tipos de tarefas
+        \item Desenvolver interfaces programáticas (APIs) para integração com outros sistemas
+    \end{itemize}
+
+    \item \textbf{Automação e Controlo de Qualidade}:
+    \begin{itemize}
+        \item Implementar distribuição automática de tarefas
+        \item Desenvolver sistema robusto de métricas e validações
+        \item Criar mecanismos de controle de qualidade e consistência
+    \end{itemize}
+
+    \item \textbf{Suporte a Múltiplos Domínios}:
+    \begin{itemize}
+        \item Permitir configuração de diferentes esquemas de anotação
+        \item Implementar suporte para diversos tipos de dados
+        \item Facilitar a extensão para novos casos de uso
+    \end{itemize}
+
+    \item \textbf{Usabilidade e Produtividade}:
+    \begin{itemize}
+        \item Desenvolver interfaces intuitivas para anotadores
+        \item Implementar ferramentas de gestão e monitoramento
+        \item Criar documentação abrangente e guias de utilização
+    \end{itemize}
+\end{enumerate}
+
+\section{Estrutura do Documento}
+
+Este documento está organizado da seguinte forma:
+
+\begin{itemize}
+    \item \textbf{Capítulo 2 - Pertinência e Viabilidade}: Apresenta análise detalhada do contexto atual, comparação com soluções existentes e identificação de oportunidades de inovação.
+
+    \item \textbf{Capítulo 3 - Especificação e Modelação}: Detalha requisitos funcionais e não-funcionais, casos de uso e arquitetura proposta.
+
+    \item \textbf{Capítulo 4 - Solução Desenvolvida}: Descreve a implementação, tecnologias utilizadas e componentes desenvolvidos.
+
+    \item \textbf{Capítulo 5 - Testes e Validação}: Apresenta metodologia de testes, resultados e validação da solução.
+
+    \item \textbf{Capítulo 6 - Método e Planeamento}: Detalha a abordagem metodológica e análise do processo de desenvolvimento.
+
+    \item \textbf{Capítulo 7 - Resultados}: Discute os resultados obtidos e avalia o cumprimento dos objetivos.
+
+    \item \textbf{Capítulo 8 - Conclusão}: Sintetiza as contribuições e apresenta perspectivas futuras.
+\end{itemize}
+
+Os anexos incluem documentação técnica adicional, manuais de utilização e outros materiais de suporte relevantes.
