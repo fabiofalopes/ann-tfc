@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from .database import SessionLocal
 from .config import get_settings
-from .models import User
+from .models import User, ProjectAssignment
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -57,4 +57,28 @@ async def get_current_admin_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="The user doesn't have enough privileges"
         )
-    return current_user 
+    return current_user
+
+async def verify_project_access(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Dependency to verify if the current user has access to the project."""
+    if current_user.is_admin:
+        # Admins have access to all projects
+        return
+
+    # Check if the user is assigned to the project
+    assignment = db.query(ProjectAssignment).filter(
+        ProjectAssignment.user_id == current_user.id,
+        ProjectAssignment.project_id == project_id
+    ).first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this project"
+        )
+    # If assignment exists, user has access
+    return 

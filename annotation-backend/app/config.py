@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # CORS
-    CORS_ORIGINS: List[str] = ["http://localhost:3000"]  # Frontend URL
+    CORS_ORIGINS: List[str] = ["http://localhost:3721"]  # Frontend URL
     
     # Admin user (created on first run)
     FIRST_ADMIN_EMAIL: str = "admin@example.com"

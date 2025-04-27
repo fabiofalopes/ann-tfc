@@ -13,7 +13,7 @@ const csvUtils = {
                 complete: (results) => {
                     console.log('Papa Parse results:', results);
                     // Check for basic required columns except thread
-                    const basicColumns = ['user_id', 'turn_id', 'turn_text', 'reply_to_turn'];
+                    const basicColumns = ['user_id', 'turn_id', 'turn_text'];
                     const missingBasicColumns = basicColumns.filter(col =>
                         !results.meta.fields.some(field =>
                             field.toLowerCase() === col.toLowerCase()
@@ -21,33 +21,18 @@ const csvUtils = {
                     );
 
                     if (missingBasicColumns.length > 0) {
-                        const errorMessage = `CSV file is missing required columns: ${missingBasicColumns.join(', ')}. \n\nRequired columns are: ${basicColumns.join(', ')} and a thread column (can be named 'thread_*' or '*_thread')`;
+                        const errorMessage = `CSV file is missing required columns: ${missingBasicColumns.join(', ')}. \n\nRequired columns are: ${basicColumns.join(', ')}`;
                         console.error(errorMessage);
                         reject(new Error(errorMessage));
                         return;
                     }
 
-                    // Find any column that contains 'thread' in its name
-                    const threadField = results.meta.fields.find((field) =>
-                        field.toLowerCase().includes('thread')
-                    );
+                    const validatedData = results.data.map((row) => ({
+                        ...row,
+                        thread: '' // Default empty thread value
+                    }));
 
-                    if (!threadField) {
-                        const errorMessage = 'CSV file must contain a thread column (can be named "thread_*" or "*_thread")';
-                        console.error(errorMessage);
-                        reject(new Error(errorMessage));
-                        return;
-                    }
-
-                    const validatedData = results.data.map((row) => {
-                        const threadValue = row[threadField];
-                        return {
-                            ...row,
-                            thread: threadValue !== undefined && threadValue !== null ? String(threadValue) : '',
-                        };
-                    });
-
-                    const uniqueTags = [...new Set(validatedData.map(row => row.thread).filter(tag => tag !== ''))];
+                    const uniqueTags = []; // No tags since we don't have thread data
 
                     console.log('Validated data:', validatedData);
                     resolve({

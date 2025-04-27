@@ -1,313 +1,311 @@
 import React, { useState, useEffect } from 'react';
-import { Route, Routes, Link, Navigate, useNavigate } from 'react-router-dom';
+import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
 import './App.css';
 import ChatRoom from './components/ChatRoom';
-import FileLoader from './components/FileLoader';
+import ProjectLoader from './components/ProjectLoader';
 import ThreadMenu from './components/ThreadMenu';
-import csvUtils from './utils/csvUtils';
 import AuthMenu from './components/AuthMenu';
+import { auth, projects, annotations } from './utils/api';
+import AdminDashboard from './components/AdminDashboard';
 
 function App() {
     const [messages, setMessages] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [tags, setTags] = useState({});
-    //const [theme, setTheme] = useState('light'); // Make the default theme 'light'
     const [theme, setTheme] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    const [fileUploaded, setFileUploaded] = useState(false);
-    const [currentFileName, setCurrentFileName] = useState('');
+    const [currentProject, setCurrentProject] = useState(null);
     const navigate = useNavigate();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
 
-    const saveState = (state) => {
-        try {
-            const serializedState = JSON.stringify(state);
-            localStorage.setItem('chatAppState', serializedState);
-        } catch (err) {
-            console.error('Could not save state', err);
-        }
-    };
-
-    const loadState = () => {
-        try {
-            const serializedState = localStorage.getItem('chatAppState');
-            if (serializedState === null) {
-                return undefined;
+    // Helper function to extract error message from various error formats
+    const getErrorMessage = (error) => {
+        if (typeof error === 'string') return error;
+        if (error.response?.data?.detail) {
+            const detail = error.response.data.detail;
+            if (Array.isArray(detail)) {
+                return detail.map(err => err.msg || String(err)).join(', ');
             }
-            return JSON.parse(serializedState);
-        } catch (err) {
-            console.error('Could not load state', err);
-            return undefined;
+            if (typeof detail === 'object' && detail.msg) {
+                return detail.msg;
+            }
+            return String(detail);
         }
+        if (error.message) return error.message;
+        return 'An unexpected error occurred';
     };
 
     useEffect(() => {
-        const savedState = loadState();
-        if (savedState) {
-            setMessages(savedState.messages);
-            setTags(savedState.tags);
-            setFileUploaded(savedState.fileUploaded);
-            setCurrentFileName(savedState.currentFileName);
+        // Check for existing auth token
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            // Try to get current user
+            auth.getCurrentUser()
+                .then(user => {
+                    setIsAuthenticated(true);
+                    setCurrentUser(user);
+                })
+                .catch(err => {
+                    // If token is invalid, clear it
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    setError(getErrorMessage(err));
+                });
         }
     }, []);
-
-    useEffect(() => {
-        saveState({ messages, tags, fileUploaded, currentFileName });
-    }, [messages, tags, fileUploaded, currentFileName]);
-
-    const handleFileSelect = async (file, isWorkspaceFile = false) => {
-        console.log('File selected in App.js:', file.name);
-        setIsLoading(true);
-        setError(null);
-        
-        try {
-            let csvData;
-            
-            if (isWorkspaceFile) {
-                // Load directly from workspace using the same parsing logic
-                csvData = await csvUtils.loadCsv(file);
-            } else {
-                // External file - copy to workspace first
-                await csvUtils.copyToFiles(file, file.name);
-                csvData = await csvUtils.loadCsv(file);
-            }
-    
-            const messagesWithTags = csvData.data.map((message) => ({
-                ...message,
-                thread: message.thread !== '' ? String(message.thread) : '',
-            }));
-            setMessages(messagesWithTags);
-    
-            // Process tags from the loaded data
-            const initialTags = {};
-            csvData.uniqueTags.forEach(tagName => {
-                if (tagName !== '') {
-                    initialTags[tagName] = {
-                        name: tagName,
-                        color: getRandomColor(),
-                        references: messagesWithTags.filter(message => String(message.thread) === tagName).map(message => message.turn_id),
-                        created: new Date().toISOString()
-                    };
-                }
-            });
-            setTags(initialTags);
-    
-            setCurrentFileName(file.name);
-            setFileUploaded(true);
-            navigate('/chat');
-        } catch (err) {
-            console.error('Error:', err);
-            setError(err.message);
-            setFileUploaded(false);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleAnnotation = async (turnId, tagName) => {
-        if (!isAuthenticated) {
-            alert('Please login to add annotations');
-            return;
-        }
-    
-        if (tagName.trim() === '') return;
-    
-        const updatedMessages = messages.map((message) =>
-            message.turn_id === turnId
-                ? { 
-                    ...message, 
-                    thread: tagName.trim(),
-                    annotator: currentUser // Add annotator information
-                  }
-                : message
-        );
-    
-        setMessages(updatedMessages);
-    
-        const updatedTags = { ...tags };
-        if (!updatedTags[tagName]) {
-            updatedTags[tagName] = {
-                name: tagName,
-                color: getRandomColor(),
-                references: [turnId],
-                created: new Date().toISOString(),
-                creator: currentUser // Add creator information
-            };
-        } else {
-            if (!updatedTags[tagName].references.includes(turnId)) {
-                updatedTags[tagName].references.push(turnId);
-            }
-        }
-    
-        setTags(updatedTags);
-    
-        // Save changes to CSV file
-        await csvUtils.saveChangesToCsv(updatedMessages, updatedTags, currentFileName);
-    };
-
-    const handleTagEdit = async (oldTagName, newTagName, newColor, newDescription) => {
-        if (newTagName.trim() === '') return;
-
-        const updatedTags = { ...tags };
-        if (oldTagName !== newTagName) {
-            updatedTags[newTagName] = {
-                ...updatedTags[oldTagName],
-                name: newTagName,
-                color: newColor || updatedTags[oldTagName].color,
-                description: newDescription
-            };
-            delete updatedTags[oldTagName];
-        } else {
-            updatedTags[oldTagName].color = newColor;
-            updatedTags[oldTagName].description = newDescription;
-        }
-
-        setTags(updatedTags);
-
-        const updatedMessages = messages.map((message) =>
-            message.thread === oldTagName
-                ? { ...message, 
-                    thread: newTagName ,
-                    annotator: currentUser
-                }
-                : message
-        );
-
-        setMessages(updatedMessages);
-
-        // Save changes to CSV file
-        await csvUtils.saveChangesToCsv(updatedMessages, updatedTags, currentFileName);
-    };
-
-    const getRandomColor = () => {
-        //return '#' + Math.floor(Math.random() * 16777215).toString(16);
-        return getRandomBalancedColor();
-    };
-    
-    const hslToHex = (h, s, l) => {
-        l /= 100;
-        const a = s * Math.min(l, 1 - l) / 100;
-        const f = n => {
-            const k = (n + h / 30) % 12;
-            const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-            return Math.round(255 * color).toString(16).padStart(2, '0');
-        };
-        return `#${f(0)}${f(8)}${f(4)}`;
-    };
-    
-    const getRandomBalancedColor = () => {
-        const hue = Math.floor(Math.random() * 360);        // Full random hue
-        const saturation = Math.floor(Math.random() * 20) + 50;  // Saturation between 50-80%
-        const lightness = Math.floor(Math.random() * 30) + 40;   // Lightness between 40-70%
-        return hslToHex(hue, saturation, lightness);
-    };
-
-    const toggleTheme = () => {
-        const newTheme = theme === 'light' ? 'dark' : 'light';
-        setTheme(newTheme);
-        document.documentElement.setAttribute('data-theme', newTheme);
-    };
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
     }, [theme]);
 
-    const handleLogin = async (email, password) => {
-        // For this simple implementation, we'll just store in localStorage
-        const users = JSON.parse(localStorage.getItem('users') || '{}');
-        
-        if (!users[email] || users[email].password !== password) {
-            throw new Error('Invalid email or password');
-        }
-    
+    const handleLogin = async (userData) => {
         setIsAuthenticated(true);
-        setCurrentUser(email);
-        localStorage.setItem('currentUser', email);
+        setCurrentUser(userData);
+        navigate('/');
     };
-    
-    const handleRegister = async (email, password) => {
-        const users = JSON.parse(localStorage.getItem('users') || '{}');
-        
-        if (users[email]) {
-            throw new Error('Email already registered');
-        }
-    
-        users[email] = { password };
-        localStorage.setItem('users', JSON.stringify(users));
-        
-        // Auto-login after registration
-        await handleLogin(email, password);
-    };
-    
+
     const handleLogout = () => {
         setIsAuthenticated(false);
         setCurrentUser(null);
-        localStorage.removeItem('currentUser');
+        setMessages([]);
+        setTags({});
+        setCurrentProject(null);
+        navigate('/');
     };
-    
-    useEffect(() => {
-        const savedUser = localStorage.getItem('currentUser');
-        if (savedUser) {
-            setIsAuthenticated(true);
-            setCurrentUser(savedUser);
+
+    const handleProjectSelect = async (project) => {
+        setIsLoading(true);
+        setError(null);
+        
+        try {
+            // First get chat rooms for the project
+            const chatRooms = await projects.getChatRooms(project.id);
+            
+            if (!chatRooms || chatRooms.length === 0) {
+                setError('No chat rooms found for this project');
+                return;
+            }
+            
+            // Get messages from the first chat room (you might want to add room selection later)
+            const projectMessages = await projects.getChatMessages(project.id, chatRooms[0].id);
+            
+            // Load existing annotations
+            const projectAnnotations = await annotations.getProjectAnnotations(project.id);
+            
+            // Process messages and annotations
+            const messagesWithTags = projectMessages.map(message => {
+                const annotation = projectAnnotations.find(a => a.message_id === message.id);
+                return {
+                    ...message,
+                    thread: annotation ? annotation.thread_id : '',
+                    annotator: annotation ? annotation.annotator.email : '',
+                };
+            });
+            
+            // Process tags from annotations
+            const initialTags = {};
+            projectAnnotations.forEach(annotation => {
+                if (!initialTags[annotation.thread_id]) {
+                    initialTags[annotation.thread_id] = {
+                        name: annotation.thread_id,
+                        color: getRandomColor(),
+                        references: projectAnnotations
+                            .filter(a => a.thread_id === annotation.thread_id)
+                            .map(a => a.message_id),
+                        created: annotation.created_at,
+                    };
+                }
+            });
+            
+            setMessages(messagesWithTags);
+            setTags(initialTags);
+            setCurrentProject(project);
+            navigate('/chat');
+        } catch (err) {
+            console.error('Error:', err);
+            setError(getErrorMessage(err));
+        } finally {
+            setIsLoading(false);
         }
-    }, []);
+    };
+
+    const handleAnnotation = async (messageId, threadId) => {
+        if (!isAuthenticated) {
+            alert('Please login to add annotations');
+            return;
+        }
+    
+        if (threadId.trim() === '') return;
+    
+        try {
+            // Save the annotation
+            await annotations.saveBatch(currentProject.id, [{
+                message_id: messageId,
+                thread_id: threadId.trim(),
+            }]);
+            
+            // Update local state
+            const updatedMessages = messages.map((message) =>
+                message.id === messageId
+                    ? { 
+                        ...message, 
+                        thread: threadId.trim(),
+                        annotator: currentUser.email,
+                    }
+                    : message
+            );
+            
+            setMessages(updatedMessages);
+            
+            const updatedTags = { ...tags };
+            if (!updatedTags[threadId]) {
+                updatedTags[threadId] = {
+                    name: threadId,
+                    color: getRandomColor(),
+                    references: [messageId],
+                    created: new Date().toISOString(),
+                };
+            } else {
+                if (!updatedTags[threadId].references.includes(messageId)) {
+                    updatedTags[threadId].references.push(messageId);
+                }
+            }
+            
+            setTags(updatedTags);
+        } catch (err) {
+            console.error('Error saving annotation:', err);
+            alert(err.response?.data?.detail || err.message || 'Failed to save annotation');
+        }
+    };
+
+    const handleTagEdit = async (oldTagName, newTagName, newColor, newDescription) => {
+        if (newTagName.trim() === '') return;
+
+        try {
+            // Update all messages with the old tag to use the new tag
+            const messagesToUpdate = messages
+                .filter(message => message.thread === oldTagName)
+                .map(message => ({
+                    message_id: message.id,
+                    thread_id: newTagName.trim(),
+                }));
+
+            if (messagesToUpdate.length > 0) {
+                await annotations.saveBatch(currentProject.id, messagesToUpdate);
+            }
+
+            // Update local state
+            const updatedTags = { ...tags };
+            if (oldTagName !== newTagName) {
+                updatedTags[newTagName] = {
+                    ...updatedTags[oldTagName],
+                    name: newTagName,
+                    color: newColor || updatedTags[oldTagName].color,
+                    description: newDescription,
+                };
+                delete updatedTags[oldTagName];
+            } else {
+                updatedTags[oldTagName].color = newColor;
+                updatedTags[oldTagName].description = newDescription;
+            }
+
+            setTags(updatedTags);
+
+            const updatedMessages = messages.map((message) =>
+                message.thread === oldTagName
+                    ? { ...message, thread: newTagName }
+                    : message
+            );
+
+            setMessages(updatedMessages);
+        } catch (err) {
+            console.error('Error updating tag:', err);
+            alert(err.response?.data?.detail || err.message || 'Failed to update tag');
+        }
+    };
+
+    const getRandomColor = () => {
+        const hue = Math.floor(Math.random() * 360);
+        const saturation = Math.floor(Math.random() * 20) + 50;
+        const lightness = Math.floor(Math.random() * 30) + 40;
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    };
+
+    const toggleTheme = () => {
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+    };
 
     return (
         <div className="App">
             <header className="App-header">
-                <h1>Disentanglement Chat Room</h1>
-                <nav className="nav-menu">
-                    <Link to="/" className="nav-button">Home</Link>
-                    <Link to="/upload" className="nav-button">Upload CSV</Link>
-                    <Link to="/chat" className="nav-button">Disentanglement Chat Room</Link>
-                </nav>
-                <button className="theme-toggle" onClick={toggleTheme}>
-                    {theme === 'light' ? '🌙' : '☀️'}
-                </button>
-                <AuthMenu
-                    isAuthenticated={isAuthenticated}
-                    currentUser={currentUser}
-                    onLogin={handleLogin}
-                    onRegister={handleRegister}
-                    onLogout={handleLogout}
-                />
+                <div className="header-controls">
+                    {isAuthenticated && (
+                        <>
+                            <button onClick={handleLogout}>Logout</button>
+                            <button onClick={toggleTheme}>
+                                {theme === 'light' ? '🌙' : '☀️'}
+                            </button>
+                        </>
+                    )}
+                </div>
             </header>
-            <main className="App-main">
-                <Routes>
-                    <Route path="/" element={<Home fileUploaded={fileUploaded} />} />
-                    <Route path="/upload" element={<FileLoader onFileSelect={handleFileSelect} />} />
-                    <Route
-                        path="/chat"
-                        element={
-                            fileUploaded ? (
-                                <div className="chat-view">
-                                    <ChatRoom messages={messages} onAnnotation={handleAnnotation} tags={tags} />
-                                    <ThreadMenu tags={tags} onTagEdit={handleTagEdit} />
-                                </div>
-                            ) : (
-                                <Navigate to="/upload" replace />
-                            )
-                        }
-                    />
-                </Routes>
-            </main>
-            {isLoading && <div className="loading-message">Loading...</div>}
-            {error && <div className="error-message">{error}</div>}
-        </div>
-    );
-}
 
-function Home({ fileUploaded }) {
-    return (
-        <div>
-            <h2>Welcome to the Disentanglement Chat Room App</h2>
-            {fileUploaded ? (
-                <p>You have uploaded a CSV file. You can now go to the <Link to="/chat">Disentanglement Chat Room</Link>.</p>
-            ) : (
-                <p>Please <Link to="/upload">upload a CSV file</Link> to start or resume a chat session.</p>
-            )}
+            {error && <div className="error-message">{error}</div>}
+
+            <Routes>
+                <Route
+                    path="/login"
+                    element={
+                        isAuthenticated ? (
+                            <Navigate to="/" replace />
+                        ) : (
+                            <AuthMenu onLogin={handleLogin} />
+                        )
+                    }
+                />
+                <Route
+                    path="/"
+                    element={
+                        isAuthenticated ? (
+                            currentUser?.is_admin ? (
+                                <AdminDashboard />
+                            ) : (
+                                <ProjectLoader
+                                    onProjectSelect={handleProjectSelect}
+                                    isLoading={isLoading}
+                                    error={error}
+                                />
+                            )
+                        ) : (
+                            <Navigate to="/login" replace />
+                        )
+                    }
+                />
+                <Route
+                    path="/chat"
+                    element={
+                        isAuthenticated ? (
+                            <div className="chat-container">
+                                <ChatRoom
+                                    messages={messages}
+                                    onAnnotation={handleAnnotation}
+                                    tags={tags}
+                                />
+                                <ThreadMenu
+                                    tags={tags}
+                                    onTagEdit={handleTagEdit}
+                                    isLoading={isLoading}
+                                    error={error}
+                                />
+                            </div>
+                        ) : (
+                            <Navigate to="/login" replace />
+                        )
+                    }
+                />
+            </Routes>
         </div>
     );
 }

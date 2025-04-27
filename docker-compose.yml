@@ -1,0 +1,27 @@
+services:
+  backend:
+    build: ./annotation-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./data/app.db
+      - SECRET_KEY=your-secret-key
+      - CORS_ORIGINS=["http://localhost:3721"]
+    volumes:
+      - ./annotation-backend:/app
+      - ./data:/app/data
+
+  frontend:
+    build: ./annotation_ui
+    ports:
+      - "3721:3721"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    volumes:
+      - ./annotation_ui:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  backend_data: 

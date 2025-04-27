@@ -1,40 +1,34 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
-from sqlalchemy import select
 from typing import List
 import pandas as pd
 import io
-from pydantic import BaseModel
-from io import BytesIO
-import csv
+import os
 
-from ..database import get_db
-from ..models import User, Project, ChatMessage
-from ..schemas import UserCreate, User as UserSchema, ProjectCreate, Project as ProjectSchema
+from .. import crud, models, schemas
+from ..dependencies import get_db
 from ..auth import get_current_admin_user, get_password_hash
+from ..utils.csv_utils import import_chat_messages, validate_csv_format
 
 router = APIRouter()
 
-
-@router.get("/users", response_model=List[UserSchema])
+@router.get("/users", response_model=List[schemas.User])
 async def list_users(
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_admin_user)
+    _: models.User = Depends(get_current_admin_user)
 ):
     """List all users (admin only)"""
-    users = db.query(User).all()
-    return users
+    return crud.get_users(db)
 
-
-@router.post("/users", response_model=UserSchema)
+@router.post("/users", response_model=schemas.User)
 async def create_user(
-    user_data: UserCreate,
+    user_data: schemas.UserCreate,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_admin_user)
+    _: models.User = Depends(get_current_admin_user)
 ):
     """Create a new user (admin only)"""
     # Check if user exists
-    existing_user = db.query(User).filter(User.email == user_data.email).first()
+    existing_user = crud.get_user_by_email(db, user_data.email)
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -43,47 +37,31 @@ async def create_user(
     
     # Create user with hashed password
     hashed_password = get_password_hash(user_data.password)
-    new_user = User(
-        email=user_data.email,
-        hashed_password=hashed_password,
-        is_admin=user_data.is_admin
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    
+    new_user = crud.create_user(db, user_data, hashed_password)
     return new_user
 
-
-@router.get("/projects", response_model=List[ProjectSchema])
+@router.get("/projects", response_model=List[schemas.Project])
 async def list_all_projects(
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_admin_user)
+    _: models.User = Depends(get_current_admin_user)
 ):
     """List all projects (admin only)"""
-    projects = db.query(Project).all()
-    return projects
+    return crud.get_projects(db)
 
-
-@router.post("/projects", response_model=ProjectSchema)
+@router.post("/projects", response_model=schemas.Project)
 async def create_project(
-    project_data: ProjectCreate,
+    project_data: schemas.ProjectCreate,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_admin_user)
+    _: models.User = Depends(get_current_admin_user)
 ):
     """Create a new project (admin only)"""
-    new_project = Project(**project_data.model_dump())
-    db.add(new_project)
-    db.commit()
-    db.refresh(new_project)
-    return new_project
-
+    return crud.create_project(db, project_data)
 
 @router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_admin_user)
+    current_user: models.User = Depends(get_current_admin_user)
 ):
     """Delete a user (admin only)"""
     if user_id == current_user.id:
@@ -92,145 +70,164 @@ async def delete_user(
             detail="Cannot delete your own account"
         )
     
-    user = db.query(User).filter(User.id == user_id).first()
-    
+    user = crud.get_user(db, user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
     
-    db.delete(user)
-    db.commit()
-
+    crud.delete_user(db, user)
 
 @router.delete("/projects/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_project(
     project_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_admin_user)
+    _: models.User = Depends(get_current_admin_user)
 ):
     """Delete a project (admin only)"""
-    project = db.query(Project).filter(Project.id == project_id).first()
-    
+    project = crud.get_project(db, project_id)
     if not project:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found"
         )
     
-    db.delete(project)
-    db.commit()
+    crud.delete_project(db, project)
 
-
-class CSVImportResponse(BaseModel):
-    message: str
-    total_messages: int
-    imported_messages: int
-    errors: List[str] = []
-
-@router.post("/import/csv/{project_id}", response_model=CSVImportResponse)
-async def import_chat_csv(
+@router.post("/projects/{project_id}/import-chat-room-csv", response_model=schemas.ChatRoomImportResponse)
+async def create_chat_room_and_import_csv(
     project_id: int,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_admin_user),
+    _: models.User = Depends(get_current_admin_user)
 ):
-    """
-    Import chat messages from a CSV file.
-    The first 4 columns MUST be in this order:
-    1. user_id: The user ID (required)
-    2. turn_id: Message ID in format VAC_R10_XXX (required)
-    3. turn_text: The actual message content (required)
-    4. reply_to_turn: ID of message being replied to (optional)
-    
-    Any columns after these 4 are ignored completely.
-    For reply_to_turn, only valid turn_ids are used, everything else is treated as empty.
-    """
-    if not current_user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only admins can import chat messages",
-        )
-
-    project = db.query(Project).filter(Project.id == project_id).first()
+    """Create a new chat room from a CSV filename and import its content (admin only)"""
+    # Check project exists
+    project = crud.get_project(db, project_id)
     if not project:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Project not found",
+            detail="Project not found"
         )
 
+    # Validate file type
+    if not file.filename or not file.filename.lower().endswith('.csv'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File must be a CSV and have a filename"
+        )
+
+    # Create chat room using filename (remove extension)
+    chat_room_name = os.path.splitext(file.filename)[0]
+    chat_room_create_schema = schemas.ChatRoomCreate(name=chat_room_name, project_id=project_id)
+    
     try:
-        # Read only the first 4 columns from CSV, skip header row
-        content = await file.read()
-        df = pd.read_csv(
-            BytesIO(content),
-            usecols=[0, 1, 2, 3],  # Only read first 4 columns
-            names=['user_id', 'turn_id', 'turn_text', 'reply_to_turn'],  # Force column names
-            skiprows=1  # Skip header row since we're forcing column names
-        )
-
-        messages_to_create = []
-        errors = []
-        total_messages = len(df)
-        imported_messages = 0
-
-        # First pass: collect valid turn_ids from this file
-        valid_turn_ids = set(
-            str(turn_id).strip() 
-            for turn_id in df['turn_id'] 
-            if pd.notna(turn_id)
-        )
-
-        # Process each row
-        for idx, row in df.iterrows():
-            try:
-                # Skip if any required field is missing or empty
-                if (pd.isna(row['user_id']) or pd.isna(row['turn_id']) or pd.isna(row['turn_text']) or
-                    str(row['user_id']).strip() == '' or str(row['turn_id']).strip() == '' or str(row['turn_text']).strip() == ''):
-                    errors.append(f"Row {idx + 2}: Missing required value (user_id, turn_id, or turn_text)")  # +2 because we skipped header and idx is 0-based
-                    continue
-
-                # Clean up the values
-                user_id = str(row['user_id']).strip()
-                turn_id = str(row['turn_id']).strip()
-                turn_text = str(row['turn_text']).strip()
-                
-                # Handle reply_to_turn - only use it if it's a valid turn_id, silently ignore everything else
-                reply_to_turn = None
-                if pd.notna(row['reply_to_turn']):
-                    reply_value = str(row['reply_to_turn']).strip()
-                    if reply_value in valid_turn_ids:
-                        reply_to_turn = reply_value
-
-                # Create message
-                message = ChatMessage(
-                    project_id=project_id,
-                    user_id=user_id,
-                    turn_id=turn_id,
-                    turn_text=turn_text,
-                    reply_to_turn=reply_to_turn
-                )
-                messages_to_create.append(message)
-                imported_messages += 1
-
-            except Exception as e:
-                errors.append(f"Row {idx + 2}: {str(e)}")  # +2 because we skipped header and idx is 0-based
-
-        # Bulk insert messages
-        if messages_to_create:
-            db.bulk_save_objects(messages_to_create)
-            db.commit()
-
-        return CSVImportResponse(
-            message="Import completed",
-            total_messages=total_messages,
-            imported_messages=imported_messages,
-            errors=errors
-        )
-
+        new_chat_room = crud.create_chat_room(db, chat_room=chat_room_create_schema)
     except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creating chat room '{chat_room_name}': {str(e)}"
+        )
+    
+    # Save uploaded file temporarily
+    temp_file_path = f"uploads/{file.filename}"
+    try:
+        contents = await file.read()
+        os.makedirs("uploads", exist_ok=True)
+        with open(temp_file_path, "wb") as f:
+            f.write(contents)
+        
+        # Validate CSV format first
+        validate_csv_format(temp_file_path)
+        
+        # Import messages using our simple utility
+        messages = import_chat_messages(temp_file_path)
+        
+        # Import messages to database
+        imported_count = 0
+        skipped_count = 0
+        errors = []
+        warnings = []
+        
+        for message in messages:
+            try:
+                # Create message schema
+                message_schema = schemas.ChatMessageCreate(
+                    turn_id=message['turn_id'],
+                    user_id=message['user_id'],
+                    turn_text=message['turn_text'],
+                    reply_to_turn=message.get('reply_to_turn')
+                )
+                
+                # Check for existing message
+                existing = crud.get_chat_message_by_turn_id(db, new_chat_room.id, message['turn_id'])
+                if existing:
+                    skipped_count += 1
+                    warnings.append(f"Message with turn_id {message['turn_id']} already exists")
+                    continue
+                
+                # Create message
+                crud.create_chat_message(db, message=message_schema, chat_room_id=new_chat_room.id)
+                imported_count += 1
+                
+            except Exception as e:
+                errors.append(f"Error importing message {message.get('turn_id', 'unknown')}: {str(e)}")
+                skipped_count += 1
+        
+        # Commit all changes
+        db.commit()
+        
+        return schemas.ChatRoomImportResponse(
+            chat_room=new_chat_room,
+            import_details=schemas.CSVImportResponse(
+                total_messages=len(messages),
+                imported_count=imported_count,
+                skipped_count=skipped_count,
+                errors=errors,
+                warnings=warnings
+            )
+        )
+        
+    except Exception as e:
+        db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Error processing CSV file: {str(e)}"
-        ) 
+        )
+    finally:
+        # Clean up temporary file
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+
+# --- Remove or comment out old endpoints --- 
+
+# @router.post("/projects/{project_id}/chat-rooms", response_model=schemas.ChatRoom)
+# async def create_chat_room(...): ... # Keep implementation commented for reference if needed
+
+# @router.post("/chat-rooms/{chat_room_id}/import-csv", response_model=schemas.CSVImportResponse)
+# async def import_chat_csv(...): ... # Keep implementation commented for reference if needed
+
+# Existing delete endpoints etc remain unchanged
+@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_admin_user)
+):
+    """Delete a user (admin only)"""
+    if user_id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete your own account"
+        )
+    
+    user = crud.get_user(db, user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    crud.delete_user(db, user)

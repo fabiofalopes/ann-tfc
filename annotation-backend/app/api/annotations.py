@@ -1,269 +1,164 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List, Optional
-from pydantic import BaseModel, Field
+from typing import List
 from datetime import datetime
 
 from ..database import get_db
-from ..models import User, Project, ChatMessage, Annotation
-from ..schemas import Annotation as AnnotationSchema, AnnotationCreate, AnnotationList
 from ..auth import get_current_user
+from ..dependencies import verify_project_access
+from ..models import User, Annotation, ChatMessage, Project, ProjectAssignment
+from ..schemas import Annotation as AnnotationSchema, AnnotationCreate, AnnotationList
 
-router = APIRouter()
+# Router for message-specific annotations
+message_annotation_router = APIRouter(
+    prefix="/projects/{project_id}/messages/{message_id}/annotations", 
+    tags=["annotations"]
+)
 
-class BatchAnnotationRequest(BaseModel):
-    message_id: int
-    thread_id: str = Field(..., min_length=1, max_length=50)
+# Router for project-level annotations (e.g., get all my annotations)
+project_annotation_router = APIRouter(
+    prefix="/projects/{project_id}/annotations", # Changed prefix
+    tags=["annotations"]
+)
 
-class BatchAnnotationResponse(BaseModel):
-    message: str
-    total_annotations: int
-    created_annotations: int
-    updated_annotations: int
-    errors: List[str] = []
+@project_annotation_router.get("/my", response_model=List[AnnotationSchema]) # Changed path to /my
+def get_my_annotations(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(verify_project_access)
+):
+    """Get all annotations made by the current user in a specific project"""
+    # Verify project exists (optional, access check implies existence)
+    # project = db.query(Project).filter(Project.id == project_id).first()
+    # if not project:
+    #     raise HTTPException(status_code=404, detail="Project not found")
+    
+    # The access check is now handled by the dependency
+    # if not current_user.is_admin:
+    #     pass 
 
-@router.post("/messages/{message_id}", response_model=AnnotationSchema)
+    annotations = db.query(Annotation).filter(
+        Annotation.project_id == project_id,
+        Annotation.annotator_id == current_user.id
+    ).all()
+    
+    return annotations
+
+@message_annotation_router.get("/", response_model=List[AnnotationSchema])
+def get_message_annotations(
+    project_id: int,
+    message_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(verify_project_access)
+):
+    """Get all annotations for a specific message"""
+    # Access check handled by dependency
+    
+    # Verify message exists and belongs to project
+    message = db.query(ChatMessage).filter(
+        ChatMessage.id == message_id,
+        ChatMessage.chat_room.has(project_id=project_id)
+    ).first()
+    
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+    
+    # Get all annotations for this message
+    annotations = db.query(Annotation).filter(
+        Annotation.message_id == message_id
+    ).all()
+    
+    return annotations
+
+@message_annotation_router.post("/", response_model=AnnotationSchema)
 def create_annotation(
+    project_id: int,
     message_id: int,
     annotation: AnnotationCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(verify_project_access)
 ):
-    """Create a thread annotation for a chat message"""
-    # Check if message exists and user has access
-    message = (
-        db.query(ChatMessage)
-        .join(Project)
-        .filter(
-            ChatMessage.id == message_id,
-            (
-                (Project.assignments.any(user_id=current_user.id)) |
-                (current_user.is_admin == True)
-            )
-        )
-        .first()
-    )
+    """Create a new annotation for a message"""
+    # Access check handled by dependency
+
+    # Verify message exists and belongs to project
+    message = db.query(ChatMessage).filter(
+        ChatMessage.id == message_id,
+        ChatMessage.chat_room.has(project_id=project_id)
+    ).first()
     
     if not message:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Message not found or access denied"
-        )
+        raise HTTPException(status_code=404, detail="Message not found")
     
-    # Check if annotation already exists
-    existing_annotation = (
-        db.query(Annotation)
-        .filter(
-            Annotation.message_id == message_id,
-            Annotation.annotator_id == current_user.id
-        )
-        .first()
-    )
+    # Check if user has already annotated this message
+    existing_annotation = db.query(Annotation).filter(
+        Annotation.message_id == message_id,
+        Annotation.annotator_id == current_user.id
+    ).first()
     
     if existing_annotation:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=400,
             detail="You have already annotated this message"
         )
     
-    # Create the annotation
+    # Create new annotation
     db_annotation = Annotation(
         message_id=message_id,
         annotator_id=current_user.id,
+        project_id=project_id,
         thread_id=annotation.thread_id,
         created_at=datetime.utcnow()
     )
+    
     db.add(db_annotation)
     db.commit()
     db.refresh(db_annotation)
     
     return db_annotation
 
-@router.post("/projects/{project_id}/batch", response_model=BatchAnnotationResponse)
-def create_batch_annotations(
-    project_id: int,
-    annotations: List[BatchAnnotationRequest],
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Create or update multiple annotations for a project"""
-    # Check if project exists and user has access
-    project = (
-        db.query(Project)
-        .filter(
-            Project.id == project_id,
-            (
-                (Project.assignments.any(user_id=current_user.id)) |
-                (current_user.is_admin == True)
-            )
-        )
-        .first()
-    )
-    
-    if not project:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Project not found or access denied"
-        )
-    
-    errors = []
-    created_count = 0
-    updated_count = 0
-    
-    for annotation in annotations:
-        try:
-            # Check if message exists in the project
-            message = (
-                db.query(ChatMessage)
-                .filter(
-                    ChatMessage.id == annotation.message_id,
-                    ChatMessage.project_id == project_id
-                )
-                .first()
-            )
-            
-            if not message:
-                errors.append(f"Message {annotation.message_id} not found in project")
-                continue
-            
-            # Check for existing annotation
-            existing_annotation = (
-                db.query(Annotation)
-                .filter(
-                    Annotation.message_id == annotation.message_id,
-                    Annotation.annotator_id == current_user.id
-                )
-                .first()
-            )
-            
-            if existing_annotation:
-                # Update existing annotation
-                existing_annotation.thread_id = annotation.thread_id
-                existing_annotation.updated_at = datetime.utcnow()
-                updated_count += 1
-            else:
-                # Create new annotation
-                db_annotation = Annotation(
-                    message_id=annotation.message_id,
-                    annotator_id=current_user.id,
-                    thread_id=annotation.thread_id,
-                    created_at=datetime.utcnow()
-                )
-                db.add(db_annotation)
-                created_count += 1
-        
-        except Exception as e:
-            errors.append(f"Error processing message {annotation.message_id}: {str(e)}")
-    
-    db.commit()
-    
-    return BatchAnnotationResponse(
-        message="Batch annotation completed",
-        total_annotations=len(annotations),
-        created_annotations=created_count,
-        updated_annotations=updated_count,
-        errors=errors
-    )
-
-@router.get("/messages/{message_id}", response_model=List[AnnotationSchema])
-def get_message_annotations(
-    message_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Get all annotations for a specific chat message"""
-    # Check if message exists and user has access
-    message = (
-        db.query(ChatMessage)
-        .join(Project)
-        .filter(
-            ChatMessage.id == message_id,
-            (
-                (Project.assignments.any(user_id=current_user.id)) |
-                (current_user.is_admin == True)
-            )
-        )
-        .first()
-    )
-    
-    if not message:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Message not found or access denied"
-        )
-    
-    # Get annotations
-    annotations = (
-        db.query(Annotation)
-        .filter(Annotation.message_id == message_id)
-        .all()
-    )
-    
-    return annotations
-
-@router.get("/projects/{project_id}", response_model=AnnotationList)
-def get_project_annotations(
-    project_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Get all annotations for a project"""
-    # Check if project exists and user has access
-    project = (
-        db.query(Project)
-        .filter(
-            Project.id == project_id,
-            (
-                (Project.assignments.any(user_id=current_user.id)) |
-                (current_user.is_admin == True)
-            )
-        )
-        .first()
-    )
-    
-    if not project:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Project not found or access denied"
-        )
-    
-    # Get annotations
-    annotations = (
-        db.query(Annotation)
-        .join(ChatMessage)
-        .filter(ChatMessage.project_id == project_id)
-        .all()
-    )
-    
-    return AnnotationList(annotations=annotations)
-
-@router.delete("/{annotation_id}", status_code=status.HTTP_204_NO_CONTENT)
+@message_annotation_router.delete("/{annotation_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_annotation(
+    project_id: int,
+    message_id: int,
     annotation_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(verify_project_access)
 ):
-    """Delete an annotation (only by owner or admin)"""
-    # Find annotation and check permissions
-    annotation = (
-        db.query(Annotation)
-        .filter(Annotation.id == annotation_id)
-        .first()
-    )
+    """Delete an annotation"""
+    # Access check handled by dependency
+
+    # Verify message exists and belongs to project
+    message = db.query(ChatMessage).filter(
+        ChatMessage.id == message_id,
+        ChatMessage.chat_room.has(project_id=project_id)
+    ).first()
+    
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+    
+    # Get the annotation
+    annotation = db.query(Annotation).filter(
+        Annotation.id == annotation_id,
+        Annotation.message_id == message_id,
+        Annotation.project_id == project_id
+    ).first()
     
     if not annotation:
+        raise HTTPException(status_code=404, detail="Annotation not found")
+    
+    # Check if user is the owner of the annotation or admin
+    if annotation.annotator_id != current_user.id and not current_user.is_admin:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Annotation not found"
+            status_code=403,
+            detail="Not enough permissions to delete this annotation"
         )
     
-    # Check if user is admin or owner
-    if not current_user.is_admin and annotation.annotator_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You can only delete your own annotations"
-        )
-    
-    # Delete annotation
     db.delete(annotation)
-    db.commit() 
+    db.commit()
+    
+    return None 

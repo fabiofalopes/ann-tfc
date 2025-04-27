@@ -1,68 +1,112 @@
 .auth-menu {
-    display: inline-flex;
+    display: flex;
+    justify-content: center;
     align-items: center;
+    min-height: calc(100vh - 60px); /* Subtract header height */
+    padding: 20px;
+    background: var(--bg-color);
 }
 
 .auth-form-container {
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background: var(--background-color);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    padding: 1rem;
-    min-width: 250px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
-.auth-tabs {
-    display: flex;
-    margin-bottom: 1rem;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.auth-tabs button {
-    flex: 1;
-    padding: 0.5rem;
-    border: none;
-    background: none;
-    cursor: pointer;
-}
-
-.auth-tabs button.active {
-    border-bottom: 2px solid var(--primary-color);
+.auth-form-container h2 {
+    margin: 0 0 1.5rem;
+    color: var(--text-color);
+    font-size: 1.8rem;
+    text-align: center;
 }
 
 .auth-form-container form {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
 }
 
 .auth-form-container input {
-    padding: 0.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.auth-form-container input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.auth-form-container button[type="submit"] {
+    padding: 12px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-top: 1rem;
+}
+
+.auth-form-container button[type="submit"]:hover {
+    background: var(--primary-color-hover);
 }
 
 .auth-error {
+    background: var(--error-bg);
     color: var(--error-color);
-    font-size: 0.875rem;
-    margin: 0.5rem 0;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    text-align: center;
+    animation: shake 0.4s ease-in-out;
 }
 
-.auth-user {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-color);
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
 }
 
-.auth-user button {
-    background: none;
-    border: none;
-    font-size: 1.5em;
-    cursor: pointer;
-    color: var(--text-color);
-    padding: 0;
+/* Hide the toggle button as we don't need it for the main login page */
+.auth-toggle {
+    display: none;
+}
+
+/* Dark mode specific styles */
+[data-theme="dark"] .auth-form-container {
+    background: var(--card-bg-dark);
+}
+
+[data-theme="dark"] .auth-form-container input {
+    background: var(--input-bg-dark);
+    border-color: var(--border-color-dark);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .auth-form-container {
+        padding: 1.5rem;
+    }
 }

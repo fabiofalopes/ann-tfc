@@ -21,14 +21,16 @@ class User(Base):
 class Project(Base):
     __tablename__ = "projects"
     
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
     # Relationships
-    messages = relationship("ChatMessage", back_populates="project", cascade="all, delete-orphan")
+    chat_rooms = relationship("ChatRoom", back_populates="project", cascade="all, delete-orphan")
     assignments = relationship("ProjectAssignment", back_populates="project", cascade="all, delete-orphan")
+    annotations = relationship("Annotation", back_populates="project", cascade="all, delete-orphan")
 
 class ProjectAssignment(Base):
     __tablename__ = "project_assignments"
@@ -41,31 +43,46 @@ class ProjectAssignment(Base):
     user = relationship("User", back_populates="project_assignments")
     project = relationship("Project", back_populates="assignments")
     
-    # Unique constraint
+    # Constraints
     __table_args__ = (
         UniqueConstraint('user_id', 'project_id', name='uix_user_project'),
     )
 
+class ChatRoom(Base):
+    __tablename__ = "chat_rooms"
+    
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    
+    # Relationships
+    project = relationship("Project", back_populates="chat_rooms")
+    messages = relationship("ChatMessage", back_populates="chat_room", cascade="all, delete-orphan")
+
 class ChatMessage(Base):
     __tablename__ = "chat_messages"
     
-    id: Mapped[int] = mapped_column(primary_key=True)
-    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
-    turn_id: Mapped[str] = mapped_column(String)  # Original string ID from CSV
-    user_id: Mapped[str] = mapped_column(String)  # Original speaker string ID
-    turn_text: Mapped[str] = mapped_column(Text)
-    reply_to_turn: Mapped[str] = mapped_column(String, nullable=True)  # Original string ID
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    turn_id: Mapped[str] = mapped_column(String, nullable=False)
+    user_id: Mapped[str] = mapped_column(String, nullable=False)
+    turn_text: Mapped[str] = mapped_column(Text, nullable=False)
+    reply_to_turn: Mapped[str] = mapped_column(String, nullable=True)
+    chat_room_id: Mapped[int] = mapped_column(ForeignKey("chat_rooms.id"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
     # Relationships
-    project = relationship("Project", back_populates="messages")
+    chat_room = relationship("ChatRoom", back_populates="messages")
     annotations = relationship("Annotation", back_populates="message", cascade="all, delete-orphan")
     
     # Indexes and constraints
     __table_args__ = (
-        Index('ix_chat_messages_project_turn', 'project_id', 'turn_id'),
-        Index('ix_chat_messages_project_reply', 'project_id', 'reply_to_turn'),
-        UniqueConstraint('project_id', 'turn_id', name='uix_project_turn'),
+        Index('ix_chat_messages_chatroom_turn', 'chat_room_id', 'turn_id'),
+        Index('ix_chat_messages_chatroom_reply', 'chat_room_id', 'reply_to_turn'),
+        UniqueConstraint('chat_room_id', 'turn_id', name='uix_chatroom_turn'),
     )
 
 class Annotation(Base):
@@ -74,6 +91,7 @@ class Annotation(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     message_id: Mapped[int] = mapped_column(ForeignKey("chat_messages.id", ondelete="CASCADE"))
     annotator_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
     thread_id: Mapped[str] = mapped_column(String)  # Thread identifier
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
@@ -81,6 +99,7 @@ class Annotation(Base):
     # Relationships
     message = relationship("ChatMessage", back_populates="annotations")
     annotator = relationship("User", back_populates="annotations")
+    project = relationship("Project", back_populates="annotations")
     
     # Indexes and constraints
     __table_args__ = (

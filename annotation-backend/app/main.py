@@ -7,7 +7,7 @@ from sqlalchemy import select
 from .config import get_settings
 from .database import engine, Base, SessionLocal
 from .models import User
-from .api import auth, admin, projects, annotations
+from .api import auth, admin, projects, message_annotation_router, project_annotation_router
 from .auth import get_password_hash
 
 # Configure logging
@@ -56,7 +56,7 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=["http://localhost:3721"],  # Frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -66,12 +66,13 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
 app.include_router(projects.router, prefix="/projects", tags=["projects"])
-app.include_router(annotations.router, prefix="/annotations", tags=["annotations"])
+app.include_router(message_annotation_router, tags=["annotations"])
+app.include_router(project_annotation_router, tags=["annotations"])
 
 @app.on_event("startup")
 def startup_event():
     """Initialize database and create first admin on startup."""
-    init_db()
+    # init_db()  # Removed: Schema managed by Alembic migrations
     create_first_admin()
 
 @app.get("/")
