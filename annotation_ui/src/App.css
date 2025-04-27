@@ -67,17 +67,25 @@ body {
 
 .header-controls {
   display: flex;
-  gap: 1rem;
   align-items: center;
+  gap: 1.5rem; /* slightly larger gap */
+  min-width: 160px; /* ensure enough space for both buttons */
+  position: relative;
 }
 
 .header-controls button {
+  min-width: 80px; /* ensures 'Logout' is never cut off */
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.2s ease;
+  background: none;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .header-controls button:first-child {
@@ -224,12 +232,16 @@ body {
 }
 
 .theme-toggle {
+  min-width: 40px;
+  padding: 0;
   background: none;
   border: none;
   font-size: 1.5em;
   cursor: pointer;
   color: var(--text-color);
-  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-button {

@@ -90,6 +90,7 @@ class AnnotationCreate(AnnotationBase):
 class Annotation(AnnotationBase):
     id: int
     annotator_id: int
+    annotator_email: str
     project_id: int
     created_at: datetime
     updated_at: Optional[datetime] = None

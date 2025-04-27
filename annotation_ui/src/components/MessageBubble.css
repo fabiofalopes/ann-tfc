@@ -1,15 +1,19 @@
 .message-bubble {
-  background-color: var(--bg-secondary);
+  background-color: #ffffff;
   border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  position: relative;
-  transition: all 0.2s ease;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.message-bubble.expanded {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .message-bubble.user-selected {
-  background-color: var(--bg-secondary);
-  box-shadow: 0 0 0 2px var(--primary);
+  background-color: #f0f7ff;
+  border-left: 4px solid #2196F3;
 }
 
 .message-bubble.annotating {
@@ -20,99 +24,185 @@
 .message-header {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.9em;
+  color: #666;
 }
 
-.message-id,
-.turn-id,
-.user-id,
-.reply-to,
-.annotator-container {
+.message-id, .turn-id, .user-id, .reply-to {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  background-color: var(--bg-primary);
-  border-radius: 4px;
+  gap: 4px;
 }
 
-.message-id-label,
-.turn-id-label,
-.user-id-label,
-.reply-to-label,
-.annotator-label {
-  color: var(--text-tertiary);
-  font-size: 0.8rem;
-}
-
-.message-id-value,
-.turn-id-value,
-.user-id-value,
-.reply-to-value,
-.annotator-value {
-  color: var(--text-primary);
-  font-weight: 500;
+.message-id-label, .turn-id-label, .user-id-label, .reply-to-label {
+  font-weight: 600;
 }
 
 .user-id {
   cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
   transition: background-color 0.2s;
 }
 
 .user-id:hover {
-  background-color: var(--primary);
-  color: white;
+  background-color: #f0f0f0;
 }
 
 .message-content {
-  color: var(--text-primary);
+  margin-bottom: 12px;
   line-height: 1.5;
-  margin: 0.5rem 0;
+  white-space: pre-wrap;
 }
 
 .see-more-container {
-  margin-top: 0.5rem;
+  text-align: center;
+  margin-bottom: 12px;
 }
 
 .see-all-button {
   background: none;
   border: none;
-  color: var(--primary);
+  color: #2196F3;
   cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.9rem;
+  padding: 4px 8px;
+  font-size: 0.9em;
 }
 
 .see-all-button:hover {
   text-decoration: underline;
 }
 
-.tag-container {
-  margin-top: 0.5rem;
+/* Annotations Section */
+.annotations-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.annotations-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
+  margin-bottom: 12px;
 }
 
-.annotation-loading {
+.annotations-header h4 {
+  margin: 0;
+  color: #333;
+}
+
+.add-annotation-button {
+  background: none;
+  border: 1px solid #4CAF50;
+  color: #4CAF50;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s;
+}
+
+.add-annotation-button:hover {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.annotation-form {
   display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.annotation-input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.submit-annotation-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submit-annotation-button:hover {
+  background-color: #45a049;
+}
+
+.annotations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.annotation-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.annotation-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.annotation-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 4px;
 }
 
-.annotation-loading .loading-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--border);
-  border-top: 2px solid var(--primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+.annotation-text {
+  font-weight: 500;
+  color: #333;
+  font-size: 1.1em;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.annotation-annotator {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.annotator-name {
+  font-weight: 500;
+  color: #2196F3;
+}
+
+.annotation-meta {
+  font-size: 0.8em;
+  color: #666;
+}
+
+.delete-annotation-button {
+  background: none;
+  border: none;
+  color: #dc3545;
+  font-size: 1.2em;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  margin-left: 8px;
+}
+
+.delete-annotation-button:hover {
+  background-color: #f8d7da;
 }
 
 /* Dark mode variables */

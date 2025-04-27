@@ -85,64 +85,99 @@
 .thread-menu {
     background-color: var(--background-color);
     border-radius: 8px;
-    padding: 16px;
+    padding: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 16px;
+    margin-bottom: 0;
 }
 
 .thread-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.thread-header h3 {
-    margin: 0;
-    color: var(--text-color);
-    font-size: 1.2rem;
+.thread-name {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .thread-stats {
     display: flex;
     gap: 12px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+}
+
+.stat-label {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+}
+
+.stat-value {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.thread-content {
+    padding: 4px 0;
 }
 
 .thread-tags {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 8px;
-    align-items: center;
+}
+
+.tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
 }
 
 .tag {
     background-color: var(--tag-background);
     color: var(--tag-text);
-    padding: 4px 8px;
+    padding: 2px 6px;
     border-radius: 4px;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
 }
 
 .no-tags {
     color: var(--text-secondary);
     font-style: italic;
+    font-size: 0.8rem;
 }
 
 .tag-edit-form {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
+}
+
+.tag-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .tag-input {
-    padding: 8px;
+    padding: 6px;
     border: 1px solid var(--border-color);
     border-radius: 4px;
     background-color: var(--input-background);
     color: var(--text-color);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 .form-actions {
@@ -154,12 +189,12 @@
 .save-button,
 .cancel-button,
 .edit-tags-button {
-    padding: 6px 12px;
+    padding: 4px 8px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s;
+    font-size: 0.8rem;
+    transition: all 0.2s;
 }
 
 .save-button {
@@ -184,10 +219,12 @@
     background-color: transparent;
     color: var(--primary-color);
     border: 1px solid var(--primary-color);
+    margin-top: 4px;
+    align-self: flex-start;
 }
 
 .edit-tags-button:hover {
-    background-color: var(--primary-hover);
+    background-color: var(--primary-color);
     color: white;
 }
 
@@ -195,14 +232,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 24px;
+    gap: 8px;
+    padding: 16px;
 }
 
 .loading-spinner {
-    width: 24px;
-    height: 24px;
-    border: 3px solid var(--border-color);
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color);
     border-top-color: var(--primary-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -210,8 +247,9 @@
 
 .thread-menu.error {
     color: var(--error-color);
-    padding: 16px;
+    padding: 12px;
     text-align: center;
+    font-size: 0.8rem;
 }
 
 @keyframes spin {

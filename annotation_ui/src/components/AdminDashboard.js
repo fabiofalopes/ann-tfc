@@ -1,27 +1,24 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { projects, users } from '../utils/api';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
-  // State
+  const navigate = useNavigate();
   const [projectsList, setProjectsList] = useState([]);
   const [usersList, setUsersList] = useState([]);
   const [projectUsers, setProjectUsers] = useState({});
-  const [newProject, setNewProject] = useState({ name: '', description: '' });
-  const [newUser, setNewUser] = useState({ email: '', password: '' });
-  const [assign, setAssign] = useState({ projectId: '', userId: '' });
-  const [importing, setImporting] = useState({});
-  const [importProgress, setImportProgress] = useState({});
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('projects'); // 'projects' or 'users'
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [projectChatRooms, setProjectChatRooms] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('projects');
+  const [newUser, setNewUser] = useState({ email: '', password: '', is_admin: false });
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
 
   // Fetch projects and users
   const fetchData = async () => {
     setLoading(true);
-    setError('');
+    setError(null);
     try {
       const [p, u] = await Promise.all([
         projects.getProjects(),
@@ -30,18 +27,27 @@ const AdminDashboard = () => {
       setProjectsList(Array.isArray(p) ? p : p.projects || []);
       setUsersList(Array.isArray(u) ? u : u.users || []);
 
-      // Fetch users for each project
+      // Fetch users and chat rooms for each project
       const projectUsersData = {};
+      const projectChatRoomsData = {};
+      
       for (const project of Array.isArray(p) ? p : p.projects || []) {
         try {
-          const users = await projects.getProjectUsers(project.id);
+          const [users, chatRooms] = await Promise.all([
+            projects.getProjectUsers(project.id),
+            projects.getChatRooms(project.id)
+          ]);
           projectUsersData[project.id] = users;
+          projectChatRoomsData[project.id] = chatRooms;
         } catch (err) {
-          console.error(`Failed to fetch users for project ${project.id}:`, err);
+          console.error(`Failed to fetch data for project ${project.id}:`, err);
           projectUsersData[project.id] = [];
+          projectChatRoomsData[project.id] = [];
         }
       }
+      
       setProjectUsers(projectUsersData);
+      setProjectChatRooms(projectChatRoomsData);
     } catch (err) {
       setError(err.message || 'Failed to load data');
     }
@@ -50,192 +56,40 @@ const AdminDashboard = () => {
 
   useEffect(() => { fetchData(); }, []);
 
-  // Create Project
-  const handleCreateProject = async (e) => {
-    e.preventDefault();
-    setError(''); setMessage('');
-    try {
-      await projects.createProject(newProject);
-      setMessage('Project created!');
-      setNewProject({ name: '', description: '' });
-      fetchData();
-    } catch (err) {
-      setError(err.message || 'Failed to create project');
-    }
+  const handleProjectClick = (projectId) => {
+    navigate(`/admin/projects/${projectId}`);
   };
 
-  // Create User
   const handleCreateUser = async (e) => {
     e.preventDefault();
-    setError(''); setMessage('');
+    setIsCreatingUser(true);
+    setError(null);
+
     try {
       await users.createUser(newUser);
-      setMessage('User created!');
-      setNewUser({ email: '', password: '' });
-      fetchData();
+      setNewUser({ email: '', password: '', is_admin: false });
+      await fetchData(); // Refresh the list
     } catch (err) {
-      setError(err.message || 'Failed to create user');
-    }
-  };
-
-  // Assign User to Project
-  const handleAssign = async (e) => {
-    e.preventDefault();
-    setError(''); setMessage('');
-    if (!assign.projectId || !assign.userId) {
-      setError('Please select both project and user');
-      return;
-    }
-    try {
-      await projects.assignUser(assign.projectId, assign.userId);
-      setMessage('User successfully assigned to project!');
-      setAssign({ projectId: '', userId: '' });
-      fetchData();
-    } catch (err) {
-      setError(err.message || 'Failed to assign user to project');
-    }
-  };
-
-  // Import Data
-  const handleImport = async (projectId, file) => {
-    setError('');
-    setMessage('');
-    
-    if (!file) {
-      setError('Please select a file');
-      return;
-    }
-    
-    if (!file.name.toLowerCase().endsWith('.csv')) {
-      setError('Please upload a CSV file');
-      return;
-    }
-    
-    setImporting((prev) => ({ ...prev, [projectId]: true }));
-    setImportProgress((prev) => ({ ...prev, [projectId]: 0 }));
-    
-    try {
-      const response = await projects.importCsv(projectId, file, (progress) => {
-        setImportProgress((prev) => ({ ...prev, [projectId]: progress }));
-      });
-      
-      const { chat_room, import_details } = response;
-      
-      // Show success message with import details
-      setMessage(`Import completed for project ${projectsList.find(p => p.id === projectId)?.name}: 
-        ${import_details.imported_count} messages imported, 
-        ${import_details.skipped_count} skipped`);
-      
-      // Show warnings if any
-      if (import_details.warnings.length > 0) {
-        setMessage(prev => prev + `\nWarnings: ${import_details.warnings.join(', ')}`);
-      }
-      
-      // Show errors if any
-      if (import_details.errors.length > 0) {
-        setError(`Import completed with errors: ${import_details.errors.join(', ')}`);
-      }
-      
-      // Update projects list with new chat room
-      setProjectsList(prevProjects => 
-        prevProjects.map(project => {
-          if (project.id === projectId) {
-            return {
-              ...project,
-              chat_rooms: [...(project.chat_rooms || []), chat_room]
-            };
-          }
-          return project;
-        })
-      );
-    } catch (err) {
-      setError(err.message || 'Failed to import data');
+      setError(err.response?.data?.detail || err.message || 'Failed to create user');
     } finally {
-      setImporting((prev) => ({ ...prev, [projectId]: false }));
-      setImportProgress((prev) => ({ ...prev, [projectId]: 0 }));
+      setIsCreatingUser(false);
     }
   };
 
-  const ProjectCard = ({ project }) => (
-    <div className="project-card">
-      <div className="project-header">
-        <h3>{project.name}</h3>
-        <p className="project-description">{project.description}</p>
-      </div>
-      
-      <div className="project-actions">
-        <div className="import-section">
-          <h4>Import Data</h4>
-          <div className="import-info">
-            <p>CSV file should contain:</p>
-            <ul>
-              <li><strong>user_id</strong>: ID of the user who sent the message</li>
-              <li><strong>turn_id</strong>: Unique identifier for the message</li>
-              <li><strong>turn_text</strong>: The message content</li>
-              <li><strong>reply_to_turn</strong> (optional): ID of the message this is replying to</li>
-            </ul>
-          </div>
-          <input
-            type="file"
-            accept=".csv"
-            disabled={importing[project.id]}
-            onChange={e => {
-              const file = e.target.files[0];
-              if (file) {
-                handleImport(project.id, file);
-              }
-            }}
-          />
-          {importing[project.id] && (
-            <div className="progress-bar">
-              <div 
-                className="progress" 
-                style={{ width: `${importProgress[project.id]}%` }}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-      
-      <div className="chat-rooms-section">
-        <h4>Chat Rooms</h4>
-        {project.chat_rooms && project.chat_rooms.length > 0 ? (
-          <div className="chat-rooms-list">
-            {project.chat_rooms.map(room => (
-              <div key={room.id} className="chat-room-item">
-                <div className="room-info">
-                  <span className="room-name">{room.name}</span>
-                  <span className="room-stats">
-                    Messages: {room.message_count || 0}
-                  </span>
-                </div>
-                <div className="room-actions">
-                  <button className="view-room-btn">View Room</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="empty-state">
-            No chat rooms yet. Import a CSV file to create one.
-          </div>
-        )}
-      </div>
-      
-      <div className="project-users">
-        <h4>Assigned Users</h4>
-        {projectUsers[project.id] && projectUsers[project.id].length > 0 ? (
-          <ul>
-            {projectUsers[project.id].map(user => (
-              <li key={user.id}>{user.email}</li>
-            ))}
-          </ul>
-        ) : (
-          <div className="empty-state">No users assigned to this project.</div>
-        )}
-      </div>
-    </div>
-  );
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) {
+      return;
+    }
+
+    try {
+      await users.deleteUser(userId);
+      await fetchData(); // Refresh the list
+    } catch (err) {
+      setError(err.response?.data?.detail || err.message || 'Failed to delete user');
+    }
+  };
+
+  if (loading) return <div className="loading">Loading dashboard data...</div>;
 
   return (
     <div className="admin-dashboard">
@@ -257,51 +111,122 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {loading && <div className="loading">Loading...</div>}
-      <div className="mt-4">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-            <strong className="font-bold">Error: </strong>
-            <span className="block sm:inline">{error}</span>
-          </div>
-        )}
-        {message && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-            <strong className="font-bold">Success: </strong>
-            <span className="block sm:inline whitespace-pre-line">{message}</span>
-          </div>
-        )}
-      </div>
+      {error && <div className="error-message">{error}</div>}
 
       {activeTab === 'projects' ? (
-        <div className="dashboard-content">
-          <div className="projects-section">
-            <div className="projects-header">
-              <h3>Projects</h3>
-              <button 
-                className="create-project-btn"
-                onClick={() => setSelectedProject(null)}
-              >
-                Create New Project
-              </button>
-            </div>
-            
-            {projectsList.length === 0 ? (
-              <div className="empty-state">No projects found.</div>
-            ) : (
-              <div className="projects-grid">
-                {projectsList.map(project => (
-                  <ProjectCard key={project.id} project={project} />
-                ))}
+        <div className="projects-grid">
+          {projectsList.map(project => (
+            <div 
+              key={project.id} 
+              className="project-card"
+              onClick={() => handleProjectClick(project.id)}
+            >
+              <div className="project-header">
+                <h3>{project.name}</h3>
+                <p className="project-description">{project.description}</p>
               </div>
-            )}
-          </div>
+              
+              <div className="project-stats">
+                <div className="stat-item">
+                  <span className="stat-label">Chat Rooms</span>
+                  <span className="stat-value">
+                    {projectChatRooms[project.id]?.length || 0}
+                  </span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Assigned Users</span>
+                  <span className="stat-value">
+                    {projectUsers[project.id]?.length || 0}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="project-meta">
+                <span className="created-date">
+                  Created: {new Date(project.created_at).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
-        <div className="dashboard-content">
-          <div className="users-section">
-            <h3>Users</h3>
-            {/* Users list content */}
+        <div className="users-section">
+          <div className="create-user-form">
+            <h3>Create New User</h3>
+            <form onSubmit={handleCreateUser}>
+              <div className="form-group">
+                <label htmlFor="email">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  value={newUser.email}
+                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <input
+                  type="password"
+                  id="password"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group checkbox">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={newUser.is_admin}
+                    onChange={(e) => setNewUser({ ...newUser, is_admin: e.target.checked })}
+                  />
+                  Admin User
+                </label>
+              </div>
+              <button 
+                type="submit" 
+                className="create-button"
+                disabled={isCreatingUser}
+              >
+                {isCreatingUser ? 'Creating...' : 'Create User'}
+              </button>
+            </form>
+          </div>
+
+          <div className="users-list">
+            <h3>Existing Users</h3>
+            {usersList.length === 0 ? (
+              <p>No users found</p>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {usersList.map(user => (
+                    <tr key={user.id}>
+                      <td>{user.id}</td>
+                      <td>{user.email}</td>
+                      <td>{user.is_admin ? 'Admin' : 'User'}</td>
+                      <td>
+                        <button 
+                          className="delete-button"
+                          onClick={() => handleDeleteUser(user.id)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       )}

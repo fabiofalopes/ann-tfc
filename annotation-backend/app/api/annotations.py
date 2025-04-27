@@ -65,12 +65,24 @@ def get_message_annotations(
     if not message:
         raise HTTPException(status_code=404, detail="Message not found")
     
-    # Get all annotations for this message
-    annotations = db.query(Annotation).filter(
+    # Get all annotations for this message with annotator information
+    annotations = db.query(
+        Annotation,
+        User.email.label('annotator_email')
+    ).join(
+        User, Annotation.annotator_id == User.id
+    ).filter(
         Annotation.message_id == message_id
     ).all()
     
-    return annotations
+    # Convert to list of dictionaries with annotator email
+    result = []
+    for annotation, annotator_email in annotations:
+        annotation_dict = annotation.__dict__
+        annotation_dict['annotator_email'] = annotator_email
+        result.append(annotation_dict)
+    
+    return result
 
 @message_annotation_router.post("/", response_model=AnnotationSchema)
 def create_annotation(
@@ -118,7 +130,11 @@ def create_annotation(
     db.commit()
     db.refresh(db_annotation)
     
-    return db_annotation
+    # Add annotator email to the response
+    annotation_dict = db_annotation.__dict__
+    annotation_dict['annotator_email'] = current_user.email
+    
+    return annotation_dict
 
 @message_annotation_router.delete("/{annotation_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_annotation(
