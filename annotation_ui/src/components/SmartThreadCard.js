@@ -88,7 +88,7 @@ const SmartThreadCard = ({
       {isHovered && (
         <div className="thread-preview">
           <div className="preview-messages">
-            {threadMessages.slice(0, 3).map((message, index) => (
+            {threadMessages.map((message, index) => (
               <div 
                 key={message.id}
                 className="preview-message"
@@ -110,11 +110,6 @@ const SmartThreadCard = ({
                 </div>
               </div>
             ))}
-            {threadMessages.length > 3 && (
-              <div className="preview-more">
-                +{threadMessages.length - 3} more messages
-              </div>
-            )}
           </div>
         </div>
       )}

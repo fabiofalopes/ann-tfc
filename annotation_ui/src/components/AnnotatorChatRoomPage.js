@@ -17,18 +17,18 @@ const parseApiError = (err) => {
 
 // Thread color palette - beautiful, distinguishable colors
 const THREAD_COLORS = [
-  '#3B82F6', // Blue
-  '#8B5CF6', // Purple
-  '#EF4444', // Red
-  '#F59E0B', // Amber
-  '#10B981', // Emerald
-  '#F97316', // Orange
-  '#6366F1', // Indigo
-  '#EC4899', // Pink
-  '#84CC16', // Lime
-  '#06B6D4', // Cyan
-  '#8B5A2B', // Brown
-  '#6B7280', // Gray
+  '#90CAF9', // Light Blue
+  '#C5CAE9', // Light Indigo
+  '#FFCCBC', // Light Orange
+  '#FFECB3', // Light Amber
+  '#C8E6C9', // Light Green
+  '#FFE0B2', // Light Orange (softer)
+  '#BBDEFB', // Lighter Blue
+  '#F8BBD0', // Light Pink
+  '#E6EE9C', // Light Lime
+  '#B2EBF2', // Light Cyan
+  '#D7CCC8', // Light Brown
+  '#F5F5F5', // Lighter Gray
 ];
 
 const AnnotatorChatRoomPage = () => {

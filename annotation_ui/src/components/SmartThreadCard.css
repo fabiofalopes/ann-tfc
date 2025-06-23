@@ -2,64 +2,48 @@
 .smart-thread-card {
   background-color: var(--background-color-secondary);
   border: 2px solid var(--border-color);
-  border-radius: 1rem; /* Increased border radius */
+  border-radius: var(--border-radius); /* Increased border radius */
   margin-bottom: 1rem; /* Increased margin */
   cursor: pointer;
-  transition: all 0.3s ease;
   position: relative;
-  overflow: visible;
+  overflow: visible; /* Crucial: Allow children to expand beyond boundaries */
   box-shadow: var(--card-shadow);
   z-index: 1; /* Base z-index */
   min-height: 80px; /* Minimum height for better proportions */
 }
 
 .smart-thread-card:hover {
-  transform: translateY(-3px); /* More pronounced hover effect */
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2); /* Stronger shadow */
+  box-shadow: var(--card-shadow); /* Stronger shadow */
   border-color: var(--thread-color);
   z-index: 1000; /* Higher z-index on hover to ensure expansion appears on top */
 }
 
 .smart-thread-card.highlighted {
   border-color: var(--thread-color);
-  box-shadow: 0 0 0 4px rgba(var(--thread-color-rgb), 0.2); /* Larger highlight ring */
-  transform: scale(1.03); /* Slightly larger scale */
+  box-shadow: var(--card-shadow); /* Larger highlight ring */
   z-index: 999; /* High z-index when highlighted */
 }
 
 /* Thread Card Header - More Spacious */
 .thread-card-header {
   padding: 1rem 1.25rem; /* Increased padding significantly */
-  color: white;
-  border-radius: 0.75rem 0.75rem 0 0; /* Adjusted for new border radius */
+  color: var(--text-color-primary);
+  border-radius: var(--border-radius) var(--border-radius) 0 0; /* Adjusted for new border radius */
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
-  overflow: hidden;
+  /* Removed overflow: hidden to prevent clipping of the hover preview */
   min-height: 60px; /* Minimum height for header */
-}
-
-.thread-card-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.smart-thread-card:hover .thread-card-header::before {
-  left: 100%;
+  background-color: var(--background-color-tertiary);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .thread-title {
   margin: 0;
   font-size: 1rem; /* Increased font size */
   font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: none;
   letter-spacing: 0.025em;
   line-height: 1.3; /* Better line height */
 }
@@ -72,54 +56,44 @@
 }
 
 .message-count, .annotator-count {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--background-color-tertiary);
   padding: 0.25rem 0.5rem; /* Increased padding */
-  border-radius: 1rem; /* More rounded */
+  border-radius: var(--border-radius); /* More rounded */
   font-weight: 600;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  text-shadow: none;
   min-width: 45px; /* Minimum width for consistency */
   text-align: center;
+  color: var(--text-color-primary);
+  border: 1px solid var(--border-color);
 }
 
 /* Thread Preview (Hover Expansion) - FIXED and More Spacious */
 .thread-preview {
   position: absolute;
-  top: 100%;
+  top: 0; /* Position at the top of the parent card */
   left: 0;
   right: 0;
-  background-color: var(--background-color-primary);
+  background-color: var(--background-color-secondary);
   border: 2px solid var(--thread-color);
-  border-top: none;
-  border-radius: 0 0 1rem 1rem; /* Adjusted for new border radius */
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3); /* Stronger shadow */
+  border-radius: var(--border-radius); /* Apply consistent border-radius to all corners for overlay */
+  /* Removed box-shadow for simplicity */
   z-index: 10000; /* Very high z-index to ensure it appears above everything */
-  animation: expandDown 0.3s ease-out;
-  max-height: 400px; /* Increased max height */
-  overflow-y: auto;
-  /* Ensure it doesn't get clipped by parent containers */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-}
-
-@keyframes expandDown {
-  from {
-    opacity: 0;
-    transform: translateY(-15px) scaleY(0.8) translateZ(0); /* More pronounced animation */
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scaleY(1) translateZ(0);
-  }
+  /* Removed animation for simplicity */
+  transform: none; /* Ensure no transforms */
+  -webkit-transform: none; /* Ensure no webkit transform */
+  padding-bottom: 1rem; /* Add padding to the bottom of the preview */
+  overflow: visible; /* Ensure content can expand freely */
 }
 
 .preview-messages {
   padding: 1rem; /* Increased padding */
+  overflow: visible; /* Ensure content can expand freely */
 }
 
 .preview-message {
-  background-color: var(--background-color-secondary);
+  background-color: var(--background-color-tertiary);
   border: 1px solid var(--border-color);
-  border-radius: 0.75rem; /* More rounded */
+  border-radius: var(--border-radius); /* More rounded */
   padding: 0.75rem; /* Increased padding */
   margin-bottom: 0.75rem; /* Increased margin */
   cursor: pointer;
@@ -144,7 +118,7 @@
   background-color: var(--background-color-tertiary);
   border-color: var(--thread-color);
   transform: translateX(6px); /* More pronounced hover effect */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--card-shadow);
 }
 
 .preview-message:last-child {
@@ -161,18 +135,20 @@
 }
 
 .preview-turn {
-  color: var(--thread-color);
-  background-color: rgba(var(--thread-color-rgb), 0.1);
+  color: var(--text-color-primary);
+  background-color: color-mix(in srgb, var(--thread-color) 10%, transparent);
   padding: 0.25rem 0.5rem; /* Increased padding */
-  border-radius: 1rem; /* More rounded */
+  border-radius: var(--border-radius); /* More rounded */
   font-weight: 700;
+  border: 1px solid var(--thread-color);
 }
 
 .preview-user {
   color: var(--text-color-secondary);
   background-color: var(--background-color-tertiary);
   padding: 0.25rem 0.5rem; /* Increased padding */
-  border-radius: 1rem; /* More rounded */
+  border-radius: var(--border-radius); /* More rounded */
+  border: 1px solid var(--border-color);
 }
 
 .preview-content {
@@ -180,7 +156,7 @@
   line-height: 1.5; /* Better line height */
   color: var(--text-color-primary);
   padding-left: 0.75rem; /* Increased padding */
-  border-left: 3px solid rgba(var(--thread-color-rgb), 0.2); /* Thicker border */
+  border-left: 3px solid var(--border-color); /* Thicker border */
 }
 
 .preview-more {
@@ -190,7 +166,7 @@
   color: var(--text-color-secondary);
   font-style: italic;
   background-color: var(--background-color-tertiary);
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
   border: 1px dashed var(--border-color);
   margin-top: 0.5rem;
 }
@@ -217,145 +193,153 @@
   }
   
   .thread-preview {
-    max-height: 300px;
+    /* Reset for mobile to ensure no conflicts */
+    transform: none; 
+    margin-top: 0; 
+    padding-top: 0;
+    border-radius: var(--border-radius); /* Consistent border-radius for mobile */
+    overflow: visible; /* Ensure content can expand freely on mobile */
   }
   
   .preview-messages {
     padding: 0.75rem;
+    overflow: visible; /* Ensure content can expand freely on mobile */
   }
 }
 
 /* Custom scrollbar for hover messages list */
 .thread-preview::-webkit-scrollbar {
-  width: 8px; /* Wider scrollbar */
+  display: none; /* Hide scrollbar when not needed for the entire preview */
 }
 
 .thread-preview::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
+  background: transparent;
 }
 
 .thread-preview::-webkit-scrollbar-thumb {
-  background: var(--thread-color);
-  border-radius: 4px;
-  opacity: 0.7;
+  background: transparent;
 }
 
 .thread-preview::-webkit-scrollbar-thumb:hover {
-  opacity: 1;
+  background: transparent;
 }
 
 /* Thread Card Annotators */
 .thread-card-annotators {
   margin-bottom: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.annotators-label {
-  font-size: 0.75rem;
-  color: var(--text-color-secondary);
-  font-weight: 500;
-  margin-right: 0.5rem;
-}
-
-.annotators-list {
-  font-size: 0.75rem;
+  padding: 0 1rem; /* Adjust padding to align with other content */
   color: var(--text-color-primary);
 }
 
-/* Thread Card Summary */
-.thread-card-summary {
+.annotators-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-color-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.annotators-list {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0.75rem;
-  border-top: 1px solid var(--border-color);
-  margin-top: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.annotator-item {
+  background-color: var(--background-color-tertiary);
+  color: var(--text-color-primary);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--border-radius);
+  font-size: 0.7rem;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+}
+
+.thread-card-summary {
+  padding: 1rem; /* Increased padding */
+  font-size: 0.85rem; /* Increased font size */
+  line-height: 1.5; /* Better line height */
+  color: var(--text-color-primary);
 }
 
 .hover-hint {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-color-secondary);
   font-style: italic;
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
+  text-align: center;
+  padding: 0.5rem;
+  background-color: var(--background-color-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
 }
 
 .smart-thread-card:hover .hover-hint {
-  opacity: 0;
+  display: none;
 }
 
-/* Hover Expansion - Now expands vertically on top */
 .thread-hover-expansion {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
   background-color: var(--background-color-secondary);
-  border: 2px solid var(--primary-color);
   border-radius: var(--border-radius);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
+  padding: 1rem;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
+  margin-top: 1rem;
   animation: expandVertical 0.3s ease-out;
-  overflow: hidden;
-  max-height: 400px;
 }
 
 @keyframes expandVertical {
   from {
     opacity: 0;
-    transform: scaleY(0.3) translateY(-20px);
-    transform-origin: top center;
+    transform: scaleY(0.8);
   }
   to {
     opacity: 1;
-    transform: scaleY(1) translateY(0);
-    transform-origin: top center;
+    transform: scaleY(1);
   }
 }
 
-/* Hover Header */
 .hover-header {
-  padding: 1rem;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark));
-  color: white;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .hover-header h4 {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--text-color-primary);
 }
 
 .hover-count {
-  font-size: 0.75rem;
-  background-color: rgba(255, 255, 255, 0.2);
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.375rem;
+  background-color: var(--background-color-tertiary);
+  color: var(--text-color-primary);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
 }
 
-/* Hover Messages List */
 .hover-messages-list {
-  max-height: 250px;
+  max-height: 300px;
   overflow-y: auto;
-  padding: 0.75rem;
+  padding-right: 0.5rem;
 }
 
 .hover-message-item {
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
   background-color: var(--background-color-tertiary);
-  border-radius: 0.5rem;
   border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  animation: slideInMessage 0.2s ease-out;
-  animation-delay: calc(var(--item-index, 0) * 0.05s);
-  animation-fill-mode: both;
+  position: relative;
+  overflow: hidden;
+  min-height: 50px;
+  color: var(--text-color-primary);
 }
 
 @keyframes slideInMessage {
@@ -370,10 +354,9 @@
 }
 
 .hover-message-item:hover {
-  background-color: rgba(59, 130, 246, 0.05);
-  border-color: var(--primary-color);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: var(--background-color-tertiary);
+  border-color: var(--thread-color);
+  transform: translateX(4px);
 }
 
 .hover-message-item:last-child {
@@ -384,42 +367,43 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
-  font-size: 0.75rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.7rem;
+  opacity: 0.8;
+  color: var(--text-color-secondary);
 }
 
-.hover-turn-id {
-  background-color: var(--background-color-secondary);
-  padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
-  font-weight: 600;
-  color: var(--text-color-primary);
-}
-
+.hover-turn-id,
 .hover-user-id {
-  background-color: rgba(33, 150, 243, 0.1);
-  color: #1976D2;
-  padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: var(--border-radius);
+  background-color: var(--background-color-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-color-primary);
 }
 
 .hover-message-preview {
-  font-size: 0.8rem;
-  color: var(--text-color-primary);
+  font-size: 0.75rem;
   line-height: 1.4;
+  color: var(--text-color-primary);
 }
 
-/* Hover Footer */
 .hover-footer {
-  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+  padding-top: 0.5rem;
   border-top: 1px solid var(--border-color);
-  background-color: var(--background-color-tertiary);
+  font-size: 0.7rem;
+  color: var(--text-color-secondary);
 }
 
 .hover-annotators {
-  font-size: 0.75rem;
-  color: var(--text-color-secondary);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
 }
 
 .hover-annotators strong {
@@ -432,13 +416,13 @@
 }
 
 .hover-messages-list::-webkit-scrollbar-track {
-  background: var(--background-color-secondary);
-  border-radius: 3px;
+  background: var(--background-color-tertiary);
+  border-radius: var(--border-radius);
 }
 
 .hover-messages-list::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 3px;
+  background: var(--thread-color);
+  border-radius: var(--border-radius);
 }
 
 .hover-messages-list::-webkit-scrollbar-thumb:hover {

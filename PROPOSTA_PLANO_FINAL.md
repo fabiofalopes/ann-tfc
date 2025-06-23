@@ -16,7 +16,7 @@ A nossa prioridade é entregar uma solução de alta qualidade que cumpra os obj
 
 Com base na análise detalhada em `ANALISE_ESTADO_ATUAL.md`, o projeto encontra-se num estado avançado, mas com assimetrias entre o backend e o frontend.
 
-### Backend (FastAPI) - ~95% Completo
+### Backend (FastAPI) - ~98% Completo
 
 *   **O que está feito:**
     *   Arquitetura em camadas (API, Lógica, Dados) bem definida.
@@ -25,22 +25,25 @@ Com base na análise detalhada em `ANALISE_ESTADO_ATUAL.md`, o projeto encontra-
     *   Endpoints de administração para gestão de utilizadores e projetos (CRUD).
     *   Funcionalidade de importação de `ChatRooms` a partir de CSV.
     *   Endpoints para o anotador listar projetos e criar/remover anotações.
+    *   **Performance:** A API de anotações foi otimizada para resolver o problema de N+1 queries na obtenção de anotações por sala de chat, melhorando significativamente a performance no frontend.
 
 *   **Principais Pendências:**
-    *   **Performance:** A API de anotações sofre de um problema de N+1 queries, impactando severamente o frontend.
     *   **Testes e Logging:** Ausência de uma suite de testes automatizados e de um sistema de logging estruturado.
+    *   **API Admin Completa:** Falta implementar a API completa para Admins gerirem projetos e atribuírem/removerem utilizadores a projetos de forma mais granular.
 
-### Frontend (React) - ~50% Completo
+### Frontend (React) - ~75% Completo
 
 *   **O que está feito:**
     *   Estrutura de roteamento com `react-router-dom` e rotas protegidas.
     *   Módulo `api.js` para comunicação com o backend (com `axios` e intercetores).
     *   Dashboards de administração funcionais para gestão de projetos, utilizadores e upload de CSVs.
+    *   **Arquitetura de Estado:** O componente `App.js` foi refatorado para descentralizar o estado, movendo a lógica de dados para as páginas específicas (`AnnotatorDashboard`, `AnnotatorProjectPage`). Foi também introduzido `AuthContext` para gestão de estado global de autenticação.
+    *   **Interface de Anotação (`AnnotatorChatRoomPage`):** A página central para a tarefa de anotação foi significativamente melhorada em termos de UI/UX, incluindo a refatoração do `MessageBubble`, a implementação de um sistema de anotação baseado em cliques (sem drag-and-drop), e um sistema de threads codificado por cores. A sidebar agora oferece uma visão geral mais abrangente das chat threads.
+    *   **Fluxo do Anotador:** O fluxo de navegação básico (Login -> Dashboard -> Projeto -> Anotação) está mais completo e funcional, com a `AnnotatorChatRoomPage` a consumir eficientemente os dados do backend.
 
 *   **Principais Pendências:**
-    *   **Arquitetura de Estado:** O componente `App.js` atua como um "god component", centralizando estado que deveria pertencer a páginas específicas. Esta é a **maior dívida técnica** e um bloqueio ao desenvolvimento.
-    *   **Fluxo do Anotador:** A experiência do anotador (Login -> Dashboard -> Projeto -> Anotação) não está completa nem é intuitiva.
-    *   **Interface de Anotação (`AnnotatorChatRoomPage`):** A página central para a tarefa de anotação está incompleta e é diretamente afetada pelo problema de performance do backend.
+    *   **UX de Anotação Avançada:** A interface de anotação, embora funcional, ainda não possui funcionalidades avançadas de usabilidade como drag-and-drop, atalhos de teclado ou feedback em tempo real para anotação.
+    *   **Funcionalidades de Admin UI:** A interface de administração para criar/editar projetos e gerir atribuições de utilizadores de forma completa ainda está por desenvolver.
 
 ---
 
@@ -52,11 +55,11 @@ Este plano foca-se em entregar o fluxo de trabalho mais crítico: a experiência
 
 | Área       | Tarefas a Executar                                                                                                                                                                 | Requisitos Chave Abordados |
 | :--------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- |
-| **Backend**  | **Task 1.1:** Criar um endpoint `GET /chat-rooms/{id}/annotations` que retorna todas as anotações de uma vez, eliminando o problema de N+1 queries. **(Prioridade Máxima)**        | `RNF1` (Performance)       |
-| **Frontend** | **Task 1.2:** Refatorar `App.js` para descentralizar o estado, movendo a lógica de dados para as páginas específicas (`AnnotatorDashboard`, `AnnotatorProjectPage`).                | Melhoria Arquitetural      |
-|            | **Task 1.3:** Implementar o fluxo de navegação completo do anotador: `AnnotatorDashboard` (lista projetos) -> `AnnotatorProjectPage` (lista chat rooms) -> `AnnotatorChatRoomPage`. | `RF2`, `RF5`, `RF9`        |
-|            | **Task 3.1 & 3.2:** Fazer com que a `AnnotatorChatRoomPage` consuma o novo endpoint do backend, carregando todos os dados de forma eficiente. Implementar uma UI de anotação "split-view" funcional (sem drag-and-drop). | `RF7`, `RF8`, `RNF4`       |
-|            | **Task 3.3 (Path B):** Implementar um mecanismo de anotação baseado em cliques (checkboxes + botão "Adicionar à thread"), como alternativa ao drag-and-drop.                             | `RF8`                      |
+| **Backend**  | ~~**Task 1.1:** Criar um endpoint `GET /chat-rooms/{id}/annotations` que retorna todas as anotações de uma vez, eliminando o problema de N+1 queries. **(Prioridade Máxima)**~~        | `RNF1` (Performance)       |
+| **Frontend** | ~~**Task 1.2:** Refatorar `App.js` para descentralizar o estado, movendo a lógica de dados para as páginas específicas (`AnnotatorDashboard`, `AnnotatorProjectPage`).~~                | Melhoria Arquitetural      |
+|            | ~~**Task 1.3:** Implementar o fluxo de navegação completo do anotador: `AnnotatorDashboard` (lista projetos) -> `AnnotatorProjectPage` (lista chat rooms) -> `AnnotatorChatRoomPage`.~~ | `RF2`, `RF5`, `RF9`        |
+|            | ~~**Task 3.1 & 3.2:** Fazer com que a `AnnotatorChatRoomPage` consuma o novo endpoint do backend, carregando todos os dados de forma eficiente. Implementar uma UI de anotação "split-view" funcional (sem drag-and-drop).~~ | `RF7`, `RF8`, `RNF4`       |
+|            | ~~**Task 3.3 (Path B):** Implementar um mecanismo de anotação baseado em cliques (checkboxes + botão "Adicionar à thread"), como alternativa ao drag-and-drop.~~                             | `RF8`                      |
 
 **O que ficará por fazer neste cenário:**
 
@@ -81,7 +84,7 @@ Este plano constrói sobre o Cenário 1, utilizando as duas semanas adicionais p
 |            | **Task 3.3 (Path A):** Implementar o sistema de anotação com **Drag-and-Drop**, proporcionando uma experiência muito mais intuitiva e eficiente.                     | `RF8`, `RNF3`, `RNF4`, `RNF5` |
 |            | **Task 4.2:** Melhorar a UX de anotação com feedback visual em tempo real durante o drag, e implementar atalhos de teclado para ações comuns.                       | `RNF4`, `RNF5`                |
 |            | **Task 4.3:** Criar uma página de visualização de resultados/estatísticas para Admins, permitindo-lhes monitorizar o progresso da anotação.                         | `RF10`                        |
-|            | **Task 5.3:** Refatorar a gestão de estado global com `AuthContext` para uma arquitetura mais limpa e manutenível.                                                    | Melhoria Arquitetural         |
+|            | ~~**Task 5.3:** Refatorar a gestão de estado global com `AuthContext` para uma arquitetura mais limpa e manutenível.~~                                                    | Melhoria Arquitetural         |
 
 **Benefícios da Extensão:**
 
