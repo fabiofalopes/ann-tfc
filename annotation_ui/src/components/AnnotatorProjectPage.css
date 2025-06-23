@@ -1,81 +1,65 @@
 .annotator-project-page {
   padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 900px;
+  margin: auto;
 }
 
-.project-header {
+.project-page-header {
   margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.project-header h2 {
+.project-page-header h2 {
   font-size: 2rem;
-  color: #333;
-  margin: 1rem 0 0.5rem;
+  color: var(--text-color-primary);
 }
 
-.project-description {
-  color: #666;
+.project-page-header p {
   font-size: 1.1rem;
+  color: var(--text-color-secondary);
 }
 
-.back-button {
-  background: none;
-  border: none;
-  color: #666;
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 0.5rem 1rem;
-  margin-bottom: 1rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.back-button:hover {
-  color: #333;
-}
-
-.chat-rooms-section {
-  margin-top: 2rem;
-}
-
-.chat-rooms-section h3 {
+.annotator-project-page h3 {
+  margin-bottom: 1.5rem;
   font-size: 1.5rem;
-  color: #333;
-  margin-bottom: 1rem;
+  color: var(--text-color-primary);
 }
 
-.chat-rooms-grid {
+.chat-room-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.chat-room-card-link {
+  text-decoration: none;
+  color: inherit;
 }
 
 .chat-room-card {
-  background: white;
+  background: var(--background-color-secondary);
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .chat-room-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15);
 }
 
 .chat-room-card h4 {
-  font-size: 1.25rem;
-  color: #333;
-  margin: 0 0 0.5rem;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
 }
 
-.room-description {
-  color: #666;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
+.chat-room-card p {
+  font-size: 0.95rem;
+  color: var(--text-color-secondary);
+  margin-bottom: 0;
 }
 
 .room-meta {

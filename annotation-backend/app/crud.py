@@ -1,5 +1,5 @@
-from sqlalchemy.orm import Session
-from typing import List, Optional
+from sqlalchemy.orm import Session, Query
+from typing import List, Optional, Tuple
 from . import models, schemas
 
 # User CRUD operations
@@ -23,6 +23,11 @@ def create_user(db: Session, user: schemas.UserCreate, hashed_password: str) -> 
     db.refresh(db_user)
     return db_user
 
+def delete_user(db: Session, user: models.User) -> None:
+    """Delete a user from the database."""
+    db.delete(user)
+    db.commit()
+
 # Project CRUD operations
 def get_project(db: Session, project_id: int) -> Optional[models.Project]:
     return db.query(models.Project).filter(models.Project.id == project_id).first()
@@ -39,6 +44,11 @@ def create_project(db: Session, project: schemas.ProjectCreate) -> models.Projec
     db.commit()
     db.refresh(db_project)
     return db_project
+
+def delete_project(db: Session, project: models.Project) -> None:
+    """Delete a project from the database."""
+    db.delete(project)
+    db.commit()
 
 # ChatRoom CRUD operations
 def get_chat_room(db: Session, chat_room_id: int) -> Optional[models.ChatRoom]:
@@ -57,6 +67,21 @@ def create_chat_room(db: Session, chat_room: schemas.ChatRoomCreate) -> models.C
     db.commit()
     db.refresh(db_chat_room)
     return db_chat_room
+
+def get_annotations_for_chat_room(
+    db: Session, chat_room_id: int
+) -> List[Tuple[models.Annotation, str]]:
+    """
+    Fetches all annotations for a given chat room, returning a tuple
+    of the Annotation object and the annotator's email.
+    """
+    return (
+        db.query(models.Annotation, models.User.email)
+        .join(models.ChatMessage, models.Annotation.message_id == models.ChatMessage.id)
+        .join(models.User, models.Annotation.annotator_id == models.User.id)
+        .filter(models.ChatMessage.chat_room_id == chat_room_id)
+        .all()
+    )
 
 # ChatMessage CRUD operations
 def get_chat_message(db: Session, message_id: int) -> Optional[models.ChatMessage]:

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { projects } from '../utils/api';
-import './ProjectLoader.css';
 
 const ProjectLoader = ({ onProjectSelect, currentProject, currentUser }) => {
     const [projectList, setProjectList] = useState([]);

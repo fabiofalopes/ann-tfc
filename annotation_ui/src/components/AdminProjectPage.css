@@ -1,0 +1,212 @@
+.admin-project-page {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: auto;
+    background-color: var(--background-color-primary);
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem 2rem;
+    background-color: var(--background-color-secondary);
+    box-shadow: var(--card-shadow);
+    border-radius: var(--border-radius);
+    position: relative;
+}
+
+.page-header .back-button {
+    position: absolute;
+    left: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--background-color-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-color-primary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.page-header .back-button:hover {
+    background-color: var(--background-color-tertiary);
+    border-color: var(--text-color-secondary);
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    color: var(--text-color-primary);
+    margin: 0;
+    text-align: center;
+}
+
+.project-name {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.project-description {
+    font-size: 1.1rem;
+    color: var(--text-color-secondary);
+    margin-bottom: 2.5rem;
+}
+
+.management-section {
+    background-color: var(--background-color-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+.management-section h2 {
+    font-size: 1.5rem;
+    color: var(--text-color-primary);
+    margin-top: 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.section-header h2 {
+    margin: 0;
+    border: none;
+    padding: 0;
+}
+
+.action-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.action-button:hover {
+    background-color: var(--primary-color-dark);
+}
+
+.action-button.delete {
+    background-color: var(--error-color);
+}
+
+.action-button.delete:hover {
+    background-color: var(--error-color-dark);
+}
+
+.assign-user-form {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: var(--background-color-tertiary);
+    border-radius: var(--border-radius);
+}
+
+.assign-user-form select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    background-color: var(--background-color-tertiary);
+    color: var(--text-color-primary);
+}
+
+.user-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.user-list th, .user-list td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color-primary);
+}
+
+.user-list th {
+    background-color: var(--background-color-tertiary);
+    font-weight: 600;
+    color: var(--text-color-secondary);
+}
+
+.user-list tr:last-child td {
+    border-bottom: none;
+}
+
+.import-csv-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: var(--background-color-tertiary);
+    border-radius: var(--border-radius);
+}
+
+.import-csv-section h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    color: var(--text-color-primary);
+}
+
+.import-csv-section input[type="file"] {
+    margin-right: 1rem;
+    color: var(--text-color-primary);
+}
+
+.chatroom-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.chatroom-list th, .chatroom-list td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color-primary);
+}
+
+.chatroom-list th {
+    background-color: var(--background-color-tertiary);
+    font-weight: 600;
+    color: var(--text-color-secondary);
+}
+
+.chatroom-list tr:last-child td {
+    border-bottom: none;
+}
+
+.danger-zone {
+    border-color: var(--error-color);
+    border-width: 2px;
+    background-color: var(--background-color-secondary);
+}
+
+.danger-zone h2 {
+    color: var(--error-color);
+    border-color: var(--error-background-color);
+}
+
+.danger-zone-content p {
+    margin-top: 0;
+    line-height: 1.6;
+    color: var(--text-color-secondary);
+} 

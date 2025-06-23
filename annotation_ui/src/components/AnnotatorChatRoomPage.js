@@ -1,148 +1,253 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { projects, annotations } from '../utils/api';
+import { projects as projectsApi, annotations as annotationsApi, auth } from '../utils/api';
 import MessageBubble from './MessageBubble';
-import ThreadMenu from './ThreadMenu';
+import SmartThreadCard from './SmartThreadCard';
 import './AnnotatorChatRoomPage.css';
 
-const AnnotatorChatRoomPage = ({ currentUser }) => {
-  const { projectId, chatRoomId } = useParams();
+const parseApiError = (err) => {
+  if (err.response?.data?.detail) {
+    if (Array.isArray(err.response.data.detail)) {
+      return err.response.data.detail.map(d => d.msg).join(', ');
+    }
+    return err.response.data.detail;
+  }
+  return err.message || 'An unknown error occurred.';
+};
+
+// Thread color palette - beautiful, distinguishable colors
+const THREAD_COLORS = [
+  '#3B82F6', // Blue
+  '#8B5CF6', // Purple
+  '#EF4444', // Red
+  '#F59E0B', // Amber
+  '#10B981', // Emerald
+  '#F97316', // Orange
+  '#6366F1', // Indigo
+  '#EC4899', // Pink
+  '#84CC16', // Lime
+  '#06B6D4', // Cyan
+  '#8B5A2B', // Brown
+  '#6B7280', // Gray
+];
+
+const AnnotatorChatRoomPage = () => {
+  const { projectId, roomId } = useParams();
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
-  const [messageAnnotations, setMessageAnnotations] = useState({});
-  const [threadTags, setThreadTags] = useState({});
+  const [annotationsMap, setAnnotationsMap] = useState({});
+  const [allThreads, setAllThreads] = useState([]);
+  const [threadDetails, setThreadDetails] = useState({});
+  const [threadColors, setThreadColors] = useState({});
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [annotationInProgress, setAnnotationInProgress] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // New state for enhanced functionality
+  const [highlightedUserId, setHighlightedUserId] = useState(null);
+  const [highlightedThreadId, setHighlightedThreadId] = useState(null);
+  const [showInstructions, setShowInstructions] = useState(true);
+  const [statistics, setStatistics] = useState({
+    totalMessages: 0,
+    annotatedMessages: 0,
+    unannotatedMessages: 0,
+    annotationPercentage: 0,
+    totalThreads: 0,
+    messagesPerThread: {},
+    annotatorsPerThread: {}
+  });
 
-  useEffect(() => {
-    fetchChatRoomData();
-  }, [projectId, chatRoomId]);
+  // Assign colors to threads
+  const assignThreadColors = useCallback((threads) => {
+    const colors = {};
+    threads.forEach((threadId, index) => {
+      colors[threadId] = THREAD_COLORS[index % THREAD_COLORS.length];
+    });
+    setThreadColors(colors);
+  }, []);
 
-  const fetchChatRoomData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const processAnnotations = (annotationsData) => {
+    const newAnnotationsMap = {};
+    const threadsSet = new Set();
+    const newThreadDetails = {};
 
-      // Fetch messages for the chat room
-      const messagesData = await projects.getChatMessages(projectId, chatRoomId);
-      setMessages(messagesData);
+    annotationsData.forEach(annotation => {
+      // Group annotations by message ID
+      if (!newAnnotationsMap[annotation.message_id]) {
+        newAnnotationsMap[annotation.message_id] = [];
+      }
+      newAnnotationsMap[annotation.message_id].push(annotation);
 
-      // Fetch all annotations for the project
-      const annotationsData = await annotations.getMyAnnotations(projectId);
+      // Collect all unique threads
+      threadsSet.add(annotation.thread_id);
+
+      // Build thread details
+      if (!newThreadDetails[annotation.thread_id]) {
+        newThreadDetails[annotation.thread_id] = {
+          id: annotation.thread_id,
+          messages: [],
+          annotators: new Set(),
+          annotations: []
+        };
+      }
+      newThreadDetails[annotation.thread_id].messages.push(annotation.message_id);
+      newThreadDetails[annotation.thread_id].annotators.add(annotation.annotator_email);
+      newThreadDetails[annotation.thread_id].annotations.push(annotation);
+    });
+
+    const threads = Array.from(threadsSet);
+    setAnnotationsMap(newAnnotationsMap);
+    setAllThreads(threads);
+    setThreadDetails(newThreadDetails);
+    assignThreadColors(threads);
+  };
+
+  // Calculate enhanced statistics
+  const calculateStatistics = useCallback((messagesData, annotationsData) => {
+    const totalMessages = messagesData.length;
+    const annotatedMessageIds = new Set(annotationsData.map(ann => ann.message_id));
+    const annotatedMessages = annotatedMessageIds.size;
+    const unannotatedMessages = totalMessages - annotatedMessages;
+    const annotationPercentage = totalMessages > 0 ? Math.round((annotatedMessages / totalMessages) * 100) : 0;
+
+    // Thread-specific statistics
+    const threadsSet = new Set(annotationsData.map(ann => ann.thread_id));
+    const totalThreads = threadsSet.size;
+    
+    const messagesPerThread = {};
+    const annotatorsPerThread = {};
+    
+    annotationsData.forEach(annotation => {
+      const threadId = annotation.thread_id;
       
-      // Process annotations and create thread tags
-      const newMessageAnnotations = {};
-      const newThreadTags = {};
+      if (!messagesPerThread[threadId]) {
+        messagesPerThread[threadId] = new Set();
+      }
+      messagesPerThread[threadId].add(annotation.message_id);
+      
+      if (!annotatorsPerThread[threadId]) {
+        annotatorsPerThread[threadId] = new Set();
+      }
+      annotatorsPerThread[threadId].add(annotation.annotator_email);
+    });
 
-      // Filter annotations for messages in this chat room
-      const relevantAnnotations = annotationsData.filter(annotation => 
-        messagesData.some(msg => msg.id === annotation.message_id)
-      );
+    // Convert sets to counts
+    Object.keys(messagesPerThread).forEach(threadId => {
+      messagesPerThread[threadId] = messagesPerThread[threadId].size;
+      annotatorsPerThread[threadId] = annotatorsPerThread[threadId].size;
+    });
 
-      // Process annotations
-      relevantAnnotations.forEach(annotation => {
-        const messageId = annotation.message_id;
-        
-        // Add to message annotations
-        if (!newMessageAnnotations[messageId]) {
-          newMessageAnnotations[messageId] = [];
-        }
-        newMessageAnnotations[messageId].push(annotation);
+    setStatistics({
+      totalMessages,
+      annotatedMessages,
+      unannotatedMessages,
+      annotationPercentage,
+      totalThreads,
+      messagesPerThread,
+      annotatorsPerThread
+    });
+  }, []);
 
-        // Process thread tags
-        if (!newThreadTags[annotation.thread_id]) {
-          newThreadTags[annotation.thread_id] = {
-            id: annotation.thread_id,
-            message_count: 1,
-            annotator_count: 1,
-            tags: [],
-            created_at: annotation.created_at
-          };
-        } else {
-          newThreadTags[annotation.thread_id].message_count++;
-        }
-      });
+  const fetchChatRoomData = useCallback(async () => {
+    // Guard clause to prevent fetching with invalid IDs
+    if (isNaN(parseInt(projectId, 10)) || isNaN(parseInt(roomId, 10))) {
+      setError("Invalid Project or Chat Room ID.");
+      setLoading(false);
+      return;
+    }
 
-      setMessageAnnotations(newMessageAnnotations);
-      setThreadTags(newThreadTags);
+    setLoading(true);
+    setError(null);
+    try {
+      const [messagesData, annotationsData, userData] = await Promise.all([
+        projectsApi.getChatMessages(projectId, roomId, 0, 1000),
+        annotationsApi.getChatRoomAnnotations(projectId, roomId),
+        auth.getCurrentUser()
+      ]);
+      
+      setMessages(messagesData);
+      setCurrentUser(userData);
+      processAnnotations(annotationsData);
+      calculateStatistics(messagesData, annotationsData);
 
     } catch (err) {
       console.error('Error fetching chat room data:', err);
-      setError(err.response?.data?.detail || err.message || 'Failed to fetch chat room data');
+      setError(parseApiError(err));
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId, roomId, calculateStatistics]);
 
-  const handleAnnotation = async (messageId, threadId) => {
+  useEffect(() => {
+    fetchChatRoomData();
+  }, [fetchChatRoomData]);
+
+  const handleCreateAnnotation = async (messageId, threadName) => {
+    setIsSubmitting(true);
     try {
-      setAnnotationInProgress(prev => ({ ...prev, [messageId]: true }));
-      
-      // Save the annotation
-      const newAnnotation = await annotations.createAnnotation(projectId, messageId, {
-        message_id: messageId,
-        thread_id: threadId
+      await annotationsApi.createAnnotation(projectId, messageId, { 
+        message_id: messageId, 
+        thread_id: threadName 
       });
 
-      // Update message annotations
-      setMessageAnnotations(prev => ({
-        ...prev,
-        [messageId]: [...(prev[messageId] || []), newAnnotation]
-      }));
-
-      // Update thread tags
-      setThreadTags(prev => {
-        const newTags = { ...prev };
-        if (!newTags[threadId]) {
-          newTags[threadId] = {
-            id: threadId,
-            message_count: 1,
-            annotator_count: 1,
-            tags: [],
-            created_at: new Date().toISOString()
-          };
-        } else {
-          newTags[threadId].message_count++;
-        }
-        return newTags;
-      });
+      // Refresh annotations to get the updated data
+      const annotationsData = await annotationsApi.getChatRoomAnnotations(projectId, roomId);
+      processAnnotations(annotationsData);
+      calculateStatistics(messages, annotationsData);
 
     } catch (err) {
-      console.error('Error saving annotation:', err);
-      
-      // Handle FastAPI validation errors (422)
-      if (err.response?.status === 422 && Array.isArray(err.response.data.detail)) {
-        const validationErrors = err.response.data.detail
-          .map(error => error.msg)
-          .join(', ');
-        setError(validationErrors);
-      } else {
-        // Handle other types of errors
-        const errorMessage = err.response?.data?.detail || 
-                          (typeof err.response?.data === 'string' ? err.response.data : null) ||
-                          err.message || 
-                          'Failed to save annotation';
-        setError(errorMessage);
-      }
+      console.error('Error creating annotation:', err);
+      throw new Error(parseApiError(err));
     } finally {
-      setAnnotationInProgress(prev => ({ ...prev, [messageId]: false }));
+      setIsSubmitting(false);
     }
   };
 
-  const handleThreadEdit = async (threadId, newTags) => {
+  const handleDeleteAnnotation = async (messageId, annotationId) => {
+    setIsSubmitting(true);
     try {
-      // Update thread tags
-      setThreadTags(prev => {
-        const newThreadTags = { ...prev };
-        if (newThreadTags[threadId]) {
-          newThreadTags[threadId].tags = newTags;
-        }
-        return newThreadTags;
-      });
+      await annotationsApi.deleteAnnotation(projectId, messageId, annotationId);
+
+      // Refresh annotations to get the updated data
+      const annotationsData = await annotationsApi.getChatRoomAnnotations(projectId, roomId);
+      processAnnotations(annotationsData);
+      calculateStatistics(messages, annotationsData);
+
     } catch (err) {
-      console.error('Error updating thread:', err);
-      setError(err.response?.data?.detail || err.message || 'Failed to update thread');
+      console.error('Error deleting annotation:', err);
+      throw new Error(parseApiError(err));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle user click highlighting
+  const handleUserClick = (userId) => {
+    setHighlightedUserId(highlightedUserId === userId ? null : userId);
+    setHighlightedThreadId(null); // Clear thread highlighting
+  };
+
+  // Handle thread click highlighting
+  const handleThreadClick = (threadId) => {
+    setHighlightedThreadId(highlightedThreadId === threadId ? null : threadId);
+    setHighlightedUserId(null); // Clear user highlighting
+  };
+
+  // Handle message selection from hover card
+  const handleMessageSelect = (messageId) => {
+    // Scroll to the message bubble
+    const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+    if (messageElement) {
+      messageElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+      // Add a temporary highlight effect
+      messageElement.classList.add('message-selected');
+      setTimeout(() => {
+        messageElement.classList.remove('message-selected');
+      }, 2000);
     }
   };
 
@@ -152,35 +257,121 @@ const AnnotatorChatRoomPage = ({ currentUser }) => {
   return (
     <div className="annotator-chat-room">
       <div className="chat-room-header">
-        <button onClick={() => navigate(`/annotator/projects/${projectId}`)} className="back-button">
+        <button onClick={() => navigate(`/projects/${projectId}`)} className="back-button">
           ← Back to Project
         </button>
-        <h2>Chat Room</h2>
+        <h2>Chat Thread Annotation</h2>
+        <div className="stats">
+          <span className="stat-item">{statistics.totalMessages} messages</span>
+          <span className="stat-item">{statistics.totalThreads} threads</span>
+          <span className="stat-item progress-stat">
+            {statistics.annotationPercentage}% annotated
+          </span>
+        </div>
       </div>
 
       <div className="chat-room-content">
         <div className="messages-container">
-          {messages.map(message => (
-            <MessageBubble
-              key={message.id}
-              message={message}
-              annotations={messageAnnotations[message.id] || []}
-              onAnnotationCreate={(tag) => handleAnnotation(message.id, tag)}
-              isAnnotating={annotationInProgress[message.id]}
-            />
-          ))}
+          <div className="messages-header">
+            <div className="messages-header-top">
+              <h3>Messages</h3>
+              <button 
+                className="dismiss-instructions-btn"
+                onClick={() => setShowInstructions(!showInstructions)}
+                title={showInstructions ? "Hide instructions" : "Show instructions"}
+              >
+                {showInstructions ? "Hide Help" : "Show Help"}
+              </button>
+            </div>
+            
+            {showInstructions && (
+              <div className="instruction-panel">
+                <p className="instruction-text">
+                  <strong>💡 Quick Guide:</strong> Click "Add Thread" to annotate messages. 
+                  Click <span className="highlight-example user-highlight">User IDs</span> to highlight all messages from that user.
+                  Click thread cards on the right to highlight thread messages. Each thread has a unique color!
+                </p>
+                <div className="progress-details">
+                  <div className="progress-bar">
+                    <div 
+                      className="progress-fill"
+                      style={{ width: `${statistics.annotationPercentage}%` }}
+                    ></div>
+                  </div>
+                  <div className="progress-text">
+                    {statistics.annotatedMessages} of {statistics.totalMessages} messages annotated 
+                    ({statistics.unannotatedMessages} remaining)
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="messages-content">
+            {messages.map(message => {
+              const messageAnnotations = annotationsMap[message.id] || [];
+              const isUserHighlighted = highlightedUserId === message.user_id;
+              const isThreadHighlighted = highlightedThreadId && 
+                messageAnnotations.some(ann => ann.thread_id === highlightedThreadId);
+
+              // Get thread color for this message
+              const messageThreadId = messageAnnotations.length > 0 ? messageAnnotations[0].thread_id : null;
+              const threadColor = messageThreadId ? threadColors[messageThreadId] : null;
+
+              return (
+                <MessageBubble
+                  key={message.id}
+                  message={message}
+                  annotations={messageAnnotations}
+                  existingThreads={allThreads}
+                  currentUserEmail={currentUser?.email}
+                  onAnnotationCreate={(threadName) => handleCreateAnnotation(message.id, threadName)}
+                  onAnnotationDelete={(annotationId) => handleDeleteAnnotation(message.id, annotationId)}
+                  isAnnotating={isSubmitting}
+                  isUserHighlighted={isUserHighlighted}
+                  isThreadHighlighted={isThreadHighlighted}
+                  onUserClick={handleUserClick}
+                  onThreadClick={handleThreadClick}
+                  data-message-id={message.id}
+                  threadColor={threadColor}
+                  threadColors={threadColors}
+                />
+              );
+            })}
+          </div>
         </div>
 
         <div className="threads-sidebar">
-          {Object.entries(threadTags).map(([threadId, thread]) => (
-            <ThreadMenu
-              key={threadId}
-              thread={thread}
-              onTagEdit={handleThreadEdit}
-              isLoading={loading}
-              error={error}
-            />
-          ))}
+          <h3>Chat Threads</h3>
+          {allThreads.length === 0 ? (
+            <p className="no-threads">
+              No threads created yet. Start by adding threads to messages on the left.
+            </p>
+          ) : (
+            <div className="threads-overview">
+              <p className="threads-count">{allThreads.length} threads found:</p>
+              <div className="threads-list">
+                {allThreads.map(threadId => {
+                  const thread = threadDetails[threadId];
+                  const isHighlighted = highlightedThreadId === threadId;
+                  const threadColor = threadColors[threadId];
+                  
+                  return (
+                    <SmartThreadCard
+                      key={threadId}
+                      threadId={threadId}
+                      threadDetails={thread}
+                      messages={messages}
+                      isHighlighted={isHighlighted}
+                      onThreadClick={handleThreadClick}
+                      onMessageSelect={handleMessageSelect}
+                      threadColor={threadColor}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,21 +1,222 @@
-@import 'theme.css';
+/* === THEME VARIABLES === */
+:root {
+  /* Brand & Accent Colors */
+  --primary-color: #3b82f6;
+  --primary-color-dark: #2563eb;
 
+  /* UI Feedback Colors */
+  --error-color: #ef4444;
+  --error-color-dark: #dc2626;
+  --error-background-color: rgba(239, 68, 68, 0.1);
+  --success-color: #22c55e;
+  
+  /* Light Theme Palette */
+  --background-color-primary-light: #f9fafb;     /* Main page background */
+  --background-color-secondary-light: #ffffff;     /* Card background */
+  --background-color-tertiary-light: #f3f4f6;      /* Input background */
+  --text-color-primary-light: #111827;            /* Main text, black for contrast */
+  --text-color-secondary-light: #6b7280;          /* Subtitles, labels */
+  --border-color-light: #e5e7eb;
+
+  /* Dark Theme Palette */
+  --background-color-primary-dark: #111827;
+  --background-color-secondary-dark: #1f2937;
+  --background-color-tertiary-dark: #374151;
+  --text-color-primary-dark: #f9fafb;             /* Main text, off-white */
+  --text-color-secondary-dark: #9ca3af;
+  --border-color-dark: #374151;
+
+  /* Default to Light Theme */
+  --background-color-primary: var(--background-color-primary-light);
+  --background-color-secondary: var(--background-color-secondary-light);
+  --background-color-tertiary: var(--background-color-tertiary-light);
+  --text-color-primary: var(--text-color-primary-light);
+  --text-color-secondary: var(--text-color-secondary-light);
+  --border-color: var(--border-color-light);
+
+  /* Global Style Tokens */
+  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --border-radius: 8px;
+}
+
+[data-theme="dark"] {
+  --background-color-primary: var(--background-color-primary-dark);
+  --background-color-secondary: var(--background-color-secondary-dark);
+  --background-color-tertiary: var(--background-color-tertiary-dark);
+  --text-color-primary: var(--text-color-primary-dark);
+  --text-color-secondary: var(--text-color-secondary-dark);
+  --border-color: var(--border-color-dark);
+}
+
+/* === GLOBAL BODY STYLES === */
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--background-color);
-  color: var(--text-color);
+  background-color: var(--background-color-primary);
+  color: var(--text-color-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-color-primary);
 }
 
-* {
-  box-sizing: border-box;
+p, span, div, td, th {
+    color: var(--text-color-secondary);
+}
+
+/* === COMMON COMPONENT STYLES === */
+
+/* Cards */
+.card {
+    background: var(--background-color-secondary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.project-card {
+    /* Extends the base card style */
+    composes: card;
+    justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+}
+
+/* Page Headers */
+.page-header {
+    background-color: var(--background-color-secondary);
+    padding: 1.5rem 2rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
+}
+
+.page-header h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: var(--text-color-primary);
+}
+
+/* Grids */
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Tables */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    /* Solves the readability issue by using the primary text color */
+    color: var(--text-color-primary); 
+}
+
+.table th {
+    font-weight: 600;
+    color: var(--text-color-secondary);
+}
+
+/* Buttons */
+.button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.button-primary {
+    composes: button;
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.button-primary:hover {
+    background-color: var(--primary-color-dark);
+}
+
+.button-danger {
+    composes: button;
+    padding: 0.5rem 1rem;
+    background-color: transparent;
+    color: var(--error-color);
+    border: 1px solid var(--error-color);
+}
+
+.button-danger:hover {
+    background-color: var(--error-background-color);
+}
+
+/* === GENERIC COMPONENT STYLES === */
+button,
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    border-radius: var(--border-radius);
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    background-color: var(--primary-color);
+    color: #ffffff; /* White text for primary buttons */
+}
+
+button:hover,
+.button:hover {
+    background-color: var(--primary-color-dark);
+}
+
+button:disabled,
+.button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Secondary / Outline Button */
+button.secondary,
+.button.secondary {
+    background-color: transparent;
+    border-color: var(--border-color);
+    color: var(--text-color-primary);
+}
+
+button.secondary:hover,
+.button.secondary:hover {
+    background-color: var(--background-color-tertiary);
+    border-color: var(--text-color-secondary);
+}
+
+/* Destructive / Delete Button */
+button.delete-button {
+    background-color: var(--error-color);
+    color: #ffffff;
+}
+
+button.delete-button:hover {
+    background-color: var(--error-color-dark);
 }

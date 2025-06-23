@@ -1,0 +1,71 @@
+.project-card {
+    background: var(--background-color-secondary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.project-card-link {
+    text-decoration: none;
+    color: inherit;
+    height: 100%; /* Ensure link takes full card height */
+}
+
+.project-card .header h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    color: var(--text-color-primary);
+}
+
+.project-card .description {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+    line-height: 1.5;
+    flex-grow: 1; /* Makes description take up available space */
+    margin-bottom: 1.5rem;
+}
+
+.project-card .stats {
+    display: flex;
+    gap: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.project-card .stat-item {
+    text-align: left;
+}
+
+.project-card .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-color-secondary);
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+}
+
+.project-card .stat-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color-primary);
+}
+
+.project-card .footer {
+    padding-top: 1rem;
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
+    color: var(--text-color-secondary);
+    border-top: 1px solid var(--border-color);
+    text-align: right;
+} 

@@ -12,9 +12,12 @@ from ..schemas import (
     ProjectList, 
     MessageList,
     ChatRoom as ChatRoomSchema,
-    ChatMessage as ChatMessageSchema
+    ChatMessage as ChatMessageSchema,
+    Annotation as AnnotationSchema
 )
 from ..auth import get_current_user, get_current_admin_user
+from ..dependencies import verify_project_access
+from .. import crud
 
 router = APIRouter()
 
@@ -342,3 +345,40 @@ def get_chat_messages(
     ).order_by(ChatMessage.created_at).offset(skip).limit(limit).all() # Added ordering
     
     return messages 
+
+@router.get("/{project_id}/chat-rooms/{room_id}/annotations", response_model=List[AnnotationSchema], tags=["annotations"])
+def get_chat_room_annotations(
+    project_id: int,
+    room_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(verify_project_access)
+):
+    """
+    Get all annotations for a specific chat room within a project.
+    The user must have access to the project.
+    """
+    # Dependency takes care of project access.
+    # We still need to verify the chat room belongs to the project.
+    chat_room = db.query(ChatRoom).filter(
+        ChatRoom.id == room_id,
+        ChatRoom.project_id == project_id
+    ).first()
+
+    if not chat_room:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Chat room not found in this project"
+        )
+
+    # Get annotations using the new CRUD function
+    annotations_data = crud.get_annotations_for_chat_room(db, chat_room_id=room_id)
+
+    # Manually construct the response to match the schema
+    result = []
+    for annotation, annotator_email in annotations_data:
+        annotation_dict = annotation.__dict__
+        annotation_dict['annotator_email'] = annotator_email
+        result.append(annotation_dict)
+
+    return result 

@@ -1,10 +1,44 @@
 .auth-menu {
     display: flex;
-    justify-content: center;
     align-items: center;
-    min-height: calc(100vh - 60px); /* Subtract header height */
-    padding: 20px;
-    background: var(--bg-color);
+    gap: 1rem; /* Provides spacing between items */
+}
+
+.user-email {
+    color: var(--text-color-secondary);
+    font-weight: 500;
+}
+
+.auth-button {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--background-color-secondary);
+    color: var(--text-color-primary);
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.auth-button:hover {
+    background-color: var(--background-color-tertiary);
+    border-color: var(--text-color-secondary);
+}
+
+.theme-toggle-button {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-color-secondary);
+    border-radius: 50%;
+}
+
+.theme-toggle-button:hover {
+    color: var(--text-color-primary);
+    background-color: var(--background-color-tertiary);
 }
 
 .auth-form-container {

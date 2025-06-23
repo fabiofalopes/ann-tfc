@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { projects, users, annotations } from '../utils/api';
-import './ProjectPage.css';
 
 const ProjectPage = () => {
   const { projectId } = useParams();
@@ -136,23 +135,19 @@ const ProjectPage = () => {
           </svg>
         )}
       </button>
-      <div className="project-header">
-        <button onClick={() => navigate('/admin')} className="back-button">
-          ← Back to Dashboard
-        </button>
-        <h2>{project.name}</h2>
-        <p className="project-description">{project.description}</p>
-        <p className="project-meta">
-          Created: {new Date(project.created_at).toLocaleDateString()}
+      <header className="page-header">
+        <h2>{project?.name}</h2>
+        <p className="description">{project?.description}</p>
+        <p className="meta">
+          Created: {new Date(project?.created_at).toLocaleDateString()}
         </p>
-      </div>
+      </header>
 
       {error && <div className="error">{error}</div>}
 
-      <div className="project-sections">
-        {/* Import Section */}
-        <section className="project-section">
-          <h3>Import Data</h3>
+      <div className="page-sections">
+        <section className="page-section">
+          <h3>Import Chat Room CSV</h3>
           <div className="import-form">
             <input
               type="file"
@@ -178,9 +173,8 @@ const ProjectPage = () => {
           )}
         </section>
 
-        {/* Users Section */}
-        <section className="project-section">
-          <h3>Project Users</h3>
+        <section className="page-section">
+          <h3>Assigned Users</h3>
           <div className="users-selection">
             <h4>Available Users</h4>
             <div className="users-grid">
@@ -200,8 +194,7 @@ const ProjectPage = () => {
           </div>
         </section>
 
-        {/* Chat Rooms Section */}
-        <section className="project-section">
+        <section className="page-section">
           <h3>Chat Rooms</h3>
           {selectedChatRoom ? (
             <div className="chat-room-view">

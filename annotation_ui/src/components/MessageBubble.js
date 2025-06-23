@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import TagInput from './TagInput';
 import './MessageBubble.css';
 
 const MessageBubble = ({ 
@@ -7,13 +6,21 @@ const MessageBubble = ({
   annotations = [], 
   onAnnotationCreate, 
   onAnnotationDelete,
-  isUserSelected, 
-  onUserClick, 
-  isAnnotating 
+  existingThreads = [],
+  currentUserEmail,
+  isAnnotating,
+  // New props for highlighting functionality
+  isUserHighlighted = false,
+  isThreadHighlighted = false,
+  onUserClick,
+  onThreadClick,
+  // New props for thread colors
+  threadColor = null,
+  threadColors = {}
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const [showAnnotationForm, setShowAnnotationForm] = useState(false);
-  const [newAnnotation, setNewAnnotation] = useState('');
+  const [showThreadInput, setShowThreadInput] = useState(false);
+  const [threadInput, setThreadInput] = useState('');
   const [error, setError] = useState(null);
   const maxLength = 300;
 
@@ -27,106 +34,128 @@ const MessageBubble = ({
 
   const shouldShowExpandButton = message?.turn_text && message.turn_text.length > maxLength;
 
-  const handleAnnotationSubmit = async (e) => {
-    e.preventDefault();
-    const threadId = newAnnotation.trim();
-    if (!threadId) return;
+  // Find current user's annotation on this message
+  const currentUserAnnotation = annotations.find(ann => ann.annotator_email === currentUserEmail);
+
+  // Extract numeric part from turn_id (e.g., "VAC_R10_001" -> "001")
+  const getNumericTurnId = (turnId) => {
+    if (turnId === null || typeof turnId === 'undefined') return 'N/A';
+    const turnIdStr = String(turnId);
+    // Get ALL numbers and take the LAST one (the actual turn number)
+    const matches = turnIdStr.match(/\d+/g);
+    if (matches && matches.length > 0) {
+      // Return the last number found, converted to integer to remove leading zeros
+      return parseInt(matches[matches.length - 1], 10).toString();
+    }
+    return turnIdStr;
+  };
+
+  // Handle user ID click to highlight all messages from same user
+  const handleUserClick = () => {
+    if (onUserClick && message.user_id) {
+      onUserClick(message.user_id);
+    }
+  };
+
+  const handleThreadSubmit = async (threadName) => {
+    if (!threadName.trim()) return;
     
     try {
       setError(null);
-      await onAnnotationCreate(threadId);
-      setNewAnnotation('');
-      setShowAnnotationForm(false);
+      
+      // If user already has an annotation on this message, delete it first
+      if (currentUserAnnotation) {
+        await onAnnotationDelete(currentUserAnnotation.id);
+      }
+      
+      // Then create the new annotation
+      await onAnnotationCreate(threadName.trim());
+      setThreadInput('');
+      setShowThreadInput(false);
     } catch (err) {
       console.error('Error creating annotation:', err);
-      
-      // Handle FastAPI validation errors (422)
-      if (err.response?.status === 422 && Array.isArray(err.response.data.detail)) {
-        const validationErrors = err.response.data.detail
-          .map(error => error.msg)
-          .join(', ');
-        setError(validationErrors);
-      } else {
-        // Handle other types of errors
-        let errorMessage;
-        if (typeof err === 'string') {
-          errorMessage = err;
-        } else if (err.response?.data?.detail) {
-          errorMessage = err.response.data.detail;
-        } else if (typeof err.response?.data === 'string') {
-          errorMessage = err.response.data;
-        } else if (err.message) {
-          errorMessage = err.message;
-        } else {
-          errorMessage = 'Failed to create annotation';
-        }
-        setError(errorMessage);
-      }
+      setError('Failed to add thread. Please try again.');
     }
   };
 
-  const handleAnnotationDelete = async (annotationId) => {
-    try {
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleThreadSubmit(threadInput);
+    } else if (e.key === 'Escape') {
+      setShowThreadInput(false);
+      setThreadInput('');
       setError(null);
-      await onAnnotationDelete(annotationId);
-    } catch (err) {
-      console.error('Error deleting annotation:', err);
-      
-      // Handle FastAPI validation errors (422)
-      if (err.response?.status === 422 && Array.isArray(err.response.data.detail)) {
-        const validationErrors = err.response.data.detail
-          .map(error => error.msg)
-          .join(', ');
-        setError(validationErrors);
-      } else {
-        // Handle other types of errors
-        let errorMessage;
-        if (typeof err === 'string') {
-          errorMessage = err;
-        } else if (err.response?.data?.detail) {
-          errorMessage = err.response.data.detail;
-        } else if (typeof err.response?.data === 'string') {
-          errorMessage = err.response.data;
-        } else if (err.message) {
-          errorMessage = err.message;
-        } else {
-          errorMessage = 'Failed to delete annotation';
-        }
-        setError(errorMessage);
-      }
     }
   };
+
+  const handleThreadSelect = (threadName) => {
+    handleThreadSubmit(threadName);
+  };
+
+  // Get unique threads from existing annotations
+  const messageThreads = annotations.map(ann => ann.thread_id);
+  
+  // Filter existing threads to show only ones not already on this message
+  const availableThreads = existingThreads.filter(thread => !messageThreads.includes(thread));
+
+  // Determine bubble classes for highlighting
+  const bubbleClasses = [
+    'message-bubble',
+    expanded ? 'expanded' : '',
+    isAnnotating ? 'annotating' : '',
+    isUserHighlighted ? 'user-highlighted' : '',
+    isThreadHighlighted ? 'thread-highlighted' : '',
+    annotations.length > 0 ? 'has-annotations' : ''
+  ].filter(Boolean).join(' ');
 
   return (
     <div 
-      className={`message-bubble ${expanded ? 'expanded' : ''} ${isUserSelected ? 'user-selected' : ''} ${isAnnotating ? 'annotating' : ''}`}
+      className={bubbleClasses}
+      data-message-id={message.id}
       style={{
-        ...annotations.length > 0 ? { borderLeft: '4px solid #4CAF50' } : {},
+        ...threadColor ? { 
+          borderLeft: `4px solid ${threadColor}`,
+          backgroundColor: `${threadColor}08` // Very subtle background tint
+        } : {},
       }}>
+      
       <div className="message-header">
-        <span className="message-id">
-          <span className="message-id-label">ID</span>
-          <span className="message-id-value">{message.id}</span>
-        </span>
         <span className="turn-id">
           <span className="turn-id-label">Turn</span>
-          <span className="turn-id-value">{message.turn_id}</span>
+          <span className="turn-id-value">{getNumericTurnId(message.turn_id)}</span>
         </span>
-        <span className="user-id" onClick={() => onUserClick(message.user_id)}>
+        <span 
+          className="user-id"
+          onClick={handleUserClick}
+          title={`Click to highlight all messages from ${message.user_id}`}
+        >
           <span className="user-id-label">User</span>
           <span className="user-id-value">{message.user_id}</span>
         </span>
         {message.reply_to_turn && (
           <span className="reply-to">
             <span className="reply-to-label">Reply to</span>
-            <span className="reply-to-value">{message.reply_to_turn}</span>
+            <span className="reply-to-value">{getNumericTurnId(message.reply_to_turn)}</span>
+          </span>
+        )}
+        {/* Thread indicator for annotated messages */}
+        {threadColor && currentUserAnnotation && (
+          <span 
+            className="thread-indicator"
+            style={{ backgroundColor: threadColor }}
+            title={`Thread: ${currentUserAnnotation.thread_id}`}
+          >
+            {currentUserAnnotation.thread_id}
           </span>
         )}
       </div>
+
       <div className="message-content">
         {displayText}
         {!expanded && shouldShowExpandButton && '...'}
       </div>
+
       {shouldShowExpandButton && (
         <div className="see-more-container">
           <button className="see-all-button" onClick={toggleExpand}>
@@ -134,58 +163,65 @@ const MessageBubble = ({
           </button>
         </div>
       )}
-      <div className="annotations-section">
-        <div className="annotations-header">
-          <h4>Annotations</h4>
-          <button 
-            className="add-annotation-button"
-            onClick={() => setShowAnnotationForm(!showAnnotationForm)}
-          >
-            {showAnnotationForm ? 'Cancel' : '+ Add Annotation'}
-          </button>
-        </div>
+
+      <div className="thread-section">
+        <button 
+          className="add-thread-button"
+          onClick={() => setShowThreadInput(!showThreadInput)}
+          disabled={isAnnotating}
+        >
+          {showThreadInput ? 'Cancel' : currentUserAnnotation ? 'Change Thread' : '+ Add Thread'}
+        </button>
+
         {error && (
           <div className="error-message">
             {error}
           </div>
         )}
-        {showAnnotationForm && (
-          <form onSubmit={handleAnnotationSubmit} className="annotation-form">
+
+        {showThreadInput && (
+          <div className="thread-input-section">
             <input
               type="text"
-              value={newAnnotation}
-              onChange={(e) => setNewAnnotation(e.target.value)}
-              placeholder="Enter annotation..."
-              className="annotation-input"
+              value={threadInput}
+              onChange={(e) => setThreadInput(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder={currentUserAnnotation ? 
+                `Change from "${currentUserAnnotation.thread_id}" to...` : 
+                "Type thread name and press Enter..."
+              }
+              className="thread-input"
+              autoFocus
             />
-            <button type="submit" className="submit-annotation-button">
-              Submit
-            </button>
-          </form>
-        )}
-        <div className="annotations-list">
-          {annotations.map(annotation => (
-            <div key={annotation.id} className="annotation-item">
-              <div className="annotation-content">
-                <div className="annotation-header">
-                  <span className="annotation-text">{annotation.thread_id}</span>
-                  <span className="annotation-annotator">
-                    by <span className="annotator-name">{annotation.annotator_email}</span>
-                  </span>
-                </div>
-                <span className="annotation-meta">
-                  {new Date(annotation.created_at).toLocaleString()}
-                </span>
-              </div>
-              <button 
-                className="delete-annotation-button"
-                onClick={() => handleAnnotationDelete(annotation.id)}
-              >
-                ×
-              </button>
+            <div className="input-hint">
+              {currentUserAnnotation ? 
+                'Press Enter to change thread, Escape to cancel' :
+                'Press Enter to add, Escape to cancel'
+              }
             </div>
-          ))}
-        </div>
+            
+            {availableThreads.length > 0 && (
+              <div className="existing-threads">
+                <div className="existing-threads-label">Or select existing thread:</div>
+                <div className="thread-chips">
+                  {availableThreads.map(thread => (
+                    <button
+                      key={thread}
+                      className="thread-chip"
+                      style={{ 
+                        backgroundColor: threadColors[thread] || '#6B7280',
+                        color: 'white'
+                      }}
+                      onClick={() => handleThreadSelect(thread)}
+                    >
+                      {thread}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

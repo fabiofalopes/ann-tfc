@@ -1,68 +1,43 @@
-import React, { useState } from 'react';
-import { auth } from '../utils/api';
+import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import './AuthMenu.css';
 
-const AuthMenu = ({ onLogin }) => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+const AuthMenu = ({ theme, toggleTheme }) => {
+    const { isAuthenticated, currentUser, logout } = useAuth();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-        setIsLoading(true);
+    const SunIcon = () => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+    );
 
-        if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-            setError('Please enter a valid email address');
-            setIsLoading(false);
-            return;
-        }
-
-        try {
-            await auth.login(email, password);
-            // Get user details after successful login
-            const userData = await auth.getCurrentUser();
-            onLogin(userData);
-            setEmail('');
-            setPassword('');
-        } catch (err) {
-            setError(err.response?.data?.detail || err.message || 'An error occurred during authentication');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const MoonIcon = () => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    );
 
     return (
         <div className="auth-menu">
-            <div className="auth-form-container">
-                <h2>Welcome Back</h2>
-                <form onSubmit={handleSubmit}>
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        disabled={isLoading}
-                    />
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        disabled={isLoading}
-                    />
-                    {error && <div className="auth-error">{error}</div>}
-                    <button 
-                        type="submit" 
-                        disabled={isLoading}
-                    >
-                        {isLoading ? 'Logging in...' : 'Log In'}
-                    </button>
-                </form>
-            </div>
+            {isAuthenticated && currentUser ? (
+                <>
+                    <span className="user-email">{currentUser.email}</span>
+                    <button onClick={logout} className="auth-button">Logout</button>
+                </>
+            ) : (
+                <span className="logged-out-message">Please log in</span>
+            )}
+            <button onClick={toggleTheme} className="theme-toggle-button" title="Toggle theme">
+                {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+            </button>
         </div>
     );
 };

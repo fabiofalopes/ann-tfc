@@ -1,14 +1,46 @@
+/* Message Bubble Component */
 .message-bubble {
-  background-color: #ffffff;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: var(--background-color-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--card-shadow);
   transition: all 0.3s ease;
+  position: relative;
+  max-width: 75%;
+  margin-left: auto;
+  margin-right: 1rem;
 }
 
 .message-bubble.expanded {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* New highlighting states */
+.message-bubble.user-highlighted {
+  background-color: rgba(33, 150, 243, 0.08);
+  border-left: 4px solid #2196F3;
+  transform: translateX(-4px);
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+}
+
+.message-bubble.thread-highlighted {
+  background-color: rgba(76, 175, 80, 0.08);
+  border-left: 4px solid #4CAF50;
+  transform: translateX(-4px);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+}
+
+.message-bubble.has-annotations {
+  /* Removed default green border - now handled by thread colors */
+}
+
+/* Combined highlighting states */
+.message-bubble.user-highlighted.thread-highlighted {
+  background-color: rgba(156, 39, 176, 0.08);
+  border-left: 4px solid #9C27B0;
+  box-shadow: 0 2px 8px rgba(156, 39, 176, 0.2);
 }
 
 .message-bubble.user-selected {
@@ -21,188 +53,297 @@
   pointer-events: none;
 }
 
+/* Message selection effect from hover cards */
+.message-bubble.message-selected {
+  background-color: rgba(255, 193, 7, 0.15);
+  border-left: 4px solid #FFC107;
+  transform: translateX(-4px) scale(1.02);
+  box-shadow: 0 4px 16px rgba(255, 193, 7, 0.3);
+  animation: messageSelected 2s ease-out;
+}
+
+@keyframes messageSelected {
+  0% {
+    background-color: rgba(255, 193, 7, 0.3);
+    transform: translateX(-4px) scale(1.05);
+  }
+  100% {
+    background-color: rgba(255, 193, 7, 0.15);
+    transform: translateX(-4px) scale(1.02);
+  }
+}
+
+/* Message Header */
 .message-header {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
-  font-size: 0.9em;
-  color: #666;
-}
-
-.message-id, .turn-id, .user-id, .reply-to {
-  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+  opacity: 0.8;
   align-items: center;
-  gap: 4px;
 }
 
-.message-id-label, .turn-id-label, .user-id-label, .reply-to-label {
+.turn-id, .user-id, .reply-to {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.75rem;
+  background-color: var(--background-color-tertiary);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+/* Thread Indicator */
+.thread-indicator {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.75rem;
+  color: white;
+  font-size: 0.65rem;
   font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  margin-left: auto;
 }
 
+/* Enhanced User ID with click functionality */
 .user-id {
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  user-select: none;
 }
 
 .user-id:hover {
-  background-color: #f0f0f0;
+  background-color: rgba(33, 150, 243, 0.1);
+  border-color: #2196F3;
+  transform: scale(1.05);
 }
 
+.user-highlighted .user-id {
+  background-color: rgba(33, 150, 243, 0.15);
+  border-color: #2196F3;
+  font-weight: 600;
+}
+
+.turn-id-label, .user-id-label, .reply-to-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: var(--text-color-secondary);
+}
+
+.turn-id-value, .user-id-value, .reply-to-value {
+  font-weight: 600;
+  color: var(--text-color-primary);
+  font-size: 0.7rem;
+}
+
+/* Message Content */
 .message-content {
-  margin-bottom: 12px;
+  margin-bottom: 0.75rem;
   line-height: 1.5;
   white-space: pre-wrap;
+  color: var(--text-color-primary);
+  font-size: 0.95rem;
 }
 
+/* See More/Less Button */
 .see-more-container {
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 0.75rem;
 }
 
 .see-all-button {
   background: none;
   border: none;
-  color: #2196F3;
+  color: var(--primary-color);
   cursor: pointer;
-  padding: 4px 8px;
-  font-size: 0.9em;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
 }
 
 .see-all-button:hover {
-  text-decoration: underline;
+  background-color: var(--background-color-tertiary);
+  color: var(--primary-color-dark);
 }
 
-/* Annotations Section */
-.annotations-section {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #eee;
+/* Thread Section */
+.thread-section {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
 }
 
-.annotations-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.annotations-header h4 {
-  margin: 0;
-  color: #333;
-}
-
-.add-annotation-button {
-  background: none;
-  border: 1px solid #4CAF50;
-  color: #4CAF50;
-  padding: 4px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9em;
-  transition: all 0.2s;
-}
-
-.add-annotation-button:hover {
-  background-color: #4CAF50;
-  color: white;
-}
-
-.annotation-form {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.annotation-input {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.9em;
-}
-
-.submit-annotation-button {
-  background-color: #4CAF50;
-  color: white;
+/* UPDATED: Neutral button colors instead of green */
+.add-thread-button {
+  background: linear-gradient(135deg, #6B7280, #4B5563);
   border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
+  position: relative;
+  overflow: hidden;
 }
 
-.submit-annotation-button:hover {
-  background-color: #45a049;
+.add-thread-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
 }
 
-.annotations-list {
+.add-thread-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4B5563, #374151);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
+}
+
+.add-thread-button:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.add-thread-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
+}
+
+.add-thread-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Thread Input Section */
+.thread-input-section {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(16, 185, 129, 0.05));
+  border-radius: 0.75rem;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  animation: slideDown 0.3s ease-out;
+}
+
+.thread-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--primary-color);
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  background-color: var(--background-color-secondary);
+  color: var(--text-color-primary);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.thread-input:focus {
+  outline: none;
+  border-color: var(--primary-color-dark);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.input-hint {
+  margin-top: 0.5rem;
+  font-size: 0.7rem;
+  color: var(--text-color-secondary);
+  font-style: italic;
+  text-align: center;
+  background-color: rgba(59, 130, 246, 0.05);
+  padding: 0.375rem;
+  border-radius: 0.375rem;
+}
+
+/* Existing Threads - Repositioned closer to button */
+.existing-threads {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.existing-threads-label {
+  font-size: 0.8rem;
+  color: var(--text-color-primary);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.thread-chips {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
 }
 
-.annotation-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 12px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  margin-bottom: 8px;
-}
-
-.annotation-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-}
-
-.annotation-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 4px;
-}
-
-.annotation-text {
-  font-weight: 500;
-  color: #333;
-  font-size: 1.1em;
-}
-
-.annotation-annotator {
-  color: #666;
-  font-size: 0.9em;
-}
-
-.annotator-name {
-  font-weight: 500;
-  color: #2196F3;
-}
-
-.annotation-meta {
-  font-size: 0.8em;
-  color: #666;
-}
-
-.delete-annotation-button {
-  background: none;
+/* UPDATED: Thread chips now use their actual thread colors */
+.thread-chip {
   border: none;
-  color: #dc3545;
-  font-size: 1.2em;
+  color: white;
+  padding: 0.375rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.7rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-  margin-left: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.delete-annotation-button:hover {
-  background-color: #f8d7da;
+.thread-chip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.4s;
+}
+
+.thread-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  filter: brightness(1.1);
+}
+
+.thread-chip:hover::before {
+  left: 100%;
+}
+
+.thread-chip:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Error Message */
+.error-message {
+  background-color: var(--error-background-color);
+  color: var(--error-color);
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  border: 1px solid var(--error-color);
 }
 
 /* Dark mode variables */

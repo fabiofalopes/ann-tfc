@@ -9,7 +9,7 @@ from .database import SessionLocal
 from .config import get_settings
 from .models import User, ProjectAssignment
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 def get_db() -> Generator:
     db = SessionLocal()
