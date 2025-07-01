@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { projects as projectsApi, users as usersApi } from '../utils/api';
+import { projects as projectsApi, users as usersApi, annotations as annotationsApi } from '../utils/api';
 import './AdminProjectPage.css';
 
 const AdminProjectPage = () => {
@@ -17,6 +17,15 @@ const AdminProjectPage = () => {
     const [userToAssign, setUserToAssign] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
+
+    // PHASE 2: Annotation Import State
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [selectedChatRoom, setSelectedChatRoom] = useState(null);
+    const [selectedUser, setSelectedUser] = useState('');
+    const [importFile, setImportFile] = useState(null);
+    const [importProgress, setImportProgress] = useState(0);
+    const [isImporting, setIsImporting] = useState(false);
+    const [importResult, setImportResult] = useState(null);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -113,6 +122,53 @@ const AdminProjectPage = () => {
         }
     };
 
+    // PHASE 2: Handle annotation import
+    const handleImportAnnotations = async () => {
+        if (!selectedChatRoom || !selectedUser || !importFile) {
+            alert('Please select a chat room, user, and file');
+            return;
+        }
+
+        setIsImporting(true);
+        setImportProgress(0);
+        setImportResult(null);
+
+        try {
+            const result = await annotationsApi.importAnnotations(
+                selectedChatRoom.id,
+                selectedUser,
+                importFile,
+                setImportProgress
+            );
+            
+            setImportResult(result);
+            setImportFile(null);
+            setSelectedUser('');
+            
+        } catch (err) {
+            console.error('Import error:', err);
+            setError(err.message || 'Failed to import annotations');
+        } finally {
+            setIsImporting(false);
+        }
+    };
+
+    const openImportModal = (chatRoom) => {
+        setSelectedChatRoom(chatRoom);
+        setShowImportModal(true);
+        setImportResult(null);
+        setError(null);
+    };
+
+    const closeImportModal = () => {
+        setShowImportModal(false);
+        setSelectedChatRoom(null);
+        setSelectedUser('');
+        setImportFile(null);
+        setImportProgress(0);
+        setImportResult(null);
+    };
+
     if (loading) {
         return <div className="loading-container">Loading project details...</div>;
     }
@@ -205,26 +261,33 @@ const AdminProjectPage = () => {
                     </button>
                 </div>
 
-                <div className="chatroom-list">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Created At</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {chatRooms.map(room => (
-                                <tr key={room.id}>
-                                    <td>{room.id}</td>
-                                    <td>{room.name}</td>
-                                    <td>{new Date(room.created_at).toLocaleString()}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                {chatRooms.length === 0 ? (
+                    <p className="no-data">No chat rooms in this project yet.</p>
+                ) : (
+                    <div className="chat-rooms-grid">
+                        {chatRooms.map(room => (
+                            <div key={room.id} className="chat-room-card">
+                                <h3>{room.name}</h3>
+                                <p>Created: {new Date(room.created_at).toLocaleString()}</p>
+                                
+                                <div className="chat-room-actions">
+                                    <button 
+                                        onClick={() => navigate(`/admin/projects/${projectId}/chat-rooms/${room.id}/analysis`)}
+                                        className="btn-secondary"
+                                    >
+                                        📊 View Analysis
+                                    </button>
+                                    <button 
+                                        onClick={() => openImportModal(room)}
+                                        className="btn-primary"
+                                    >
+                                        📥 Import Annotations
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
             
             <div className="management-section danger-zone">
@@ -238,6 +301,97 @@ const AdminProjectPage = () => {
                     </button>
                 </div>
             </div>
+
+            {/* PHASE 2: Import Annotations Modal */}
+            {showImportModal && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <div className="modal-header">
+                            <h3>Import Annotations</h3>
+                            <button onClick={closeImportModal} className="close-button">×</button>
+                        </div>
+                        
+                        <div className="modal-body">
+                            <p><strong>Chat Room:</strong> {selectedChatRoom?.name}</p>
+                            
+                            <div className="form-group">
+                                <label htmlFor="user-select">Assign to User:</label>
+                                <select 
+                                    id="user-select"
+                                    value={selectedUser} 
+                                    onChange={(e) => setSelectedUser(e.target.value)}
+                                    disabled={isImporting}
+                                >
+                                    <option value="">Select a user...</option>
+                                    {allUsers.map(user => (
+                                        <option key={user.id} value={user.id}>
+                                            {user.email} {user.is_admin ? '(Admin)' : '(Annotator)'}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label htmlFor="file-input">CSV File:</label>
+                                <input
+                                    id="file-input"
+                                    type="file"
+                                    accept=".csv"
+                                    onChange={(e) => setImportFile(e.target.files[0])}
+                                    disabled={isImporting}
+                                />
+                                <small>CSV must contain 'turn_id' and 'thread_id' (or 'thread_column') columns</small>
+                            </div>
+
+                            {isImporting && (
+                                <div className="progress-section">
+                                    <div className="progress-bar">
+                                        <div 
+                                            className="progress-fill" 
+                                            style={{ width: `${importProgress}%` }}
+                                        ></div>
+                                    </div>
+                                    <p>Importing... {importProgress}%</p>
+                                </div>
+                            )}
+
+                            {importResult && (
+                                <div className="import-result">
+                                    <h4>Import Complete!</h4>
+                                    <p><strong>Annotator:</strong> {importResult.annotator_email}</p>
+                                    <p><strong>Total annotations:</strong> {importResult.total_annotations}</p>
+                                    <p><strong>Successfully imported:</strong> {importResult.imported_count}</p>
+                                    <p><strong>Skipped:</strong> {importResult.skipped_count}</p>
+                                    
+                                    {importResult.errors.length > 0 && (
+                                        <div className="errors">
+                                            <h5>Errors:</h5>
+                                            <ul>
+                                                {importResult.errors.map((error, index) => (
+                                                    <li key={index}>{error}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="modal-footer">
+                            <button onClick={closeImportModal} className="btn-secondary">
+                                Close
+                            </button>
+                            <button 
+                                onClick={handleImportAnnotations}
+                                disabled={!selectedUser || !importFile || isImporting}
+                                className="btn-primary"
+                            >
+                                {isImporting ? 'Importing...' : 'Import Annotations'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

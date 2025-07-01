@@ -57,7 +57,10 @@ def get_message_annotations(
     current_user: User = Depends(get_current_user),
     _: None = Depends(verify_project_access)
 ):
-    """Get all annotations for a specific message"""
+    """
+    Get annotations for a specific message.
+    PHASE 1 SECURITY: Annotators see only their own annotations, admins see all.
+    """
     # Access check handled by dependency
     
     # Verify message exists and belongs to project
@@ -69,15 +72,21 @@ def get_message_annotations(
     if not message:
         raise HTTPException(status_code=404, detail="Message not found")
     
-    # Get all annotations for this message with annotator information
-    annotations = db.query(
+    # PILLAR 1: Isolate annotations based on user role
+    query = db.query(
         Annotation,
         User.email.label('annotator_email')
     ).join(
         User, Annotation.annotator_id == User.id
     ).filter(
         Annotation.message_id == message_id
-    ).all()
+    )
+    
+    # If not admin, filter to only show user's own annotations
+    if not current_user.is_admin:
+        query = query.filter(Annotation.annotator_id == current_user.id)
+    
+    annotations = query.all()
     
     # Convert to list of dictionaries with annotator email
     result = []

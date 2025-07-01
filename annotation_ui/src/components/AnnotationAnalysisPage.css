@@ -1,0 +1,360 @@
+.annotation-analysis-page {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.analysis-header {
+    margin-bottom: 30px;
+}
+
+.analysis-header h1 {
+    margin: 10px 0;
+    color: #333;
+}
+
+.back-button {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.back-button:hover {
+    background: #5a6268;
+}
+
+/* Statistics Summary */
+.statistics-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.stat-value.discordant {
+    color: #e74c3c;
+}
+
+/* Annotators Section */
+.annotators-section {
+    margin-bottom: 30px;
+}
+
+.annotators-section h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.annotators-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.annotator-badge {
+    background: #007bff;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Thread Equivalences Section */
+.equivalences-section {
+    margin-bottom: 30px;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #17a2b8;
+}
+
+.equivalences-section h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.equivalences-info p {
+    margin-bottom: 15px;
+    color: #666;
+    font-size: 14px;
+}
+
+.equivalences-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.equivalence-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.thread-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    border: 1px solid rgba(0,0,0,0.2);
+}
+
+.equivalence-symbol {
+    font-size: 16px;
+    font-weight: bold;
+    color: #17a2b8;
+    margin: 0 4px;
+}
+
+/* Filters Section */
+.filters-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-group label {
+    font-weight: 500;
+    color: #333;
+}
+
+.filter-group select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+}
+
+.filter-group input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+/* Messages Analysis */
+.messages-analysis h3 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.analysis-table {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 150px 1fr 300px 120px;
+    background: #f8f9fa;
+    font-weight: bold;
+    padding: 15px;
+    border-bottom: 2px solid #ddd;
+}
+
+.table-row {
+    display: grid;
+    grid-template-columns: 150px 1fr 300px 120px;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    align-items: start;
+}
+
+.table-row.discordant {
+    background-color: #fff5f5;
+    border-left: 4px solid #e74c3c;
+}
+
+.table-row.concordant {
+    background-color: #f0fff4;
+    border-left: 4px solid #27ae60;
+}
+
+.col-turn strong {
+    display: block;
+    color: #333;
+}
+
+.col-turn small {
+    color: #666;
+    font-size: 12px;
+}
+
+.col-message p {
+    margin: 0;
+    line-height: 1.4;
+    color: #333;
+}
+
+.col-annotations {
+    padding: 0 10px;
+}
+
+.no-annotations {
+    color: #999;
+    font-style: italic;
+}
+
+.annotations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.annotation-item {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.1);
+    font-size: 13px;
+}
+
+.annotation-item strong {
+    display: block;
+    font-weight: bold;
+}
+
+.annotation-item small {
+    color: #666;
+    font-size: 11px;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.unannotated {
+    background: #f8f9fa;
+    color: #6c757d;
+}
+
+.status-badge.single {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-badge.concordant {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.discordant {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* IAA Section */
+.iaa-section {
+    margin-top: 40px;
+    padding: 30px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.iaa-section h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.iaa-section p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-primary:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.loading, .error, .no-data {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.error {
+    color: #e74c3c;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .table-header,
+    .table-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .col-turn,
+    .col-message,
+    .col-annotations,
+    .col-status {
+        padding: 5px 0;
+    }
+    
+    .filters-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .statistics-summary {
+        grid-template-columns: 1fr 1fr;
+    }
+} 

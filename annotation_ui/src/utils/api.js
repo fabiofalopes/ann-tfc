@@ -237,6 +237,70 @@ export const annotations = {
         const response = await api.get(`/projects/${projectId}/annotations/my`);
         return response.data;
     },
+    // PHASE 2: ANNOTATION IMPORT
+    importAnnotations: async (chatRoomId, userId, file, onProgress) => {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('user_id', userId);
+            
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                onUploadProgress: (progressEvent) => {
+                    if (onProgress) {
+                        const percentCompleted = Math.round(
+                            (progressEvent.loaded * 100) / progressEvent.total
+                        );
+                        onProgress(percentCompleted);
+                    }
+                }
+            };
+            
+            const response = await api.post(
+                `/admin/chat-rooms/${chatRoomId}/import-annotations`,
+                formData,
+                config
+            );
+            
+            return response.data;
+        } catch (error) {
+            console.error('Annotation import error:', error);
+            
+            if (!error.response) {
+                throw new Error('Network error or server is not responding. Please check your connection and try again.');
+            }
+            
+            if (error.response.status === 413) {
+                throw new Error('File is too large. Please try a smaller file.');
+            }
+            
+            if (error.response.status === 415) {
+                throw new Error('Invalid file format. Please upload a CSV file.');
+            }
+            
+            if (error.response.status === 403) {
+                throw new Error('You do not have permission to import annotations.');
+            }
+            
+            if (error.response.status === 500) {
+                const errorDetail = error.response.data?.detail || error.response.data?.message;
+                throw new Error(`Server error: ${errorDetail || 'An unexpected error occurred'}`);
+            }
+            
+            throw new Error(
+                error.response.data?.message || 
+                error.response.data?.detail || 
+                'Failed to import annotations. Please check the file format and try again.'
+            );
+        }
+    },
+    // PHASE 3: AGGREGATED ANNOTATIONS FOR ANALYSIS
+    getAggregatedAnnotations: async (chatRoomId) => {
+        const response = await api.get(`/admin/chat-rooms/${chatRoomId}/aggregated-annotations`);
+        return response.data;
+    },
 };
 
 export default api; 

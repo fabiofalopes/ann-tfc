@@ -355,8 +355,8 @@ def get_chat_room_annotations(
     _: None = Depends(verify_project_access)
 ):
     """
-    Get all annotations for a specific chat room within a project.
-    The user must have access to the project.
+    Get annotations for a specific chat room within a project.
+    PHASE 1 SECURITY: Annotators see only their own annotations, admins see all.
     """
     # Dependency takes care of project access.
     # We still need to verify the chat room belongs to the project.
@@ -371,8 +371,15 @@ def get_chat_room_annotations(
             detail="Chat room not found in this project"
         )
 
-    # Get annotations using the new CRUD function
-    annotations_data = crud.get_annotations_for_chat_room(db, chat_room_id=room_id)
+    # PILLAR 1: Isolate annotations based on user role
+    if current_user.is_admin:
+        # Admins can see ALL annotations
+        annotations_data = crud.get_all_annotations_for_chat_room_admin(db, chat_room_id=room_id)
+    else:
+        # Annotators can ONLY see their own annotations
+        annotations_data = crud.get_annotations_for_chat_room_by_annotator(
+            db, chat_room_id=room_id, annotator_id=current_user.id
+        )
 
     # Manually construct the response to match the schema
     result = []

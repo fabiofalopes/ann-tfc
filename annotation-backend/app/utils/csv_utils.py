@@ -100,4 +100,113 @@ def validate_csv_format(file_path: str) -> bool:
     except pd.errors.ParserError:
         raise ValueError("File is not a valid CSV format")
     except Exception as e:
-        raise ValueError(f"Error validating CSV: {str(e)}") 
+        raise ValueError(f"Error validating CSV: {str(e)}")
+
+# PHASE 2: ANNOTATION IMPORT UTILITIES
+
+def import_annotations_from_csv(file_path: str) -> List[Dict[str, Any]]:
+    """
+    Import annotations from a CSV file containing turn_id and thread_id columns.
+    This is used for importing pre-existing annotation data.
+    
+    Required columns (case insensitive):
+    - turn_id: Unique identifier for the message
+    - thread_id (or thread_column): The thread assignment for the message
+    
+    Returns a list of dictionaries with 'turn_id' and 'thread_id'.
+    """
+    try:
+        # Read CSV with pandas
+        df = pd.read_csv(
+            file_path,
+            quoting=csv.QUOTE_MINIMAL,
+            escapechar='\\',
+            encoding='utf-8',
+            on_bad_lines='skip'
+        )
+        
+        # Convert column names to lowercase for case-insensitive matching
+        df.columns = df.columns.str.lower()
+        
+        # Check for thread column (could be named 'thread_id' or 'thread_column')
+        thread_column = None
+        if 'thread_id' in df.columns:
+            thread_column = 'thread_id'
+        elif 'thread_column' in df.columns:
+            thread_column = 'thread_column'
+        elif 'thread' in df.columns:
+            thread_column = 'thread'
+        
+        if not thread_column:
+            raise ValueError("CSV must contain a thread column (thread_id, thread_column, or thread)")
+        
+        # Check for turn_id column
+        if 'turn_id' not in df.columns:
+            raise ValueError("CSV must contain a turn_id column")
+        
+        # Select only the columns we need
+        df = df[['turn_id', thread_column]]
+        
+        # Clean up the data
+        df['turn_id'] = df['turn_id'].apply(lambda x: str(x).strip() if pd.notna(x) else None)
+        df['thread_id'] = df[thread_column].apply(lambda x: str(x).strip() if pd.notna(x) else None)
+        
+        # Remove any rows where required fields are None or empty
+        df = df.dropna(subset=['turn_id', 'thread_id'])
+        df = df[df['thread_id'] != '']
+        
+        # Convert to list of dictionaries with standardized column names
+        annotations = []
+        for _, row in df.iterrows():
+            annotations.append({
+                'turn_id': row['turn_id'],
+                'thread_id': row['thread_id']
+            })
+        
+        print(f"Successfully parsed {len(annotations)} annotations")
+        if annotations:
+            print("First annotation:", annotations[0])
+        
+        return annotations
+        
+    except Exception as e:
+        raise Exception(f"Error importing annotations from CSV: {str(e)}")
+
+def validate_annotations_csv_format(file_path: str) -> bool:
+    """
+    Validate that a file is a properly formatted CSV with the required columns for annotations.
+    Returns True if valid, raises ValueError with description if invalid.
+    """
+    try:
+        # Try to read first few rows to validate format
+        df = pd.read_csv(
+            file_path,
+            nrows=5,
+            quoting=csv.QUOTE_MINIMAL,
+            escapechar='\\',
+            encoding='utf-8',
+            on_bad_lines='skip'
+        )
+        
+        # Convert column names to lowercase
+        df.columns = df.columns.str.lower()
+        
+        # Check for required columns
+        if 'turn_id' not in df.columns:
+            raise ValueError("CSV is missing required column: turn_id")
+        
+        # Check for thread column (flexible naming)
+        thread_columns = ['thread_id', 'thread_column', 'thread']
+        has_thread_column = any(col in df.columns for col in thread_columns)
+        
+        if not has_thread_column:
+            raise ValueError(f"CSV is missing a thread column. Expected one of: {', '.join(thread_columns)}")
+            
+        return True
+        
+    except pd.errors.EmptyDataError:
+        raise ValueError("CSV file is empty")
+    except pd.errors.ParserError:
+        raise ValueError("File is not a valid CSV format")
+    except Exception as e:
+        raise ValueError(f"Error validating annotations CSV: {str(e)}") 

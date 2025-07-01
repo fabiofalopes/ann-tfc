@@ -9,6 +9,7 @@ import ChatRoomPage from './components/ChatRoomPage';
 import AnnotatorProjectPage from './components/AnnotatorProjectPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AnnotatorChatRoomPage from './components/AnnotatorChatRoomPage';
+import AnnotationAnalysisPage from './components/AnnotationAnalysisPage';
 import { useAuth } from './contexts/AuthContext';
 import LoginPage from './components/LoginPage'; 
 import AdminProjectPage from './components/AdminProjectPage';
@@ -88,6 +89,15 @@ function App() {
                         element={
                             <ProtectedRoute adminOnly>
                                 <ChatRoomPage />
+                            </ProtectedRoute>
+                        } 
+                    />
+                    {/* PHASE 3: Annotation Analysis Route */}
+                    <Route 
+                        path="/admin/projects/:projectId/chat-rooms/:roomId/analysis" 
+                        element={
+                            <ProtectedRoute adminOnly>
+                                <AnnotationAnalysisPage />
                             </ProtectedRoute>
                         } 
                     />
