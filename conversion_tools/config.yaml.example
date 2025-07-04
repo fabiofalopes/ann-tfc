@@ -1,0 +1,44 @@
+# Configuration for Excel Import Tool
+
+api:
+  base_url: "http://localhost:8000"
+  admin_email: "admin@example.com"
+  admin_password: "admin"
+
+project:
+  # Project management options:
+  # - "create_new": Create a new project with the details below
+  # - "select_existing": Select from existing projects (will show list)
+  # - "use_id": Use the specific project_id below
+  mode: "select_existing"  # Options: create_new, select_existing, use_id
+  
+  # Used when mode is "use_id"
+  project_id: 1
+  
+  # Used when mode is "create_new"
+  new_project:
+    name: "Excel Import Project"
+    description: "Project created from Excel import tool"
+  
+  # Used to remember the last selected project
+  last_used_project_id: null
+
+import:
+  # Email domain for creating user accounts
+  email_domain: "research.pt"
+  
+  # Default password for new users
+  default_user_password: "ChangeMe123!"
+  
+  # Skip confirmation prompts (useful for automation)
+  auto_confirm: false
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: null  # Path to log file (null = console only)
+
+# Output Configuration
+output:
+  save_report: true  # Save detailed report after import
+  report_file: "import_report_{timestamp}.txt"  # Report filename ({timestamp} will be replaced) 

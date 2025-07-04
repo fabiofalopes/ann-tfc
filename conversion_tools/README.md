@@ -1,321 +1,478 @@
-# Annotated Chatroom Import Tool
+# Ferramentas de Conversão - Sistema de Anotação de Chat Rooms
 
-A simple CLI tool to import complete annotated chatrooms from CSV files into the annotation system.
+## 📖 Visão Geral
 
-## Overview
+Este conjunto de ferramentas de conversão constitui um **template funcional e sistema de interface** para importar dados de anotação em massa para o sistema de anotação de chat rooms. O sistema foi desenvolvido com o objectivo de criar um **workflow eficiente e reutilizável** que serve como modelo para futuras integrações de dados, demonstrando as melhores práticas para interacção com a API FastAPI do backend.
 
-This tool imports CSV files that contain both chat messages and thread annotations. Each CSV file represents a complete annotated chatroom by a single annotator.
+### Objectivos Estratégicos
 
-## Installation
+1. **Interface API Eficiente**: Demonstrar como interagir de forma optimal com a API FastAPI desenvolvida, seguindo padrões de autenticação, gestão de dados e upload de ficheiros
+2. **Workflow de Importação em Massa**: Estabelecer um processo standardizado para importar dados anotados existentes para o sistema
+3. **Template de Desenvolvimento**: Fornecer um modelo técnico reutilizável para futuros workflows de importação de dados
+4. **Automatização de Processos**: Minimizar intervenção manual através de detecção automática de ficheiros, validação de dados e gestão de erros
 
-```bash
-cd conversion_tools
-pip install -r requirements.txt
-```
+## 🏗️ Arquitectura do Sistema
 
-## Usage
-
-### Basic Usage
-
-```bash
-python import_annotated_chatroom.py \
-    --csv-file "annotated_csvs/VAC_R10-joao.csv" \
-    --annotator-email "joao@study.com" \
-    --project-id 1
-```
-
-### Full Options
-
-```bash
-python import_annotated_chatroom.py \
-    --csv-file "annotated_csvs/VAC_R10-joao.csv" \
-    --annotator-email "joao@study.com" \
-    --annotator-name "João Silva" \
-    --project-id 1 \
-    --chatroom-name "VAC_R10 Vaccination Debate - João" \
-    --api-base-url "http://localhost:8000" \
-    --admin-email "admin@example.com" \
-    --admin-password "password"
-```
-
-### Environment Variables
-
-You can set admin credentials as environment variables:
-
-```bash
-export ADMIN_EMAIL="admin@example.com"
-export ADMIN_PASSWORD="your_password"
-
-python import_annotated_chatroom.py \
-    --csv-file "annotated_csvs/VAC_R10-joao.csv" \
-    --annotator-email "joao@study.com" \
-    --project-id 1
-```
-
-## CSV Format
-
-The tool expects CSV files with these columns:
-
-- `user_id`: ID of the chat participant
-- `turn_id`: Unique identifier for each message
-- `turn_text`: The actual message text
-- `reply_to_turn`: ID of the message being replied to (optional)
-- `thread` (or `Thread_*`): Thread annotation (the tool auto-detects column name)
-
-### Example CSV Structure
-
-```csv
-user_id;turn_id;turn_text;reply_to_turn;thread
-1280;VAC_R10_001;Olá! Sou o moderador...;;0
-1969;VAC_R10_002;Na minha opinião a vacinação...;;0
-1953;VAC_R10_003;Na minha opinião eu não acho...;;0
-```
-
-## What the Tool Does
-
-1. **Reads the CSV file** and detects the thread column automatically
-2. **Authenticates** with the backend API using admin credentials
-3. **Creates the annotator user** if it doesn't exist
-4. **Imports the chatroom** with all messages via existing API
-5. **Imports the annotations** linking messages to threads
-6. **Reports statistics** and results
-
-## Example Output
+### Estrutura de Ficheiros
 
 ```
-🚀 Starting annotated chatroom import...
-   CSV file: annotated_csvs/VAC_R10-joao.csv
-   Annotator: João Silva (joao@study.com)
-   Project ID: 1
-   Chatroom name: VAC_R10-joao - João Silva's Annotations
-   API URL: http://localhost:8000
-
-📁 Reading CSV file: annotated_csvs/VAC_R10-joao.csv
-✅ CSV file validated: 160 messages found
-✅ Thread column detected: 'thread'
-📊 Statistics:
-   - Total messages: 160
-   - Annotated messages: 156 (97.5%)
-   - Unique threads: 8
-   - Thread distribution: 0(98), 1(12), 2(8), 3(15), 4(3), 5(18), 6(1), 7(1)
-✅ Authenticated as admin@example.com
-✅ User created: joao@study.com (ID: 15)
-✅ Chatroom imported: "VAC_R10-joao - João Silva's Annotations" (ID: 42)
-✅ Annotations imported: 156 annotations successfully processed
-
-🎯 Import completed successfully!
-   Chatroom ID: 42
-   User ID: 15
-   Total messages: 160
-   Total annotations: 156
-   Import time: 3.2 seconds
-
-✨ Success! You can now view the imported chatroom in the web interface:
-   http://localhost:3000/admin/projects/1
+conversion_tools/
+├── import_excel.py                 # Script principal - interface de utilizador
+├── config.yaml                     # Configuração do sistema (gerada automaticamente)
+├── config.yaml.example            # Template de configuração
+├── requirements.txt               # Dependências Python
+├── excel_import/                  # Módulo principal de importação
+│   ├── __init__.py               # Definições de exportação do módulo
+│   ├── excel_parser.py           # Parser de ficheiros Excel - extracção de dados
+│   ├── data_transformer.py      # Transformação de dados para formato API
+│   ├── api_client.py            # Cliente API - interface com backend
+│   └── batch_import_manager.py   # Gestor de importação em lote
+└── README.md                     # Documentação técnica
 ```
 
-## Multiple Annotators Workflow
+### Componentes Técnicos
 
-To import the same chat annotated by different people:
+#### 1. **`import_excel.py`** - Interface Principal
+**Responsabilidade**: Interface de utilizador e orchestração do workflow
+- Detecção automática de ficheiros Excel em directórios padrão
+- Gestão de configuração (criação, validação, actualização)
+- Interface interactiva para selecção de projectos
+- Coordenação dos módulos de processamento
+- Exibição de progressos e relatórios de importação
 
-```bash
-# Create a project first (via web UI or API)
+#### 2. **`excel_parser.py`** - Extractor de Dados Excel
+**Responsabilidade**: Parsing e validação de ficheiros Excel multi-tab
+- **Input**: Ficheiros `.xlsx` com múltiplos sheets (um por anotador)
+- **Validação**: Verificação de colunas obrigatórias e consistência entre sheets
+- **Extracção**: Dados de mensagens, anotações e metadados de anotadores
+- **Padrões Suportados**: Detecção automática de nomes de anotadores em sheet names
 
-# Import João's annotations
-python import_annotated_chatroom.py \
-    --csv-file "annotated_csvs/VAC_R10-joao.csv" \
-    --annotator-email "joao@study.com" \
-    --project-id 1
-
-# Import Zuil's annotations
-python import_annotated_chatroom.py \
-    --csv-file "annotated_csvs/VAC_R10-zuil.csv" \
-    --annotator-email "zuil@study.com" \
-    --project-id 1
-
-# Result: 2 chatrooms in the same project for IAA analysis
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Authentication failed**: Check admin email/password
-2. **CSV parsing error**: Ensure proper delimiter (`;` or `,`)
-3. **No thread column found**: Check column names (should be `thread`, `Thread_*`, etc.)
-4. **User creation failed**: Email might already exist with different name
-
-### Getting Help
-
-Run with `--help` to see all options:
-
-```bash
-python import_annotated_chatroom.py --help
-```
-
-# Conversion Tools
-
-This directory contains tools for importing annotated chatroom data into the annotation system.
-
-## 🚀 Quick Start - Batch Import (Recommended)
-
-For importing multiple CSV files representing the same chatroom annotated by different people:
-
-```bash
-# 1. Install dependencies
-pip install -r requirements.txt
-
-# 2. Place your CSV files in annotated_csvs/ folder
-# Example: VAC_R10-joao.csv, VAC_R10-zuil.csv
-
-# 3. Test what will be imported (dry run)
-python batch_import_annotated_chatrooms.py --dry-run
-
-# 4. Import everything
-python batch_import_annotated_chatrooms.py
-```
-
-## Tools Overview
-
-### 🎯 batch_import_annotated_chatrooms.py (NEW)
-**Perfect for IAA (Inter-Annotator Agreement) studies**
-
-**What it does:**
-- Scans a folder and groups CSV files by base name
-- Creates ONE chatroom per group (no duplicates!)
-- Imports all annotators' annotations to the same chatroom
-- Automatically creates users and assigns them to projects
-
-**Example:**
-```
-annotated_csvs/
-├── VAC_R10-joao.csv    # Same chatroom, different annotations
-└── VAC_R10-zuil.csv    # Same chatroom, different annotations
-
-Result: 1 chatroom "VAC_R10 - IAA Study" with 2 annotation sets
-```
-
-**Configuration (edit the script):**
 ```python
-API_BASE_URL = "http://localhost:8000"
-ADMIN_EMAIL = "admin@example.com" 
-ADMIN_PASSWORD = "admin"
-PROJECT_ID = 5
-ANNOTATED_CSVS_FOLDER = "annotated_csvs"
+# Colunas obrigatórias esperadas
+REQUIRED_COLUMNS = ["user_id", "turn_id", "turn_text", "reply_to_turn"]
+
+# Padrões de detecção de colunas de thread/anotação
+THREAD_COLUMN_PATTERNS = [
+    r"^thread$", r"^thread_.*", r".*_thread.*",
+    r"^annotation.*", r".*annotation.*"
+]
 ```
 
-**Usage:**
-```bash
-# Validate files without importing
-python batch_import_annotated_chatrooms.py --dry-run
+#### 3. **`data_transformer.py`** - Transformador de Dados
+**Responsabilidade**: Conversão de dados Excel para schemas compatíveis com a API
+- **Transformação de Schemas**: Conversão para formato Pydantic compatível
+- **Geração de Utilizadores**: Criação automática de contas de utilizador baseada em nomes de anotadores
+- **Preparação CSV**: Conversão para formato CSV compatível com endpoints de import da API
+- **Validação de Dados**: Verificação de integridade e consistência
 
-# Import everything
-python batch_import_annotated_chatrooms.py
+```python
+# Schemas de dados gerados
+@dataclass
+class ChatRoomCreate:
+    name: str
+    description: Optional[str] = None
+    project_id: Optional[int] = None
 
-# Custom settings
-python batch_import_annotated_chatrooms.py --project-id 3 --folder my_csvs/
+@dataclass  
+class ChatMessage:
+    turn_id: str
+    user_id: str
+    turn_text: str
+    reply_to_turn: Optional[str] = None
+
+@dataclass
+class AnnotationCreate:
+    turn_id: str
+    thread_id: str
 ```
 
-### 📝 import_annotated_chatroom.py (Individual Import)
-For importing single annotated chatroom files one at a time.
+#### 4. **`api_client.py`** - Cliente API
+**Responsabilidade**: Interface completa com a API FastAPI do backend
+- **Autenticação**: OAuth2 com gestão automática de tokens
+- **Gestão de Utilizadores**: Criação e atribuição de utilizadores a projectos
+- **Upload de Dados**: Import de mensagens e anotações via multipart form data
+- **Gestão de Projectos**: Criação, listagem e validação de projectos
 
-**Usage:**
-```bash
-python import_annotated_chatroom.py VAC_R10-joao.csv --annotator-name "João" --annotator-email "joao@research.pt"
+**Endpoints Utilizados**:
+```python
+# Autenticação
+POST /auth/token
+
+# Gestão de utilizadores (admin)
+GET /admin/users
+POST /admin/users
+
+# Gestão de projectos (admin)
+GET /admin/projects
+POST /admin/projects
+POST /projects/{project_id}/assign/{user_id}
+
+# Import de dados (admin)
+POST /admin/projects/{project_id}/import-chat-room-csv
+POST /admin/chat-rooms/{chat_room_id}/import-annotations
 ```
 
-## CSV File Format
+#### 5. **`batch_import_manager.py`** - Gestor de Importação em Lote
+**Responsabilidade**: Orquestração de importação de múltiplos ficheiros
+- **Processamento em Lote**: Gestão de múltiplos ficheiros Excel
+- **Gestão de Estado**: Tracking de progressos, erros e sucessos
+- **Optimização**: Reutilização de conexões API e gestão eficiente de recursos
+- **Relatórios**: Geração de relatórios detalhados de importação
 
-Your CSV files should have this structure:
+## 🔄 Workflow de Importação
+
+### Fluxo de Dados Completo
+
+```mermaid
+graph TD
+    A[Ficheiros Excel] --> B[ExcelParser]
+    B --> C[DataTransformer]
+    C --> D[APIClient]
+    D --> E[Backend API]
+    
+    B --> F[Validação de Consistência]
+    C --> G[Geração de CSV]
+    D --> H[Autenticação OAuth2]
+    D --> I[Gestão de Utilizadores]
+    D --> J[Upload Multipart]
+    
+    E --> K[Base de Dados]
+    E --> L[Chat Rooms]
+    E --> M[Anotações]
+```
+
+### Processo Detalhado
+
+#### Fase 1: Preparação e Configuração
+1. **Detecção de Ficheiros**: Scan automático de directórios padrão para ficheiros `.xlsx`
+2. **Validação de Configuração**: Verificação/criação de `config.yaml`
+3. **Teste de Conectividade**: Verificação de acesso à API backend
+4. **Autenticação**: Login automático com credenciais de administrador
+
+#### Fase 2: Análise de Dados
+1. **Parsing Excel**: Extracção de dados de todos os sheets do ficheiro
+2. **Detecção de Anotadores**: Identificação automática baseada em nomes de sheets
+3. **Validação de Consistência**: Verificação de que todos os sheets têm as mesmas mensagens
+4. **Validação de Schema**: Confirmação de colunas obrigatórias
+
+#### Fase 3: Transformação de Dados
+1. **Criação de Schemas**: Conversão para objectos compatíveis com a API
+2. **Geração de Utilizadores**: Criação automática de contas de email baseadas em nomes
+3. **Preparação CSV**: Formatação para upload via API
+4. **Validação Final**: Verificação de integridade dos dados transformados
+
+#### Fase 4: Importação para API
+1. **Gestão de Projecto**: Seleção ou criação de projecto de destino
+2. **Criação de Utilizadores**: Import de contas de anotadores via API
+3. **Atribuição de Projecto**: Associação de utilizadores ao projecto
+4. **Upload de Chat Room**: Criação de chat room com mensagens via CSV
+5. **Upload de Anotações**: Import de anotações por utilizador via CSV
+
+#### Fase 5: Verificação e Relatórios
+1. **Validação de Import**: Verificação de dados importados
+2. **Geração de Relatórios**: Estatísticas detalhadas de importação
+3. **Logging**: Registo completo de operações e erros
+
+## 📊 Formato de Dados Esperado
+
+### Estrutura de Ficheiros Excel
+
+Cada ficheiro Excel deve conter:
+- **Múltiplos sheets**: Um sheet por anotador
+- **Dados consistentes**: Todas as mensagens devem estar presentes em todos os sheets
+- **Anotações individuais**: Cada sheet contém as anotações de um anotador específico
+
+### Colunas Obrigatórias
 
 ```csv
-user_id;turn_id;turn_text;reply_to_turn;thread
-1280;VAC_R10_001;Hello everyone!;;0
-1969;VAC_R10_002;Hi there!;;0  
-1952;VAC_R10_003;Good morning;VAC_R10_001;1
+user_id,turn_id,turn_text,reply_to_turn,thread
+123,msg_001,"Hello everyone!",,"thread_1"
+456,msg_002,"Hi there!",msg_001,"thread_1"
+789,msg_003,"How's it going?",,"thread_2"
 ```
 
-**Required columns:**
-- `user_id`: Participant ID
-- `turn_id`: Unique message ID  
-- `turn_text`: Message content
-- `reply_to_turn`: ID of message being replied to (empty if not a reply)
+**Descrição das Colunas**:
+- `user_id`: Identificador do utilizador que enviou a mensagem
+- `turn_id`: Identificador único da mensagem/turno
+- `turn_text`: Conteúdo textual da mensagem
+- `reply_to_turn`: ID da mensagem à qual esta responde (opcional)
+- `thread`/`thread_id`: Identificador do thread de anotação
 
-**Thread column (any name starting with "thread"):**
-- `thread`, `Thread_annotator`, `thread_id`, etc.
-- Contains thread/conversation IDs assigned by the annotator
+### Padrões de Nomes de Sheets
 
-## Workflow
-
-### For IAA Studies (Multiple Annotators, Same Chatroom)
-
-1. **Prepare files**: Name them `CHATROOM-ANNOTATOR.csv`
-   - `VAC_R10-joao.csv`
-   - `VAC_R10-zuil.csv`
-   - `VAC_R10-maria.csv`
-
-2. **Place in folder**: Put all files in `annotated_csvs/`
-
-3. **Test**: `python batch_import_annotated_chatrooms.py --dry-run`
-
-4. **Import**: `python batch_import_annotated_chatrooms.py`
-
-**Result**: One chatroom with multiple annotation sets for comparison!
-
-### For Individual Imports
-
-Use `import_annotated_chatroom.py` for one-off imports or different chatrooms.
-
-## Requirements
-
-```txt
-pandas>=1.5.0
-requests>=2.28.0
-click>=8.0.0
+O sistema detecta automaticamente nomes de anotadores usando padrões regex:
+```python
+ANNOTATOR_PATTERNS = [
+    r"thread_(.+)",           # "thread_joao" → "joao"
+    r"(.+)_annotations",      # "joao_annotations" → "joao"  
+    r"(.+)_thread",          # "joao_thread" → "joao"
+    r"annotation_(.+)",       # "annotation_joao" → "joao"
+    r"anotação (.+)",        # "anotação João" → "João"
+    r"^(.+)$"                # fallback: nome completo
+]
 ```
 
-Install with: `pip install -r requirements.txt`
+## ⚙️ Configuração Técnica
 
-## Backend Requirements
+### Ficheiro `config.yaml`
 
-- Backend must be running on `http://localhost:8000`
-- Admin credentials required
-- Target project must exist
-- Users will be created automatically
+```yaml
+api:
+  base_url: "http://localhost:8000"
+  admin_email: "admin@example.com"
+  admin_password: "admin"
 
-## Troubleshooting
+project:
+  mode: "select_existing"  # create_new, select_existing, use_id
+  project_id: 1
+  new_project:
+    name: "Excel Import Project"
+    description: "Project created from Excel import tool"
+  last_used_project_id: null
 
-**"No CSV files found"**: Check that files are in the correct folder and end with `.csv`
+import:
+  email_domain: "research.pt"
+  default_user_password: "ChangeMe123!"
+  auto_confirm: false
 
-**"Different message structure"**: Files in the same group must have identical messages (same `user_id`, `turn_id`, `turn_text`, `reply_to_turn`)
+logging:
+  level: "INFO"
+  file: null
 
-**"No thread column found"**: Ensure your CSV has a column starting with "thread"
-
-**"Authentication failed"**: Check admin credentials in configuration
-
-**"Project not found"**: Verify project ID exists using `--list-projects` flag
-
-## Examples
-
-### Batch Import Output
-```
-📁 Found 4 CSV files in annotated_csvs
-📊 Grouped into 2 chatrooms:
-   VAC_R10: 2 annotators (VAC_R10-joao.csv, VAC_R10-zuil.csv)
-   COVID_R5: 2 annotators (COVID_R5-ana.csv, COVID_R5-pedro.csv)
-
-✅ Chatroom imported: "VAC_R10 - IAA Study" (ID: 8)
-✅ Annotations imported: 160 from joao
-✅ Annotations imported: 160 from zuil
-
-🎯 Batch import completed!
-   Chatrooms created: 2
-   Total annotators: 4  
-   Total annotations: 640
+output:
+  save_report: true
+  report_file: "import_report_{timestamp}.txt"
 ```
 
-This setup is **perfect for research** where you need to:
-- Compare annotations between multiple people
-- Calculate inter-annotator agreement
-- Analyze annotation consistency
-- Study conversation threading approaches 
+### Variáveis de Ambiente
+
+O sistema suporta configuração via variáveis de ambiente para ambientes de produção:
+```bash
+export API_BASE_URL="https://api.production.com"
+export API_ADMIN_EMAIL="admin@company.com"
+export API_ADMIN_PASSWORD="secure_password"
+```
+
+## 🚀 Utilização
+
+### Instalação e Setup
+
+```bash
+# 1. Activar ambiente virtual
+cd conversion_tools
+source venv/bin/activate
+
+# 2. Instalar dependências
+pip install -r requirements.txt
+
+# 3. Colocar ficheiros Excel em directórios suportados
+# ../uploads/Archive/ (recomendado)
+# ../uploads/
+# ./excel_files/
+# ./
+
+# 4. Executar ferramenta
+python import_excel.py
+```
+
+### Workflow Interactivo
+
+O script guia o utilizador através de um processo interactivo:
+
+1. **Primeira Execução**: Criação automática de configuração
+2. **Detecção de Ficheiros**: Lista automática de ficheiros Excel encontrados
+3. **Seleção de Projecto**: Interface para escolha/criação de projecto
+4. **Preview de Dados**: Exibição detalhada do que será importado
+5. **Confirmação**: Verificação final antes da importação
+6. **Execução**: Processamento com barras de progresso
+7. **Relatório**: Resumo detalhado dos resultados
+
+### Exemplo de Output
+
+```
+🚀 Ferramenta de Importação Excel - Sistema de Anotação
+═══════════════════════════════════════════════════════
+
+📁 Found 3 Excel files in ../uploads/Archive/
+   • AMO_R01.xlsx
+   • AMO_R02.xlsx  
+   • VAC_R10.xlsx
+
+🔑 Autenticating with API...
+✅ Successfully authenticated as admin@example.com
+
+📋 Project Selection:
+   1. Chat Disentanglement Study (ID: 1)
+   2. Annotation Quality Research (ID: 2)
+   3. Create new project
+   
+Select project [1]: 1
+
+📊 Import Preview:
+═══════════════════
+Files to process: 3
+Total annotators: 12
+Total messages: 1,847
+Total annotations: 8,234
+
+Continue with import? [y/N]: y
+
+🔄 Processing AMO_R01.xlsx...
+   📖 Parsing Excel file...
+   👥 Creating users: joao@research.pt, pedro@research.pt...
+   🏠 Creating chat room: AMO_R01 - Multi-Annotator Study
+   📤 Uploading messages (160 messages)...
+   🏷️ Importing annotations for joao@research.pt (234 annotations)...
+   ✅ Completed in 12.3s
+
+✅ Import completed successfully!
+📈 Final Report: 3 files, 12 users, 3 chat rooms, 8,234 annotations
+```
+
+## 🔧 Desenvolvimento e Extensão
+
+### Patterns de Design Implementados
+
+1. **Separation of Concerns**: Cada módulo tem uma responsabilidade específica
+2. **Dependency Injection**: Configuração injectada via parâmetros
+3. **Error Handling**: Gestão robusta de erros com logging detalhado
+4. **Progress Tracking**: Feedback em tempo real para operações longas
+5. **Batch Processing**: Optimização para processamento de múltiplos ficheiros
+
+### Extensibilidade
+
+O sistema foi desenvolvido como template para futuros workflows:
+
+```python
+# Exemplo de extensão para novos formatos de dados
+class CSVImportManager(BatchImportManager):
+    def process_single_file(self, file_path: str) -> ImportResult:
+        # Implementar parsing específico para CSV
+        pass
+
+# Exemplo de novo transformer
+class CustomDataTransformer(DataTransformer):
+    def custom_format_to_api_schema(self, data):
+        # Implementar transformação customizada
+        pass
+```
+
+### Testing e Debugging
+
+```bash
+# Modo debug com logging verbose
+python import_excel.py --debug
+
+# Dry-run para testar sem importar
+python import_excel.py --dry-run
+
+# Processar ficheiro específico
+python import_excel.py --file path/to/specific.xlsx
+```
+
+## 🛡️ Compliance com API Backend
+
+### Verificação de Conformidade
+
+O sistema foi auditado para compliance 100% com a API FastAPI:
+
+- ✅ **Autenticação OAuth2**: Form data com `application/x-www-form-urlencoded`
+- ✅ **Gestão de Headers**: Limpeza correcta de headers para uploads multipart
+- ✅ **Schemas de Dados**: Conformidade total com schemas Pydantic do backend
+- ✅ **Formato CSV**: Colunas e delimitadores conforme esperado pela API
+- ✅ **Gestão de Erros**: Handling apropriado de códigos de status HTTP
+- ✅ **Upload de Ficheiros**: Multipart form data correctamente formatado
+
+### Endpoints API Utilizados
+
+Todos os endpoints são utilizados conforme especificação OpenAPI:
+
+```python
+# Conformidade verificada para cada endpoint
+auth_endpoints = [
+    "POST /auth/token"  # OAuth2PasswordRequestForm
+]
+
+admin_endpoints = [
+    "GET /admin/users",                                    # List users
+    "POST /admin/users",                                   # Create user  
+    "GET /admin/projects",                                 # List projects
+    "POST /admin/projects",                                # Create project
+    "POST /admin/projects/{id}/import-chat-room-csv",      # Import messages
+    "POST /admin/chat-rooms/{id}/import-annotations"       # Import annotations
+]
+
+project_endpoints = [
+    "POST /projects/{project_id}/assign/{user_id}"        # Assign user to project
+]
+```
+
+## 📚 Casos de Uso e Aplicações
+
+### 1. Importação de Dados Históricos
+Migração de anotações existentes de outros sistemas ou formatos para o sistema actual.
+
+### 2. Integração de Ferramentas Externas
+Template para conectar ferramentas de anotação externas (LabelStudio, Prodigy, etc.) ao sistema.
+
+### 3. Workflows de Investigação
+Importação rápida de dados anotados por investigadores para análise comparativa.
+
+### 4. Backup e Restauro
+Exportação/importação para backup de dados de anotação.
+
+### 5. Template de Desenvolvimento
+Base para desenvolvimento de novos conectores e workflows de importação.
+
+## 🔍 Troubleshooting Técnico
+
+### Problemas Comuns
+
+1. **Erro de Conexão API**
+   ```
+   APIError: Cannot connect to API at http://localhost:8000
+   ```
+   **Solução**: Verificar se o backend está em execução e acessível
+
+2. **Erro de Autenticação**
+   ```
+   APIError: Authentication failed: 401 Unauthorized
+   ```
+   **Solução**: Verificar credenciais no `config.yaml`
+
+3. **Erro de Formato Excel**
+   ```
+   ValueError: Missing required columns: ['turn_id', 'turn_text']
+   ```
+   **Solução**: Verificar estrutura do ficheiro Excel conforme especificação
+
+4. **Erro de Upload**
+   ```
+   APIError: Failed to create chat room and import messages
+   ```
+   **Solução**: Verificar logs detalhados e formato de dados CSV gerado
+
+### Debug Avançado
+
+```python
+# Activar logging debug
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+# Verificar dados transformados antes do upload
+transformer = DataTransformer()
+csv_data = transformer.prepare_csv_import_data(messages)
+print("CSV Data:", csv_data[:500])  # Primeiro 500 caracteres
+```
+
+## 🎯 Conclusão
+
+Este sistema de ferramentas de conversão representa uma implementação completa e robusta para integração eficiente com APIs FastAPI, fornecendo um modelo técnico sólido para futuros desenvolvimentos de workflows de importação de dados. A arquitectura modular, compliance total com a API, e extensibilidade fazem desta solução um template valioso para qualquer sistema que necessite de importação de dados estruturados em massa.
+
+O sistema demonstra as melhores práticas em:
+- **Interface com APIs REST/FastAPI**
+- **Gestão de autenticação OAuth2**
+- **Upload de ficheiros multipart**
+- **Processamento de dados em lote**
+- **Gestão de erros robusta**
+- **User experience interactiva**

@@ -1,0 +1,15 @@
+api:
+  admin_email: admin@example.com
+  admin_password: admin
+  base_url: http://localhost:8000
+import:
+  auto_confirm: false
+  default_user_password: ChangeMe123!
+  email_domain: research.pt
+project:
+  last_used_project_id: 18
+  mode: select_existing
+  new_project:
+    description: Project created from Excel import tool
+    name: Excel Import Project
+  project_id: 1
