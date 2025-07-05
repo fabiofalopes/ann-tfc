@@ -203,4 +203,35 @@ class BatchAnnotationImportResponse(BaseModel):
     total_imported: int
     total_skipped: int
     results: List[BatchAnnotationResult]
-    global_errors: List[str] = [] 
+    global_errors: List[str] = []
+
+# PHASE 5: INTER-ANNOTATOR AGREEMENT (IAA) SCHEMAS
+
+class PairwiseAccuracy(BaseModel):
+    """Represents the one-to-one accuracy score between two annotators."""
+    annotator_1_id: int
+    annotator_2_id: int
+    annotator_1_email: str
+    annotator_2_email: str
+    accuracy: float
+
+class AnnotatorInfo(BaseModel):
+    """Information about an annotator."""
+    id: int
+    email: str
+
+class ChatRoomIAA(BaseModel):
+    """Holds the complete IAA analysis for a single chat room."""
+    chat_room_id: int
+    chat_room_name: str
+    message_count: int
+    
+    # New fields for clarity and partial analysis support
+    analysis_status: str  # "Complete", "Partial", "NotEnoughData"
+    
+    total_annotators_assigned: int
+    completed_annotators: List[AnnotatorInfo]
+    pending_annotators: List[AnnotatorInfo]
+    
+    # Calculation is now based on completed_annotators
+    pairwise_accuracies: List[PairwiseAccuracy] 

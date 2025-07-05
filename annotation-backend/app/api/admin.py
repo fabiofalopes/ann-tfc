@@ -464,3 +464,40 @@ async def import_batch_annotations(
         # Clean up temporary file
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)
+
+# PHASE 5: INTER-ANNOTATOR AGREEMENT (IAA) ENDPOINT
+
+@router.get(
+    "/chat-rooms/{chat_room_id}/iaa",
+    response_model=schemas.ChatRoomIAA,
+    summary="Get Inter-Annotator Agreement for a Chat Room",
+)
+async def get_iaa_for_chat_room(
+    chat_room_id: int,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(get_current_admin_user)
+):
+    """
+    Calculates and returns the one-to-one agreement analysis for a specific chat room.
+    
+    This endpoint is restricted to admin users and will only return results
+    if the chat room has been fully annotated by all assigned annotators.
+    
+    The analysis includes:
+    - Pairwise accuracy scores between all annotator pairs
+    - Chat room metadata (name, message count, annotator count)
+    - Completeness status
+    
+    Args:
+        chat_room_id: ID of the chat room to analyze
+    
+    Returns:
+        ChatRoomIAA: Complete IAA analysis with pairwise accuracy scores
+    
+    Raises:
+        HTTPException: 
+            - 404 if chat room not found
+            - 400 if chat room is not fully annotated or has insufficient data
+    """
+    analysis = crud.get_chat_room_iaa_analysis(db=db, chat_room_id=chat_room_id)
+    return analysis

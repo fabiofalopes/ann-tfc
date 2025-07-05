@@ -79,7 +79,7 @@ class ChatRoomDataTransformer:
         if not clean_name:
             clean_name = f"annotator{hash(annotator_name) % 10000}"
         
-        return f"{clean_name}@{self.default_email_domain}"
+        return f"anota{clean_name}@{self.default_email_domain}"
     
     def generate_user_display_name(self, annotator_name: str) -> str:
         """

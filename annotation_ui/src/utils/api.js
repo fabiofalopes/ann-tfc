@@ -301,6 +301,11 @@ export const annotations = {
         const response = await api.get(`/admin/chat-rooms/${chatRoomId}/aggregated-annotations`);
         return response.data;
     },
+    // PHASE 5: INTER-ANNOTATOR AGREEMENT (IAA)
+    getChatRoomIAA: async (chatRoomId) => {
+        const response = await api.get(`/admin/chat-rooms/${chatRoomId}/iaa`);
+        return response.data;
+    },
 };
 
 export default api; 

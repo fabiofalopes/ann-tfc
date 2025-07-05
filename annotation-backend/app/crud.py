@@ -1,6 +1,10 @@
 from sqlalchemy.orm import Session, Query
 from typing import List, Optional, Tuple
 from . import models, schemas
+from fastapi import HTTPException
+import numpy as np
+from scipy.optimize import linear_sum_assignment
+from itertools import combinations
 
 # User CRUD operations
 def get_user(db: Session, user_id: int) -> Optional[models.User]:
@@ -467,4 +471,188 @@ def import_batch_annotations_for_chat_room(
         total_skipped=total_skipped,
         results=results,
         global_errors=global_errors
+    )
+
+# PHASE 5: INTER-ANNOTATOR AGREEMENT (IAA) FUNCTIONS
+
+def _calculate_one_to_one_accuracy(annot1: List[str], annot2: List[str]) -> float:
+    """
+    Computes the one-to-one accuracy metric for two lists of annotations.
+    This metric finds the optimal matching between thread labels from two annotators
+    and calculates the percentage of messages that align based on this matching.
+
+    Parameters:
+    annot1: A list of thread identifiers (e.g., strings) from the first annotator.
+    annot2: A list of thread identifiers from the second annotator. Must be the same length as annot1.
+
+    Returns:
+    A float representing the accuracy score (0-100).
+    """
+    # Ensure annotations are of the same length
+    assert len(annot1) == len(annot2), "Annotation lists must have the same length."
+    
+    if len(annot1) == 0:
+        return 0.0
+
+    # Create a contingency matrix to store the overlap between thread labels
+    unique_labels1 = sorted(list(set(annot1)))
+    unique_labels2 = sorted(list(set(annot2)))
+    
+    label_map1 = {label: i for i, label in enumerate(unique_labels1)}
+    label_map2 = {label: i for i, label in enumerate(unique_labels2)}
+
+    # Initialize a zero matrix for counting overlaps
+    overlap_matrix = np.zeros((len(unique_labels1), len(unique_labels2)), dtype=int)
+
+    # Populate the overlap matrix
+    for i in range(len(annot1)):
+        idx1 = label_map1[annot1[i]]
+        idx2 = label_map2[annot2[i]]
+        overlap_matrix[idx1, idx2] += 1
+
+    # Apply the Hungarian algorithm to find the optimal matching.
+    # We negate the matrix because the algorithm finds the minimum cost assignment,
+    # and we want to maximize the overlap.
+    row_ind, col_ind = linear_sum_assignment(-overlap_matrix)
+
+    # Calculate total overlap by summing the values at the optimal matching positions
+    total_overlap = overlap_matrix[row_ind, col_ind].sum()
+
+    # Calculate one-to-one accuracy as the percentage of the total messages
+    accuracy = (total_overlap / len(annot1)) * 100 if len(annot1) > 0 else 0
+
+    return accuracy
+
+
+def get_chat_room_iaa_analysis(db: Session, chat_room_id: int) -> Optional[schemas.ChatRoomIAA]:
+    """
+    Calculates and returns the Inter-Annotator Agreement (IAA) analysis for a chat room.
+    
+    This function now supports partial analysis:
+    1. Verifies the chat room exists
+    2. Identifies annotators who have completed annotating all messages
+    3. If 2+ annotators have completed work, calculates IAA for that subset
+    4. Returns analysis with clear status and annotator information
+    
+    Args:
+        db: Database session
+        chat_room_id: ID of the chat room to analyze
+        
+    Returns:
+        ChatRoomIAA schema with analysis (complete, partial, or insufficient data)
+    """
+    # Get chat room
+    chat_room = get_chat_room(db, chat_room_id)
+    if not chat_room:
+        raise HTTPException(status_code=404, detail="Chat room not found")
+    
+    # Get all messages in the chat room
+    messages = get_chat_messages_by_room(db, chat_room_id, skip=0, limit=10000)
+    message_count = len(messages)
+    
+    if message_count == 0:
+        raise HTTPException(status_code=400, detail="Chat room has no messages")
+    
+    # Get all users assigned to this project (potential annotators)
+    assigned_users = (
+        db.query(models.User)
+        .join(models.ProjectAssignment, models.User.id == models.ProjectAssignment.user_id)
+        .filter(models.ProjectAssignment.project_id == chat_room.project_id)
+        .all()
+    )
+    
+    # Get all annotations for this chat room with annotator information
+    annotations_query = (
+        db.query(models.Annotation, models.User.email, models.ChatMessage.turn_id)
+        .join(models.ChatMessage, models.Annotation.message_id == models.ChatMessage.id)
+        .join(models.User, models.Annotation.annotator_id == models.User.id)
+        .filter(models.ChatMessage.chat_room_id == chat_room_id)
+        .order_by(models.ChatMessage.id, models.Annotation.annotator_id)
+        .all()
+    )
+    
+    # Group annotations by annotator
+    annotator_data = {}
+    for annotation, email, turn_id in annotations_query:
+        annotator_id = annotation.annotator_id
+        if annotator_id not in annotator_data:
+            annotator_data[annotator_id] = {
+                'email': email,
+                'annotations': {}
+            }
+        annotator_data[annotator_id]['annotations'][annotation.message_id] = annotation.thread_id
+    
+    # Identify completed and pending annotators
+    completed_annotators = []
+    pending_annotators = []
+    
+    for user in assigned_users:
+        if user.id in annotator_data:
+            # Check if this annotator has annotated all messages
+            if len(annotator_data[user.id]['annotations']) == message_count:
+                completed_annotators.append(schemas.AnnotatorInfo(id=user.id, email=user.email))
+            else:
+                pending_annotators.append(schemas.AnnotatorInfo(id=user.id, email=user.email))
+        else:
+            # User hasn't started annotating
+            pending_annotators.append(schemas.AnnotatorInfo(id=user.id, email=user.email))
+    
+    # Determine analysis status
+    completed_count = len(completed_annotators)
+    total_assigned = len(assigned_users)
+    
+    if completed_count < 2:
+        # Not enough completed annotators for analysis
+        return schemas.ChatRoomIAA(
+            chat_room_id=chat_room_id,
+            chat_room_name=chat_room.name,
+            message_count=message_count,
+            analysis_status="NotEnoughData",
+            total_annotators_assigned=total_assigned,
+            completed_annotators=completed_annotators,
+            pending_annotators=pending_annotators,
+            pairwise_accuracies=[]
+        )
+    
+    # We have enough completed annotators - calculate IAA for completed subset
+    analysis_status = "Complete" if completed_count == total_assigned else "Partial"
+    
+    # Create ordered annotation lists for completed annotators only
+    message_ids = [msg.id for msg in messages]
+    completed_annotator_lists = {}
+    
+    for completed_annotator in completed_annotators:
+        annotator_id = completed_annotator.id
+        completed_annotator_lists[annotator_id] = {
+            'email': completed_annotator.email,
+            'annotations': [annotator_data[annotator_id]['annotations'][msg_id] for msg_id in message_ids]
+        }
+    
+    # Calculate pairwise accuracies for completed annotators
+    pairwise_accuracies = []
+    completed_annotator_ids = list(completed_annotator_lists.keys())
+    
+    for annotator_1_id, annotator_2_id in combinations(completed_annotator_ids, 2):
+        annot1 = completed_annotator_lists[annotator_1_id]['annotations']
+        annot2 = completed_annotator_lists[annotator_2_id]['annotations']
+        
+        accuracy = _calculate_one_to_one_accuracy(annot1, annot2)
+        
+        pairwise_accuracies.append(schemas.PairwiseAccuracy(
+            annotator_1_id=annotator_1_id,
+            annotator_2_id=annotator_2_id,
+            annotator_1_email=completed_annotator_lists[annotator_1_id]['email'],
+            annotator_2_email=completed_annotator_lists[annotator_2_id]['email'],
+            accuracy=accuracy
+        ))
+    
+    return schemas.ChatRoomIAA(
+        chat_room_id=chat_room_id,
+        chat_room_name=chat_room.name,
+        message_count=message_count,
+        analysis_status=analysis_status,
+        total_annotators_assigned=total_assigned,
+        completed_annotators=completed_annotators,
+        pending_annotators=pending_annotators,
+        pairwise_accuracies=pairwise_accuracies
     ) 

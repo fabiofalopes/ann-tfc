@@ -92,9 +92,9 @@ function App() {
                             </ProtectedRoute>
                         } 
                     />
-                    {/* PHASE 3: Annotation Analysis Route */}
+                    {/* PHASE 5: IAA Analysis Route */}
                     <Route 
-                        path="/admin/projects/:projectId/chat-rooms/:roomId/analysis" 
+                        path="/admin/projects/:projectId/analysis/:roomId" 
                         element={
                             <ProtectedRoute adminOnly>
                                 <AnnotationAnalysisPage />

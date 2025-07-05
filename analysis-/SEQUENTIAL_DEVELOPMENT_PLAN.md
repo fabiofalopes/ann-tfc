@@ -1,368 +1,273 @@
-# Sequential Development Plan - Annotation Metrics & Visualization
-**Created:** January 2025  
-**Project Status:** 85% Complete - Phase 4 (IAA Metrics Implementation)  
-**Docker Deployment:** All development will be tested using Docker containers
+# Focused Development Plan: Inter-Annotator Agreement (IAA) Metrics
+
+**Project Status:** The core application is stable, and the `conversion_tools` for data importation are complete. We can now proceed with implementing the primary value-add feature: annotation metrics.
+
+## 1. Core Vision & Philosophy
+
+This plan outlines the sequential steps to implement Inter-Annotator Agreement (IAA) metrics. It is guided by two core principles:
+
+1.  **Backend First:** We will fully implement, test, and validate the backend API for IAA metrics before any frontend work begins. This ensures our API is robust, and the frontend's role remains that of a pure consumer, as per our project's architectural rules.
+2.  **Focus on Core Requirements:** Our initial and primary focus is the **"one-to-one accuracy"** metric, as specified in the `ANNOTATION_METRICS_NOTE.md`. Other metrics (e.g., Cohen's Kappa) are out of scope for this development phase.
 
 ---
 
-## Overview
+## 2. The "Validate as We Build" Testing Strategy
 
-This document provides a complete sequential development plan for implementing the remaining annotation metrics and visualization features. The project has evolved from 0% to 85% complete, with solid architecture and most critical features implemented. The remaining work focuses on **Inter-Annotator Agreement (IAA) metrics** and **advanced visualization systems**.
+To ensure stability and correctness, every backend development step will be immediately validated. We will centralize our testing efforts into a single, evolving script.
 
-### Current State Summary
-- ✅ **Backend (95% Complete):** All data models, APIs, and infrastructure ready
-- ✅ **Frontend (80% Complete):** Modern React architecture with excellent UX
-- ❌ **Missing:** IAA metric calculations (Cohen's Kappa, Krippendorff's Alpha)
-- ❌ **Missing:** Advanced visualization dashboard
-- ❌ **Missing:** Statistical analysis features
+**Methodology:**
+
+1.  **Create a Test Script:** We will create a new file: `annotation-backend/api_tests.py`.
+2.  **Purpose:** This script will be our single source of truth for testing API endpoints. It will handle the authentication flow (login, get token) and make authenticated requests to the endpoints we are developing.
+3.  **Structure:** It will contain simple, dedicated functions for each test case (e.g., `test_login()`, `test_get_iaa_for_chatroom()`). We can run specific tests by calling the desired function within a `if __name__ == "__main__":` block. This script will serve as a living document and troubleshooting record.
+
+This approach is simpler than managing repeated `curl` commands and more organized, as it keeps all test logic and credentials in one manageable place.
 
 ---
 
-## Phase 1: Backend IAA Metrics Foundation (Priority: CRITICAL)
+## Phase 1: Backend - IAA Metrics API (CRITICAL PRIORITY)
 
-### 1.1 Add Statistical Computing Dependencies
-**Files:** `annotation-backend/requirements.txt`
-**Estimated Time:** 30 minutes
+Our goal is to create a secure endpoint that calculates and returns the one-to-one agreement for a given chat room.
 
-**Tasks:**
-1. Add `scipy` for Hungarian algorithm (one-to-one accuracy)
-2. Add `scikit-learn` for additional statistical metrics
-3. Add `numpy` enhancement for matrix operations
-4. Test Docker container rebuild with new dependencies
+### Step 1.1: Add Dependencies
 
-**Validation:**
-- Docker container builds successfully
-- All statistical libraries import correctly
-- API starts without errors
+**File to Edit:** `annotation-backend/requirements.txt`
 
-### 1.2 Implement Core IAA Schemas
-**Files:** `annotation-backend/app/schemas.py`
-**Estimated Time:** 45 minutes
+**Task:**
+- Add the necessary libraries for scientific computing. The `scipy` library is essential for the Hungarian algorithm used in the one-to-one accuracy calculation.
 
-**Tasks:**
-1. Add `PairwiseAccuracy` schema for annotator comparisons
-2. Add `ChatRoomAnalysis` schema for detailed room analysis
-3. Add `ProjectSummary` schema extending base Project with metrics
-4. Add `IAA_Metrics` schema for comprehensive statistical results
-
-**New Schemas:**
-```python
-class PairwiseAccuracy(BaseModel):
-    annotator1_email: str
-    annotator2_email: str
-    accuracy: float
-    metric_type: str = "one_to_one"
-
-class ChatRoomAnalysis(BaseModel):
-    completeness_status: str
-    total_messages: int
-    annotators_summary: Dict[str, int]
-    pairwise_accuracies: List[PairwiseAccuracy]
-    cohens_kappa: Optional[float] = None
-    krippendorff_alpha: Optional[float] = None
-
-class ProjectSummary(Project):
-    num_chat_rooms: int
-    num_completed_rooms: int
-    average_agreement: Optional[float] = None
-    metrics_summary: Dict[str, float] = {}
+```
+# ... existing dependencies
+scipy
+numpy
 ```
 
-### 1.3 Implement IAA Calculation Functions
-**Files:** `annotation-backend/app/crud.py`
-**Estimated Time:** 2 hours
+**Validation:**
+- After adding the dependencies, rebuild and run the backend Docker container to ensure it starts without errors.
+- `cd annotation-backend && docker-compose up --build`
+- Check the logs for any import errors.
 
-**Tasks:**
-1. Implement `get_annotations_for_analysis()` function
-2. Implement `_calculate_one_to_one_accuracy()` with Hungarian algorithm
-3. Implement `_calculate_cohens_kappa()` for inter-annotator agreement
-4. Implement `_calculate_krippendorff_alpha()` for reliability measurement
-5. Implement `get_project_summaries()` with aggregated metrics
+### Step 1.2: Define API Schemas
 
-**Key Functions:**
-- One-to-one accuracy using Hungarian algorithm
-- Cohen's Kappa for categorical agreement
-- Krippendorff's Alpha for reliability measurement
-- Statistical significance testing
+**File to Edit:** `annotation-backend/app/schemas.py`
 
-### 1.4 Create IAA API Endpoints
-**Files:** `annotation-backend/app/api/annotations.py`
-**Estimated Time:** 1.5 hours
+**Task:**
+- Create the Pydantic models that will define the structure of the API response. These schemas ensure our API outputs are consistent and validated.
 
-**Tasks:**
-1. Create `GET /admin/chat-rooms/{id}/iaa-analysis` endpoint
-2. Create `GET /admin/projects/{id}/metrics-summary` endpoint
-3. Create `GET /admin/projects/{id}/detailed-analysis` endpoint
-4. Add comprehensive error handling for incomplete annotations
-5. Add validation for minimum annotator requirements
+```python
+# ... existing code ...
 
-**API Endpoints:**
-- Detailed IAA analysis per chat room
-- Project-level metrics aggregation
-- Batch analysis for multiple rooms
-- Statistical significance indicators
+class PairwiseAccuracy(BaseModel):
+    """Represents the one-to-one accuracy score between two annotators."""
+    annotator_1_id: int
+    annotator_2_id: int
+    annotator_1_email: str
+    annotator_2_email: str
+    accuracy: float
 
----
+class ChatRoomIAA(BaseModel):
+    """Holds the complete IAA analysis for a single chat room."""
+    chat_room_id: int
+    chat_room_name: str
+    is_fully_annotated: bool
+    message_count: int
+    annotator_count: int
+    pairwise_accuracies: List[PairwiseAccuracy]
 
-## Phase 2: Frontend IAA Visualization (Priority: HIGH)
+# ... existing code ...
+```
 
-### 2.1 Create IAA Analysis Components
-**Files:** `annotation_ui/src/components/`
-**Estimated Time:** 3 hours
+**Validation:**
+- No direct validation is needed here, but syntax errors will be caught when the application is run in the next steps.
 
-**Tasks:**
-1. Create `IAA_AnalysisPage.js` - Main analysis dashboard
-2. Create `PairwiseHeatmap.js` - Agreement visualization matrix
-3. Create `MetricsCards.js` - Key statistics display
-4. Create `AnnotatorPerformanceTable.js` - Annotator rankings
-5. Create `StatisticalSummary.js` - Cohen's Kappa, Krippendorff's Alpha display
+### Step 1.3: Implement IAA Calculation Logic
 
-**Components Structure:**
-- Heatmap visualization for pairwise agreement
-- Color-coded agreement levels (red <60%, yellow 60-80%, green >80%)
-- Interactive tooltips with detailed statistics
-- Responsive design for mobile viewing
+**File to Edit:** `annotation-backend/app/crud.py`
 
-### 2.2 Enhance Admin Project Dashboard
-**Files:** `annotation_ui/src/components/AdminProjectPage.js`
-**Estimated Time:** 2 hours
+**Task:**
+- Implement the core business logic for the IAA calculation. This involves fetching annotations and processing them using the one-to-one accuracy algorithm.
 
-**Tasks:**
-1. Add IAA metrics cards to project overview
-2. Add "View IAA Analysis" buttons to chat room lists
-3. Add project-level metrics summary
-4. Add annotator performance leaderboard
-5. Add agreement quality trend visualization
+**New Functions:**
 
-**Enhancements:**
-- Project completion indicators
-- Average agreement scores
-- Active annotator counts
-- Low-agreement room alerts
+1.  **`_calculate_one_to_one_accuracy(...)`**: A private helper function that contains the exact Python code from `ANNOTATION_METRICS_NOTE.md` to perform the calculation using `scipy.optimize.linear_sum_assignment`.
+2.  **`get_chat_room_iaa_analysis(...)`**: The main public function. It will:
+    -   Take a `chat_room_id` and a database session `db` as input.
+    -   Verify that the chat room is fully annotated by all its assigned annotators. If not, it should raise an appropriate `HTTPException`.
+    -   Fetch all message annotations for that room, organized by annotator.
+    -   Generate all possible pairs of annotators (e.g., (A, B), (A, C), (B, C)).
+    -   For each pair, call `_calculate_one_to_one_accuracy` to get the score.
+    -   Assemble the final result into the `schemas.ChatRoomIAA` Pydantic model.
 
-### 2.3 Update API Client
-**Files:** `annotation_ui/src/utils/api.js`
-**Estimated Time:** 30 minutes
+**Validation:**
+- This logic will be tested via the API endpoint in the next step. Direct unit testing can be added later if desired, but for now, we will rely on integration testing through the API.
 
-**Tasks:**
-1. Add `getIAAAnalysis(chatRoomId)` function
-2. Add `getProjectMetrics(projectId)` function
-3. Add `getDetailedAnalysis(projectId)` function
-4. Add error handling for incomplete data scenarios
+### Step 1.4: Create the API Endpoint
 
----
+**File to Edit:** We will use the existing `annotation-backend/app/api/admin.py` for this new admin-focused endpoint.
 
-## Phase 3: Enhanced Visualization Features (Priority: MEDIUM)
+**Task:**
+- Create a new, protected API endpoint that exposes the IAA calculation functionality.
 
-### 3.1 Advanced Heatmap Visualization
-**Files:** `annotation_ui/src/components/PairwiseHeatmap.js`
-**Estimated Time:** 2 hours
+```python
+# In annotation-backend/app/api/admin.py
 
-**Tasks:**
-1. Implement interactive heatmap with hover details
-2. Add color scale legend with agreement thresholds
-3. Add export functionality for heatmap data
-4. Add drill-down capability to message-level analysis
-5. Add statistical significance indicators
+# ... existing imports
+from .. import crud, schemas
+from ..dependencies import get_current_active_admin_user
 
-**Features:**
-- Symmetric matrix visualization
-- Configurable color schemes
-- Exportable to PNG/SVG
-- Click-to-analyze functionality
+# ... existing router
 
-### 3.2 Time-Series Analysis Dashboard
-**Files:** `annotation_ui/src/components/AgreementTrendsChart.js`
-**Estimated Time:** 2.5 hours
+@router.get(
+    "/chat-rooms/{chat_room_id}/iaa",
+    response_model=schemas.ChatRoomIAA,
+    summary="Get Inter-Annotator Agreement for a Chat Room",
+    dependencies=[Depends(get_current_active_admin_user)],
+)
+def get_iaa_for_chat_room(
+    chat_room_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Calculates and returns the one-to-one agreement analysis for a specific chat room.
 
-**Tasks:**
-1. Create line chart for agreement trends over time
-2. Add annotator learning curve visualization
-3. Add project milestone tracking
-4. Add interactive filtering by annotator/time period
-5. Add export functionality for trend data
+    This endpoint is restricted to admin users and will only return results
+    if the chat room has been fully annotated by all assigned annotators.
+    """
+    analysis = crud.get_chat_room_iaa_analysis(db=db, chat_room_id=chat_room_id)
+    if not analysis:
+        raise HTTPException(
+            status_code=404,
+            detail="Analysis could not be performed. Ensure the chat room exists and is fully annotated."
+        )
+    return analysis
+```
+*Self-correction: The original plan put the endpoint in `annotations.py`. It's better suited for `admin.py` as this is an administrative/analytical function.*
 
-**Visualization Types:**
-- Agreement quality over time
-- Annotator consistency trends
-- Project milestone markers
-- Comparative analysis charts
-
-### 3.3 Statistical Analysis Dashboard
-**Files:** `annotation_ui/src/components/StatisticalAnalysisPage.js`
-**Estimated Time:** 2 hours
-
-**Tasks:**
-1. Create comprehensive statistical summary
-2. Add confidence interval visualizations
-3. Add statistical significance testing results
-4. Add recommendation engine based on metrics
-5. Add export functionality for analysis reports
+**Validation:**
+- Using the `api_tests.py` script, add a new test function that:
+    1.  Logs in as an admin user.
+    2.  Calls the `GET /api/v1/admin/chat-rooms/{chat_room_id}/iaa` endpoint for a chat room known to be fully annotated.
+    3.  Asserts that the response status code is 200.
+    4.  Prints the JSON response to verify the accuracy scores are calculated correctly.
+    5.  Tests the endpoint against a non-existent or incomplete chat room and asserts a 4xx status code.
 
 ---
 
-## Phase 4: Enhanced Import System (Priority: LOW)
+## Phase 1.5: Backend Validation (Completed)
 
-### 4.1 Batch Import CLI Tool Enhancement
-**Files:** `conversion_tools/batch_import_annotated_chatrooms.py`
-**Estimated Time:** 1.5 hours
+Before proceeding, it's important to confirm the success of Phase 1.
 
-**Tasks:**
-1. Add automatic thread column detection
-2. Add validation for annotation completeness
-3. Add progress reporting with detailed statistics
-4. Add error recovery mechanisms
-5. Add IAA pre-calculation during import
+**Status: COMPLETE**
 
-**Features:**
-- Smart CSV format detection
-- Automated user creation
-- Progress tracking with ETA
-- Error logging and recovery
-
-### 4.2 Frontend Import Interface
-**Files:** `annotation_ui/src/components/AdminImportPage.js`
-**Estimated Time:** 2 hours
-
-**Tasks:**
-1. Create drag-and-drop import interface
-2. Add import progress visualization
-3. Add validation feedback system
-4. Add batch import management
-5. Add automatic IAA calculation post-import
+-   **Dependencies:** `scipy` and `numpy` were successfully added to `requirements.txt`, and the Docker container builds and runs without issues.
+-   **Schemas:** `PairwiseAccuracy` and `ChatRoomIAA` Pydantic models were correctly defined in `schemas.py`.
+-   **Business Logic:** The core IAA calculation logic, including `_calculate_one_to_one_accuracy` and `get_chat_room_iaa_analysis`, was implemented in `crud.py`.
+-   **API Endpoint:** The protected admin endpoint `GET /admin/chat-rooms/{chat_room_id}/iaa` was created in `admin.py`.
+-   **Validation Script:** A comprehensive test script, `api_tests.py`, was created to perform automated validation.
+-   **End-to-End Testing:** The test script successfully authenticated, called the endpoint, and confirmed it works as expected for both valid and invalid cases. The backend is stable and ready to serve the frontend.
 
 ---
 
-## Phase 5: Testing & Validation (Priority: MEDIUM)
+## Phase 2: Frontend - Refined IAA Visualization & Analysis (REVISED)
 
-### 5.1 Backend Testing Suite
-**Files:** `annotation-backend/tests/`
-**Estimated Time:** 3 hours
+This phase is now revised based on new feedback and a clearer vision for the user interface, as outlined in `ANNOTATION_VISUALIZATION_IDEAS.md`. We will discard the previous frontend implementation for concordance/discordance and build a new, cleaner interface that directly consumes the validated backend endpoint.
 
-**Tasks:**
-1. Create IAA metric calculation tests
-2. Create API endpoint tests
-3. Create statistical accuracy validation tests
-4. Create performance benchmarks
-5. Create Docker integration tests
+**Core Philosophy:** The frontend's only job is to **request, receive, and visualize** the analysis data from the backend. All complex calculations are handled by the server.
 
-**Test Coverage:**
-- Statistical algorithm accuracy
-- API response validation
-- Error handling scenarios
-- Performance under load
+### Step 2.1: Enhance Backend for Partial Analysis (CRITICAL)
 
-### 5.2 Frontend Testing Suite
-**Files:** `annotation_ui/src/tests/`
-**Estimated Time:** 2 hours
+**File to Edit:** `annotation-backend/app/crud.py` and `annotation-backend/app/schemas.py`
 
-**Tasks:**
-1. Create visualization component tests
-2. Create user interaction tests
-3. Create API integration tests
-4. Create responsive design tests
-5. Create accessibility tests
+**Task:**
+The current backend `get_chat_room_iaa_analysis` function fails if a room is not annotated by *all* assigned users. This needs to be changed to support partial analysis.
 
+1.  **Modify `get_chat_room_iaa_analysis` in `crud.py`:**
+    *   The function should **no longer raise an `HTTPException`** if the room is not fully annotated.
+    *   Instead, it must identify the subset of annotators who **have** completed annotating all messages.
+    *   If this subset contains 2 or more annotators, it should calculate the pairwise IAA for **only that completed subset**.
+    *   If fewer than 2 annotators have completed the work, it should return a clear status but no accuracy scores.
+
+2.  **Update `schemas.ChatRoomIAA` in `schemas.py`:**
+    *   The schema must be enhanced to provide the necessary context to the frontend.
+
+    ```python
+    # In annotation-backend/app/schemas.py
+
+    class AnnotatorInfo(BaseModel):
+        id: int
+        email: str
+
+    class ChatRoomIAA(BaseModel):
+        """Holds the complete IAA analysis for a single chat room."""
+        chat_room_id: int
+        chat_room_name: str
+        message_count: int
+        
+        # New fields for clarity
+        analysis_status: str # e.g., "Complete", "Partial", "NotEnoughData"
+        
+        total_annotators_assigned: int
+        completed_annotators: List[AnnotatorInfo]
+        pending_annotators: List[AnnotatorInfo]
+        
+        # Calculation is now based on completed_annotators
+        pairwise_accuracies: List[PairwiseAccuracy]
+    ```
+
+**Validation:**
+-   Update `api_tests.py` to test scenarios with partially annotated rooms and verify the API returns the correct subset of results and a `Partial` status.
+
+### Step 2.2: Refactor Admin Project Page
+
+**File to Edit:** `annotation_ui/src/components/AdminProjectPage.js`
+
+**Task:**
+-   **Remove Annotation Import UI:** Delete the modal and all related state (`showImportModal`, `selectedChatRoom`, `handleImportAnnotations`, etc.). The frontend will no longer be responsible for this.
+-   **Implement Chat Room Status List:** Transform the existing list of chat rooms into a more informative, interactive table as described in `ANNOTATION_VISUALIZATION_IDEAS.md`.
+
+| Chat Room Name | Status | # Annotators | Avg. Agreement | Actions |
+| :--- | :--- | :--- | :--- | :--- |
+| `CR_101` | `Annotated` | `3 / 3` | `85.5%` | `View Analysis` |
+| `CR_102` | `In Progress` | `2 / 3` | `N/A` | `(Analysis Unavailable)` |
+
+-   The `View Analysis` button will navigate the user to the dedicated analysis page: `/projects/{projectId}/analysis/{roomId}`.
+-   This button should be disabled if analysis is not possible (e.g., fewer than 2 annotators have completed annotations).
+
+### Step 2.3: Create New Annotation Analysis Page
+
+**File to Create:** `annotation_ui/src/components/AnnotationAnalysisPage.js` (Overwrite existing)
+**File to Create:** `annotation_ui/src/components/IAAMatrix.js` and `.css`
+
+**Task:**
+-   This page will be built from scratch to be a pure visualization component.
+-   On page load, it will call a new API function `api.getChatRoomIAA(roomId)`.
+-   It will display the results using two main components:
+
+1.  **`IAAStatus` Component:**
+    *   A prominent banner at the top that clearly displays the `analysis_status`.
+    *   If status is `Partial`, it must list the annotators whose work is complete and those who are still `Pending`.
+
+2.  **`IAAMatrix` Component (`IAAMatrix.js`):**
+    *   This component will receive the `pairwise_accuracies` and `completed_annotators` as props.
+    *   It will render a heatmap/matrix as described in the visualization plan.
+    *   The matrix will only include the annotators who have completed the work.
+    *   It will use a color scale (red to green) to represent agreement scores.
+    *   Tooltips will show the exact percentage on hover.
+
+3.  **`ChatRoomStatistics` Component:**
+    *   A simple table displaying key metadata from the API response: `chat_room_name`, `message_count`, and the annotator counts (`completed / total`).
+
+**Validation:**
+-   Manually test the full flow:
+    1.  Navigate from the Admin Dashboard to the `AdminProjectPage`.
+    2.  Verify the chat room list is clear and informative.
+    3.  Click `View Analysis`.
+    4.  Verify the `AnnotationAnalysisPage` correctly displays the heatmap, stats, and status (both for fully and partially completed rooms).
 ---
-
-## Phase 6: Documentation & Optimization (Priority: LOW)
-
-### 6.1 API Documentation Enhancement
-**Files:** `annotation-backend/docs/`
-**Estimated Time:** 1 hour
-
-**Tasks:**
-1. Update OpenAPI specification with IAA endpoints
-2. Add metric calculation examples
-3. Add usage guidelines for IAA analysis
-4. Add troubleshooting guides
-
-### 6.2 Performance Optimization
-**Files:** Various
-**Estimated Time:** 2 hours
-
-**Tasks:**
-1. Optimize IAA calculation algorithms
-2. Add caching for expensive calculations
-3. Add database indexing for analysis queries
-4. Add lazy loading for large datasets
-
----
-
-## Development Phases Summary
-
-### **Phase 1: Backend IAA Foundation (CRITICAL - 4.5 hours)**
-- Statistical dependencies
-- Core schemas
-- IAA calculation functions
-- API endpoints
-
-### **Phase 2: Frontend Visualization (HIGH - 6 hours)**
-- Analysis components
-- Admin dashboard enhancements
-- API client updates
-
-### **Phase 3: Advanced Features (MEDIUM - 6.5 hours)**
-- Heatmap visualization
-- Time-series analysis
-- Statistical dashboard
-
-### **Phase 4: Import Enhancements (LOW - 3.5 hours)**
-- CLI tool improvements
-- Frontend import interface
-
-### **Phase 5: Testing (MEDIUM - 5 hours)**
-- Backend testing suite
-- Frontend testing suite
-
-### **Phase 6: Documentation (LOW - 3 hours)**
-- API documentation
-- Performance optimization
-
----
-
-## Docker Development Workflow
-
-### Testing Strategy
-Since you're using Docker for deployment, each phase should be tested as follows:
-
-1. **Backend Changes:**
-   ```bash
-   cd annotation-backend
-   docker-compose up --build
-   # Test API endpoints with curl/Postman
-   # Check Docker logs for errors
-   ```
-
-2. **Frontend Changes:**
-   ```bash
-   cd annotation_ui
-   docker-compose up --build
-   # Test UI functionality
-   # Check browser console for errors
-   ```
-
-3. **Full System Testing:**
-   ```bash
-   # From project root
-   docker-compose up --build
-   # Test complete annotation workflow
-   ```
-
-### Continuous Validation
-- Each phase should be completed and tested before moving to the next
-- API endpoints should be tested via Docker logs and manual testing
-- Frontend components should be tested in browser with Docker deployment
-- Database changes should be validated via Docker PostgreSQL container
-
----
-
 ## Next Steps
 
-1. **Start with Phase 1.1** - Add statistical dependencies to requirements.txt
-2. **Test Docker rebuild** - Ensure container builds successfully
-3. **Implement incrementally** - Complete each sub-task before moving forward
-4. **Test continuously** - Use Docker logs and browser testing throughout
-5. **Document progress** - Update this plan with completion status
+1.  **Begin with Phase 2, Step 2.1:** Enhance the backend to support partial analysis.
+2.  **Proceed sequentially through the revised plan,** ensuring each step is validated before moving to the next.
+3.  **Leverage the `ANNOTATION_VISUALIZATION_IDEAS.md`** as the design document for all new UI components.
 
-This sequential plan provides a clear path from your current 85% complete state to a fully featured annotation metrics platform. The ordering prioritizes critical backend functionality first, followed by user-facing visualizations, and finally enhancements and optimizations. 
+This sequential plan provides a clear path from your current stable state to a fully featured annotation metrics platform. The ordering prioritizes critical backend functionality first, followed by user-facing visualizations, and finally enhancements and optimizations. 

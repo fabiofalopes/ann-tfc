@@ -11,21 +11,13 @@ const AdminProjectPage = () => {
     const [assignedUsers, setAssignedUsers] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
     const [chatRooms, setChatRooms] = useState([]);
+    const [chatRoomAnalytics, setChatRoomAnalytics] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isAssigning, setIsAssigning] = useState(false);
     const [userToAssign, setUserToAssign] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
-
-    // PHASE 2: Annotation Import State
-    const [showImportModal, setShowImportModal] = useState(false);
-    const [selectedChatRoom, setSelectedChatRoom] = useState(null);
-    const [selectedUser, setSelectedUser] = useState('');
-    const [importFile, setImportFile] = useState(null);
-    const [importProgress, setImportProgress] = useState(0);
-    const [isImporting, setIsImporting] = useState(false);
-    const [importResult, setImportResult] = useState(null);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -41,6 +33,9 @@ const AdminProjectPage = () => {
             setAssignedUsers(assignedUsersData);
             setAllUsers(allUsersData);
             setChatRooms(chatRoomsData);
+            
+            // Fetch analytics for each chat room
+            await fetchChatRoomAnalytics(chatRoomsData);
         } catch (err) {
             console.error("Failed to fetch project admin data:", err);
             setError(err.response?.data?.detail || 'Failed to load project data.');
@@ -48,6 +43,44 @@ const AdminProjectPage = () => {
             setLoading(false);
         }
     }, [projectId]);
+
+    const fetchChatRoomAnalytics = async (rooms) => {
+        const analytics = {};
+        
+        // Fetch IAA analysis for each chat room
+        for (const room of rooms) {
+            try {
+                const iaaData = await annotationsApi.getChatRoomIAA(room.id);
+                analytics[room.id] = {
+                    status: iaaData.analysis_status,
+                    completedAnnotators: iaaData.completed_annotators.length,
+                    totalAnnotators: iaaData.total_annotators_assigned,
+                    averageAgreement: calculateAverageAgreement(iaaData.pairwise_accuracies),
+                    canAnalyze: iaaData.pairwise_accuracies.length > 0
+                };
+            } catch (err) {
+                console.error(`Failed to fetch IAA for room ${room.id}:`, err);
+                analytics[room.id] = {
+                    status: 'Error',
+                    completedAnnotators: 0,
+                    totalAnnotators: 0,
+                    averageAgreement: null,
+                    canAnalyze: false
+                };
+            }
+        }
+        
+        setChatRoomAnalytics(analytics);
+    };
+
+    const calculateAverageAgreement = (pairwiseAccuracies) => {
+        if (!pairwiseAccuracies || pairwiseAccuracies.length === 0) {
+            return null;
+        }
+        
+        const sum = pairwiseAccuracies.reduce((acc, pair) => acc + pair.accuracy, 0);
+        return (sum / pairwiseAccuracies.length).toFixed(1);
+    };
 
     useEffect(() => {
         fetchData();
@@ -122,51 +155,16 @@ const AdminProjectPage = () => {
         }
     };
 
-    // PHASE 2: Handle annotation import
-    const handleImportAnnotations = async () => {
-        if (!selectedChatRoom || !selectedUser || !importFile) {
-            alert('Please select a chat room, user, and file');
-            return;
-        }
-
-        setIsImporting(true);
-        setImportProgress(0);
-        setImportResult(null);
-
-        try {
-            const result = await annotationsApi.importAnnotations(
-                selectedChatRoom.id,
-                selectedUser,
-                importFile,
-                setImportProgress
-            );
-            
-            setImportResult(result);
-            setImportFile(null);
-            setSelectedUser('');
-            
-        } catch (err) {
-            console.error('Import error:', err);
-            setError(err.message || 'Failed to import annotations');
-        } finally {
-            setIsImporting(false);
-        }
-    };
-
-    const openImportModal = (chatRoom) => {
-        setSelectedChatRoom(chatRoom);
-        setShowImportModal(true);
-        setImportResult(null);
-        setError(null);
-    };
-
-    const closeImportModal = () => {
-        setShowImportModal(false);
-        setSelectedChatRoom(null);
-        setSelectedUser('');
-        setImportFile(null);
-        setImportProgress(0);
-        setImportResult(null);
+    const getStatusBadge = (status) => {
+        const badges = {
+            'Complete': { class: 'status-complete', text: 'Annotated' },
+            'Partial': { class: 'status-partial', text: 'In Progress' },
+            'NotEnoughData': { class: 'status-insufficient', text: 'Insufficient Data' },
+            'Error': { class: 'status-error', text: 'Error' }
+        };
+        
+        const badge = badges[status] || { class: 'status-unknown', text: 'Unknown' };
+        return <span className={`status-badge ${badge.class}`}>{badge.text}</span>;
     };
 
     if (loading) {
@@ -264,28 +262,51 @@ const AdminProjectPage = () => {
                 {chatRooms.length === 0 ? (
                     <p className="no-data">No chat rooms in this project yet.</p>
                 ) : (
-                    <div className="chat-rooms-grid">
-                        {chatRooms.map(room => (
-                            <div key={room.id} className="chat-room-card">
-                                <h3>{room.name}</h3>
-                                <p>Created: {new Date(room.created_at).toLocaleString()}</p>
-                                
-                                <div className="chat-room-actions">
-                                    <button 
-                                        onClick={() => navigate(`/admin/projects/${projectId}/chat-rooms/${room.id}/analysis`)}
-                                        className="btn-secondary"
-                                    >
-                                        📊 View Analysis
-                                    </button>
-                                    <button 
-                                        onClick={() => openImportModal(room)}
-                                        className="btn-primary"
-                                    >
-                                        📥 Import Annotations
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="chat-rooms-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Chat Room Name</th>
+                                    <th>Status</th>
+                                    <th># Annotators</th>
+                                    <th>Avg. Agreement</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {chatRooms.map(room => {
+                                    const analytics = chatRoomAnalytics[room.id] || {};
+                                    return (
+                                        <tr key={room.id}>
+                                            <td>
+                                                <strong>{room.name}</strong>
+                                                <br />
+                                                <small>Created: {new Date(room.created_at).toLocaleDateString()}</small>
+                                            </td>
+                                            <td>
+                                                {getStatusBadge(analytics.status)}
+                                            </td>
+                                            <td>
+                                                {analytics.completedAnnotators || 0} / {analytics.totalAnnotators || 0}
+                                            </td>
+                                            <td>
+                                                {analytics.averageAgreement ? `${analytics.averageAgreement}%` : 'N/A'}
+                                            </td>
+                                            <td>
+                                                <button 
+                                                    onClick={() => navigate(`/admin/projects/${projectId}/analysis/${room.id}`)}
+                                                    className="action-button"
+                                                    disabled={!analytics.canAnalyze}
+                                                    title={!analytics.canAnalyze ? 'Analysis unavailable - need at least 2 completed annotators' : 'View detailed analysis'}
+                                                >
+                                                    📊 View Analysis
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
                     </div>
                 )}
             </div>
@@ -301,97 +322,6 @@ const AdminProjectPage = () => {
                     </button>
                 </div>
             </div>
-
-            {/* PHASE 2: Import Annotations Modal */}
-            {showImportModal && (
-                <div className="modal-overlay">
-                    <div className="modal">
-                        <div className="modal-header">
-                            <h3>Import Annotations</h3>
-                            <button onClick={closeImportModal} className="close-button">×</button>
-                        </div>
-                        
-                        <div className="modal-body">
-                            <p><strong>Chat Room:</strong> {selectedChatRoom?.name}</p>
-                            
-                            <div className="form-group">
-                                <label htmlFor="user-select">Assign to User:</label>
-                                <select 
-                                    id="user-select"
-                                    value={selectedUser} 
-                                    onChange={(e) => setSelectedUser(e.target.value)}
-                                    disabled={isImporting}
-                                >
-                                    <option value="">Select a user...</option>
-                                    {allUsers.map(user => (
-                                        <option key={user.id} value={user.id}>
-                                            {user.email} {user.is_admin ? '(Admin)' : '(Annotator)'}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="file-input">CSV File:</label>
-                                <input
-                                    id="file-input"
-                                    type="file"
-                                    accept=".csv"
-                                    onChange={(e) => setImportFile(e.target.files[0])}
-                                    disabled={isImporting}
-                                />
-                                <small>CSV must contain 'turn_id' and 'thread_id' (or 'thread_column') columns</small>
-                            </div>
-
-                            {isImporting && (
-                                <div className="progress-section">
-                                    <div className="progress-bar">
-                                        <div 
-                                            className="progress-fill" 
-                                            style={{ width: `${importProgress}%` }}
-                                        ></div>
-                                    </div>
-                                    <p>Importing... {importProgress}%</p>
-                                </div>
-                            )}
-
-                            {importResult && (
-                                <div className="import-result">
-                                    <h4>Import Complete!</h4>
-                                    <p><strong>Annotator:</strong> {importResult.annotator_email}</p>
-                                    <p><strong>Total annotations:</strong> {importResult.total_annotations}</p>
-                                    <p><strong>Successfully imported:</strong> {importResult.imported_count}</p>
-                                    <p><strong>Skipped:</strong> {importResult.skipped_count}</p>
-                                    
-                                    {importResult.errors.length > 0 && (
-                                        <div className="errors">
-                                            <h5>Errors:</h5>
-                                            <ul>
-                                                {importResult.errors.map((error, index) => (
-                                                    <li key={index}>{error}</li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="modal-footer">
-                            <button onClick={closeImportModal} className="btn-secondary">
-                                Close
-                            </button>
-                            <button 
-                                onClick={handleImportAnnotations}
-                                disabled={!selectedUser || !importFile || isImporting}
-                                className="btn-primary"
-                            >
-                                {isImporting ? 'Importing...' : 'Import Annotations'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
