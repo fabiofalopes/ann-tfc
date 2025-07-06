@@ -1,0 +1,132 @@
+.error-message-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    border: 1px solid;
+    margin: 1rem 0;
+    background-color: var(--background-color-secondary);
+}
+
+.error-message-container.error {
+    border-color: var(--error-color);
+    background-color: var(--error-bg);
+}
+
+.error-message-container.warning {
+    border-color: #ffc107;
+    background-color: #fff3cd;
+}
+
+.error-message-container.info {
+    border-color: #17a2b8;
+    background-color: #d1ecf1;
+}
+
+.error-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.error-content {
+    flex: 1;
+}
+
+.error-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.error-message-container.error .error-title {
+    color: var(--error-color);
+}
+
+.error-message-container.warning .error-title {
+    color: #856404;
+}
+
+.error-message-container.info .error-title {
+    color: #0c5460;
+}
+
+.error-text {
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+}
+
+.error-message-container.error .error-text {
+    color: var(--error-color);
+}
+
+.error-message-container.warning .error-text {
+    color: #856404;
+}
+
+.error-message-container.info .error-text {
+    color: #0c5460;
+}
+
+.error-retry-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.error-retry-button:hover {
+    background-color: var(--primary-color-hover);
+}
+
+/* Compact variant */
+.error-message-container.compact {
+    padding: 1rem;
+    margin: 0.5rem 0;
+}
+
+.error-message-container.compact .error-title {
+    font-size: 1rem;
+}
+
+.error-message-container.compact .error-text {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.error-message-container.compact .error-icon {
+    font-size: 1.2rem;
+}
+
+/* Inline variant */
+.error-message-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    border: 1px solid;
+}
+
+.error-message-inline.error {
+    border-color: var(--error-color);
+    background-color: var(--error-bg);
+    color: var(--error-color);
+}
+
+.error-message-inline.warning {
+    border-color: #ffc107;
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.error-message-inline.info {
+    border-color: #17a2b8;
+    background-color: #d1ecf1;
+    color: #0c5460;
+} 

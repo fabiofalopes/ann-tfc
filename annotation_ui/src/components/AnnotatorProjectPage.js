@@ -38,6 +38,14 @@ const AnnotatorProjectPage = () => {
             <header className="project-page-header">
                 <h2>{project.name}</h2>
                 <p>{project.description}</p>
+                <div className="project-actions">
+                    <Link 
+                        to={`/projects/${projectId}/my-annotations`}
+                        className="my-annotations-button"
+                    >
+                        📊 View My Annotations
+                    </Link>
+                </div>
             </header>
             
             <h3>Available Chat Rooms for Annotation</h3>

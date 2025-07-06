@@ -227,13 +227,14 @@
 }
 
 .modal {
-    background: white;
-    border-radius: 8px;
+    background: var(--background-color-secondary);
+    border-radius: var(--border-radius);
     width: 90%;
     max-width: 600px;
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
 }
 
 .modal-header {
@@ -241,12 +242,12 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h3 {
     margin: 0;
-    color: #333;
+    color: var(--text-color-primary);
 }
 
 .close-button {
@@ -254,7 +255,7 @@
     border: none;
     font-size: 24px;
     cursor: pointer;
-    color: #999;
+    color: var(--text-color-secondary);
     padding: 0;
     width: 30px;
     height: 30px;
@@ -264,7 +265,7 @@
 }
 
 .close-button:hover {
-    color: #333;
+    color: var(--text-color-primary);
 }
 
 .modal-body {
@@ -279,7 +280,7 @@
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
-    color: #333;
+    color: var(--text-color-primary);
 }
 
 .form-group select,
@@ -415,21 +416,21 @@
 }
 
 .chat-room-card {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    background: var(--background-color-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: var(--card-shadow);
 }
 
 .chat-room-card h3 {
     margin: 0 0 10px 0;
-    color: #333;
+    color: var(--text-color-primary);
 }
 
 .chat-room-card p {
     margin: 0 0 15px 0;
-    color: #666;
+    color: var(--text-color-secondary);
 }
 
 /* New Chat Rooms Table Styles */

@@ -6,7 +6,7 @@ from datetime import datetime
 from ..database import get_db
 from ..auth import get_current_user
 from ..dependencies import verify_project_access
-from ..models import User, Annotation, ChatMessage, Project, ProjectAssignment
+from ..models import User, Annotation, ChatMessage, Project, ProjectAssignment, ChatRoom
 from ..schemas import Annotation as AnnotationSchema, AnnotationCreate, AnnotationList
 
 # Router for message-specific annotations
@@ -21,30 +21,47 @@ project_annotation_router = APIRouter(
     tags=["annotations"]
 )
 
-@project_annotation_router.get("/my", response_model=List[AnnotationSchema]) # Changed path to /my
+@project_annotation_router.get("/my") # Changed path to /my
 def get_my_annotations(
     project_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
     _: None = Depends(verify_project_access)
 ):
-    """Get all annotations made by the current user in a specific project"""
-    # Get all annotations for this user with annotator information
+    """Get all annotations made by the current user in a specific project with rich context"""
+    # Get annotations with chat room and message information
     annotations = db.query(
         Annotation,
-        User.email.label('annotator_email')
+        User.email.label('annotator_email'),
+        ChatRoom.id.label('chat_room_id'),
+        ChatRoom.name.label('chat_room_name'),
+        ChatMessage.turn_id.label('message_turn_id'),
+        ChatMessage.turn_text.label('message_text')
     ).join(
         User, Annotation.annotator_id == User.id
+    ).join(
+        ChatMessage, Annotation.message_id == ChatMessage.id
+    ).join(
+        ChatRoom, ChatMessage.chat_room_id == ChatRoom.id
     ).filter(
         Annotation.project_id == project_id,
         Annotation.annotator_id == current_user.id
-    ).all()
+    ).order_by(ChatRoom.name, Annotation.created_at).all()
     
-    # Convert to list of dictionaries with annotator email
+    # Convert to list of dictionaries with rich context
     result = []
-    for annotation, annotator_email in annotations:
-        annotation_dict = annotation.__dict__
+    for annotation, annotator_email, chat_room_id, chat_room_name, message_turn_id, message_text in annotations:
+        annotation_dict = annotation.__dict__.copy()
+        # Remove SQLAlchemy internal attributes
+        annotation_dict.pop('_sa_instance_state', None)
+        
+        # Add rich context
         annotation_dict['annotator_email'] = annotator_email
+        annotation_dict['chat_room_id'] = chat_room_id
+        annotation_dict['chat_room_name'] = chat_room_name
+        annotation_dict['message_turn_id'] = message_turn_id
+        annotation_dict['message_text'] = message_text[:100] + "..." if len(message_text) > 100 else message_text
+        
         result.append(annotation_dict)
     
     return result

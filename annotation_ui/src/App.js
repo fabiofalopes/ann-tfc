@@ -10,6 +10,7 @@ import AnnotatorProjectPage from './components/AnnotatorProjectPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AnnotatorChatRoomPage from './components/AnnotatorChatRoomPage';
 import AnnotationAnalysisPage from './components/AnnotationAnalysisPage';
+import MyAnnotationsPage from './components/MyAnnotationsPage';
 import { useAuth } from './contexts/AuthContext';
 import LoginPage from './components/LoginPage'; 
 import AdminProjectPage from './components/AdminProjectPage';
@@ -63,6 +64,14 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 <AnnotatorChatRoomPage />
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/projects/:projectId/my-annotations" 
+                        element={
+                            <ProtectedRoute>
+                                <MyAnnotationsPage />
                             </ProtectedRoute>
                         } 
                     />

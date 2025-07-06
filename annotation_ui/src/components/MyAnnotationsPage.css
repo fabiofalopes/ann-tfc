@@ -1,0 +1,400 @@
+.my-annotations-page {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: var(--background-color-primary);
+    min-height: 100vh;
+}
+
+/* Header Styles */
+.my-annotations-page .page-header {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem 2rem;
+    background-color: var(--background-color-secondary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
+}
+
+.my-annotations-page .header-content {
+    flex: 1;
+}
+
+.my-annotations-page .back-button {
+    background-color: var(--background-color-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-color-primary);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.my-annotations-page .back-button:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.my-annotations-page .header-content h2 {
+    font-size: 2rem;
+    color: var(--text-color-primary);
+    margin: 0 0 0.5rem 0;
+}
+
+.my-annotations-page .header-content p {
+    color: var(--text-color-secondary);
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Statistics Cards */
+.annotations-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background-color: var(--background-color-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--text-color-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background-color: var(--background-color-secondary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.empty-state h3 {
+    color: var(--text-color-primary);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.empty-state p {
+    color: var(--text-color-secondary);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+.action-button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1rem;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.2s;
+}
+
+.action-button:hover {
+    background-color: var(--primary-color-hover);
+}
+
+/* Annotations Content */
+.annotations-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.chat-room-group {
+    background-color: var(--background-color-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+}
+
+.chat-room-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    background-color: var(--background-color-tertiary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chat-room-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.chat-room-title h3 {
+    color: var(--text-color-primary);
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.annotation-count {
+    color: var(--text-color-secondary);
+    font-size: 0.9rem;
+    background-color: var(--background-color-primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.chat-room-actions {
+    display: flex;
+    align-items: center;
+}
+
+.continue-button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.continue-button:hover {
+    background-color: var(--primary-color-dark);
+}
+
+/* Annotations Summary */
+.annotations-summary {
+    padding: 1.5rem 2rem 2rem;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: var(--background-color-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+.stat-label {
+    color: var(--text-color-secondary);
+    font-size: 0.9rem;
+}
+
+.stat-value {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.thread-distribution h4 {
+    color: var(--text-color-primary);
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+}
+
+.thread-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+}
+
+.thread-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: var(--background-color-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    transition: transform 0.2s;
+}
+
+.thread-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.thread-name {
+    color: var(--text-color-primary);
+    font-weight: 500;
+}
+
+.thread-count {
+    color: var(--text-color-secondary);
+    font-size: 0.9rem;
+    background-color: var(--background-color-secondary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+}
+
+/* Recent Activity */
+.recent-activity {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.recent-activity h4 {
+    color: var(--text-color-primary);
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.activity-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem;
+    background-color: var(--background-color-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    transition: transform 0.2s;
+}
+
+.activity-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.activity-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.activity-thread {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.activity-message {
+    color: var(--text-color-secondary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.activity-date {
+    color: var(--text-color-secondary);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    margin-left: 1rem;
+}
+
+/* Loading and Error States */
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-color-secondary);
+    font-size: 1.1rem;
+}
+
+.error-message {
+    background-color: var(--error-bg);
+    color: var(--error-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--error-color);
+    margin: 2rem 0;
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .my-annotations-page {
+        padding: 1rem;
+    }
+    
+    .my-annotations-page .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .annotations-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .chat-room-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .chat-room-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .activity-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .activity-date {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+    
+    .annotations-list {
+        padding: 1rem;
+    }
+    
+    .annotation-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+} 

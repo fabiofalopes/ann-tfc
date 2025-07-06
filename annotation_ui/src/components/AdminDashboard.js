@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { projects as projectsApi, users as usersApi } from '../utils/api';
+import LoadingSpinner from './LoadingSpinner';
+import ErrorMessage from './ErrorMessage';
+import Modal from './Modal';
+import ConfirmationModal from './ConfirmationModal';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -13,6 +17,9 @@ const AdminDashboard = () => {
   const [newUser, setNewUser] = useState({ email: '', password: '', is_admin: false });
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [newProject, setNewProject] = useState({ name: '', description: '' });
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState({ show: false, user: null });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -59,6 +66,7 @@ const AdminDashboard = () => {
     try {
       await usersApi.createUser(newUser);
       setNewUser({ email: '', password: '', is_admin: false });
+      setShowCreateUserModal(false);
       fetchData(); // Refresh all data
     } catch (error) {
       console.error("Failed to create user:", error);
@@ -66,22 +74,38 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteUser = async (userId) => {
+  const handleDeleteUser = async (user) => {
+    setDeleteConfirmation({ show: true, user });
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!deleteConfirmation.user) return;
+    
+    setIsDeleting(true);
     try {
-      await usersApi.deleteUser(userId);
+      await usersApi.deleteUser(deleteConfirmation.user.id);
+      setDeleteConfirmation({ show: false, user: null });
       fetchData(); // Refresh all data
     } catch (error) {
       console.error("Error deleting user:", error);
       setError(error.response?.data?.detail || 'Failed to delete user');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   if (loading) {
-    return <div>Loading dashboard...</div>;
+    return <LoadingSpinner message="Loading dashboard..." size="large" />;
   }
 
   if (error) {
-    return <div className="error-message">Error: {error}</div>;
+    return (
+      <ErrorMessage 
+        message={error} 
+        title="Dashboard Error"
+        onRetry={fetchData}
+      />
+    );
   }
 
   return (
@@ -166,8 +190,57 @@ const AdminDashboard = () => {
         </div>
       ) : (
         <div className="users-view">
-          <div className="form-container user-creation-form">
-            <h2>Create New User</h2>
+          <div className="view-header">
+            <h2>Users ({users.length})</h2>
+            <button 
+              className="primary-button"
+              onClick={() => setShowCreateUserModal(true)}
+            >
+              ＋ Create User
+            </button>
+          </div>
+
+          <div className="users-table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map(user => (
+                  <tr key={user.id}>
+                    <td>{user.id}</td>
+                    <td>{user.email}</td>
+                    <td>
+                      <span className={`role-badge ${user.is_admin ? 'admin' : 'user'}`}>
+                        {user.is_admin ? 'Admin' : 'User'}
+                      </span>
+                    </td>
+                    <td>
+                      <button 
+                        onClick={() => handleDeleteUser(user)} 
+                        className="delete-button"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Create User Modal */}
+          <Modal
+            isOpen={showCreateUserModal}
+            onClose={() => setShowCreateUserModal(false)}
+            title="Create New User"
+            size="medium"
+          >
             <form onSubmit={handleCreateUser}>
               <div className="form-field">
                 <label htmlFor="email">Email</label>
@@ -200,35 +273,30 @@ const AdminDashboard = () => {
                 />
                 <label htmlFor="is_admin">Admin User</label>
               </div>
-              <button type="submit" className="primary-button">Create User</button>
+              <div className="modal-actions">
+                <button 
+                  type="button" 
+                  className="secondary-button"
+                  onClick={() => setShowCreateUserModal(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="primary-button">Create User</button>
+              </div>
             </form>
-          </div>
+          </Modal>
 
-          <div className="existing-users-list">
-            <h2>Existing Users ({users.length})</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map(user => (
-                  <tr key={user.id}>
-                    <td>{user.id}</td>
-                    <td>{user.email}</td>
-                    <td>{user.is_admin ? 'Admin' : 'User'}</td>
-                    <td>
-                      <button onClick={() => handleDeleteUser(user.id)} className="delete-button">Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/* Delete Confirmation Modal */}
+          <ConfirmationModal
+            isOpen={deleteConfirmation.show}
+            onClose={() => setDeleteConfirmation({ show: false, user: null })}
+            onConfirm={confirmDeleteUser}
+            title="Delete User"
+            message={`Are you sure you want to delete the user "${deleteConfirmation.user?.email}"? This action cannot be undone.`}
+            confirmText="Delete"
+            type="danger"
+            isLoading={isDeleting}
+          />
         </div>
       )}
     </div>
