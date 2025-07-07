@@ -8,13 +8,18 @@ Features:
 - Automatic user management
 - Complete data import flow
 - Beautiful progress indicators
+- Custom folder path support via command-line arguments
 
-Usage: python import_excel.py
+Usage: 
+    python import_excel.py                          # Use default paths
+    python import_excel.py --folder ../uploads/Archive  # Use custom folder
+    python import_excel.py --help                  # Show help
 """
 
 import os
 import sys
 import logging
+import argparse
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 
@@ -50,23 +55,36 @@ def print_banner():
     print()
 
 
-def find_excel_files() -> List[str]:
-    """Find Excel files in common locations."""
-    search_paths = [
-        "../uploads/Archive/",
-        "../uploads/",
-        "./excel_files/",
-        "./"
-    ]
+def find_excel_files(custom_folder: Optional[str] = None) -> List[str]:
+    """Find Excel files in specified folder or common locations."""
+    if custom_folder:
+        # Use the custom folder specified by user
+        search_paths = [custom_folder]
+        print(f"🎯 Searching for Excel files in specified folder: {custom_folder}")
+    else:
+        # Use default search paths
+        search_paths = [
+            "../uploads/Archive/",
+            "../uploads/",
+            "./excel_files/",
+            "./"
+        ]
+        print("🔍 Searching for Excel files in default locations...")
     
     excel_files = []
     for path in search_paths:
-        if Path(path).exists():
-            files = list(Path(path).glob("*.xlsx"))
+        path_obj = Path(path)
+        if path_obj.exists():
+            files = list(path_obj.glob("*.xlsx"))
             if files:
                 excel_files.extend([str(f) for f in files])
                 print(f"📁 Found {len(files)} Excel files in {path}")
+                for file in files:
+                    print(f"   - {file.name}")
                 break
+        else:
+            if custom_folder:
+                print(f"❌ Specified folder does not exist: {path}")
     
     return excel_files
 
@@ -220,6 +238,11 @@ def create_new_project(api_client: AnnotationAPIClient, config: Dict[str, Any]) 
         
     except APIError as e:
         print(f"❌ Failed to create project: {e}")
+        print("\n🔍 Debugging information:")
+        print(f"   Project name: {name}")
+        print(f"   Project description: {description}")
+        print(f"   API endpoint: {api_client.base_url}/admin/projects")
+        print("   Please check backend logs for more details.")
         return None
 
 
@@ -255,7 +278,13 @@ def manage_project_selection(api_client: AnnotationAPIClient, config: Dict[str, 
             return project_id
         except APIError as e:
             print(f"❌ Failed to create project: {e}")
-            return None
+            print("\n💡 Possible causes:")
+            print("   • Backend server is not running")
+            print("   • Database connection issues")
+            print("   • Admin authentication problems")
+            print("   • Duplicate project name")
+            print("\nFalling back to project selection...")
+            mode = "select_existing"
     
     # Default: select from existing projects
     try:
@@ -263,9 +292,21 @@ def manage_project_selection(api_client: AnnotationAPIClient, config: Dict[str, 
         projects = api_client.get_projects()
         
         if not projects:
-            print("❌ No projects found. Creating a default project...")
-            project = api_client.create_default_project()
-            return project["id"]
+            print("❌ No projects found in database.")
+            print("🔨 Attempting to create a default project...")
+            try:
+                project = api_client.create_default_project()
+                print(f"✅ Default project created: {project['name']} (ID: {project['id']})")
+                return project["id"]
+            except APIError as e:
+                print(f"❌ Failed to create default project: {e}")
+                print("\n🚨 CRITICAL ERROR: Cannot create projects!")
+                print("   Please ensure:")
+                print("   1. Backend is running (check http://localhost:8000)")
+                print("   2. Database is accessible")
+                print("   3. Admin credentials are correct")
+                print("   4. Admin user has project creation permissions")
+                return None
         
         project_id = display_project_menu(projects, config)
         
@@ -278,6 +319,14 @@ def manage_project_selection(api_client: AnnotationAPIClient, config: Dict[str, 
             
     except APIError as e:
         print(f"❌ Error fetching projects: {e}")
+        print("\n🔍 Debugging information:")
+        print(f"   API URL: {api_client.base_url}")
+        print(f"   Admin email: {api_client.admin_email}")
+        print("   Endpoint: /admin/projects")
+        print("\n💡 Please verify:")
+        print("   • Backend server is running")
+        print("   • Admin credentials are correct")
+        print("   • Network connectivity to API")
         return None
 
 
@@ -404,12 +453,44 @@ def perform_import(api_client: AnnotationAPIClient, excel_files: List[str], proj
         return False
 
 
+def parse_arguments():
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Excel Annotations Import Tool",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python import_excel.py                          # Use default search paths
+  python import_excel.py --folder ../uploads/Archive  # Import from specific folder
+  python import_excel.py --folder /path/to/excel/files  # Use absolute path
+        """
+    )
+    
+    parser.add_argument(
+        "--folder", "-f",
+        type=str,
+        help="Specify a custom folder path containing Excel files to import"
+    )
+    
+    parser.add_argument(
+        "--verbose", "-v",
+        action="store_true",
+        help="Enable verbose logging for debugging"
+    )
+    
+    return parser.parse_args()
+
+
 def main():
     """Main function."""
+    # Parse command-line arguments
+    args = parse_arguments()
+    
     print_banner()
     
     # Set up logging
-    setup_logging()
+    log_level = "DEBUG" if args.verbose else "INFO"
+    setup_logging(log_level)
     
     # Load configuration
     config = load_config()
@@ -420,15 +501,20 @@ def main():
             print("❌ Failed to create configuration. Exiting.")
             return 1
     
-    # Find Excel files
-    excel_files = find_excel_files()
+    # Find Excel files with optional custom folder
+    excel_files = find_excel_files(args.folder)
     if not excel_files:
         print("❌ No Excel files found!")
-        print("   Please place Excel files in one of these locations:")
-        print("   - ../uploads/Archive/")
-        print("   - ../uploads/")
-        print("   - ./excel_files/")
-        print("   - Current directory")
+        if args.folder:
+            print(f"   No .xlsx files found in: {args.folder}")
+            print("   Please check the folder path and ensure it contains Excel files.")
+        else:
+            print("   Please place Excel files in one of these locations:")
+            print("   - ../uploads/Archive/")
+            print("   - ../uploads/")
+            print("   - ./excel_files/")
+            print("   - Current directory")
+            print("   Or use --folder to specify a custom path.")
         return 1
     
     # Test API connection

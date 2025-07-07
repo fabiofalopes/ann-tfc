@@ -34,7 +34,8 @@ conversion_tools/
 
 #### 1. **`import_excel.py`** - Interface Principal
 **Responsabilidade**: Interface de utilizador e orchestração do workflow
-- Detecção automática de ficheiros Excel em directórios padrão
+- Detecção automática de ficheiros Excel em directórios padrão ou especificados via linha de comando
+- Suporte para argumentos de linha de comando (`--folder`, `--verbose`) para personalização da execução
 - Gestão de configuração (criação, validação, actualização)
 - Interface interactiva para selecção de projectos
 - Coordenação dos módulos de processamento
@@ -249,9 +250,14 @@ import:
 
 #### 3. Executar Importação de Dados Reais
 
+É possível executar o script para que procure ficheiros nas pastas padrão ou especificar uma pasta directamente.
+
 ```bash
-# Executar script de importação
+# Executar o script para procurar ficheiros em pastas padrão
 python import_excel.py
+
+# Ou, de forma mais directa, apontar para a pasta com os dados de teste
+python import_excel.py --folder ../uploads/Archive
 ```
 
 **O que acontece automaticamente**:
@@ -445,6 +451,12 @@ pip install -r requirements.txt
 
 # 4. Executar ferramenta
 python import_excel.py
+
+# Para importar de uma pasta específica, use o argumento --folder:
+python import_excel.py --folder ../uploads/Archive
+
+# Para obter logs detalhados (debugging), use o argumento --verbose:
+python import_excel.py --verbose
 ```
 
 ### Workflow Interactivo
@@ -532,14 +544,11 @@ class CustomDataTransformer(DataTransformer):
 ### Testing e Debugging
 
 ```bash
-# Modo debug com logging verbose
-python import_excel.py --debug
+# Activar logging detalhado para debugging
+python import_excel.py --verbose
 
-# Dry-run para testar sem importar
-python import_excel.py --dry-run
-
-# Processar ficheiro específico
-python import_excel.py --file path/to/specific.xlsx
+# Processar ficheiros de uma pasta específica para testing
+python import_excel.py --folder ../uploads/Archive --verbose
 ```
 
 ## 🛡️ Compliance com API Backend

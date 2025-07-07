@@ -500,12 +500,15 @@ class AnnotationAPIClient:
         """
         project_data = {
             "name": name,
-            "description": description,
-            "is_active": True
+            "description": description
         }
         
         try:
+            logger.debug(f"Creating project with data: {project_data}")
             response = self._make_request('POST', '/admin/projects', json=project_data)
+            
+            logger.debug(f"Project creation response status: {response.status_code}")
+            logger.debug(f"Project creation response text: {response.text}")
             
             if response.status_code in [200, 201]:
                 project = response.json()
@@ -514,7 +517,8 @@ class AnnotationAPIClient:
                 logger.info(f"Created project: {project['name']} (ID: {project_id})")
                 return project
             else:
-                raise APIError(f"Failed to create project: {response.text}")
+                error_detail = f"Status {response.status_code}: {response.text}"
+                raise APIError(f"Failed to create project: {error_detail}")
                 
         except APIError:
             raise

@@ -7,7 +7,7 @@ import:
   default_user_password: ChangeMe123!
   email_domain: research.pt
 project:
-  last_used_project_id: 18
+  last_used_project_id: 20
   mode: select_existing
   new_project:
     description: Project created from Excel import tool
