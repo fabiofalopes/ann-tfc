@@ -1,209 +1,429 @@
-# Annotation tool for chat disentanglement
+# Ferramenta de Anotação
 
-Work in progress
+Interface web para anotação de conversas e cálculo de métricas de Inter-Annotator Agreement (IAA).
 
-Versão 0.001 da Ferramenta de anotação, especificamente do layout para o modulo de chat disentanglement.
+**Versão**: 0.001 | **Status**: Desenvolvimento ativo
 
-![image](https://github.com/user-attachments/assets/8d67cbf2-724f-4919-b610-dab906eecf1f)
+![Captura de ecrã da interface de anotação](https://github.com/user-attachments/assets/8d67cbf2-724f-4919-b610-dab906eecf1f)
 
-## Correr App
+## 📋 Índice
 
-## Local
-
-1. Install dependencies:
-   ```
-   npm install
-   ```
-2. Start the development server:
-   ```
-   npm run dev
-   ```
-   This command starts both:
-      - React development server on port 3721 (frontend)
-      - Express server on port 3722 (handles file operations and API endpoints)
-
-   Num projeto Node, é necessário um servidor (como o [Express.js](https://expressjs.com/en/starter/installing.html)) para lidar com operações de ficheiros porque o código do lado do cliente que é executado no navegador não tem acesso direto ao sistema de ficheiros do sistema devido a restrições de segurança, e o servidor atua como intermediário para salvar, recuperar e manipular ficheiros.
-
-3. http://localhost:3721 
-
-## Docker
-
-1. Requisitos: Docker e Docker Compose
-2. Build and run the Docker container:
-   ```
-   docker-compose up --build
-   ```
-   or
-   ```
-   docker compose build
-   docker compose up -d
-   ```
-3. http://localhost:3721
-
-# Notas
-
-Input csv: Obrigatorio seguir o formato colunas :
-- **user_id**: consists of the ID of the user who sent the turn.
-- **turn_id**: represents a unique ID for the sent turn.
-- **turn_text**: consists of a text, containing one or more sentences sent by the user.
-- **reply_to_turn**: also called reply-mark. This column indicates which turn the current turn explicitly replies to.
-- **thread**: a column that should be filled in by the annotator through the identification of the threads.
-
-# Todo's
-
-- [x] Esquema de cores: Tanto em tags como na UI em geral
-   - Esta melhor mas pode ser melhorado!
-
-- [x] O "see more" das mensagens longas tem que ser apenas para mensagens mesmo longas (so alterar o threshold)
-
-- [x] Important: Load the tags já criadas no csv com um comportamento estranho. Deve mostrar logo todas as tags previamente anotadas e guardadas no ficheiro
-
-- [x] Save file / Load file Resume
-
-- [ ] Resume Work (começar exatamente onde estava, mesmo a nivel de scroll no chat)
-
-- [x] Navegação das paginas, agora esta confuso com a landing page assim..
-
-- [x] Thread Tag menu mais optimizado: Cartões editaveis com descrição por exemplo para a tag editada.
-   - [ ] Colocada descrição, talvez possam haver mais campos???
-
-- [x] Adicionar um 'File Picker' com uma lista de 'Arquivos Recentes' ou 'Arquivos Abertos Recentemente' no ecrã de upload do csv.
-   - De momento a pagina 'upload' contem um componente workspace que lê diretamente da pasta 'files' na base do projecto, listanto assim todos os ficheiros que já foram carregados previamentem, visto que de momento, quando carregamos um ficheiro, é criada uma copia nesta pasta.
-
-- [ ] Sugestão de tags. Após já terem sido criadas algumas tags, deve sempre sugerir essas tags para ser apenas 1 click para as colocar no turno.
-
-- [ ] Se coluna reply_to_turn tiver referencia, então mostrar referencia a chat bubble (estilo whatsapp)
-
-- [ ] Adicionar um Minimap (Code map - ao estilo do vscode) no chat, com highlights e cores, para permitir saltar diretamente para seções específicas das anotações no chat.
-
-- [ ] Se clicar numa caixa de uma respetiva tag no thread menu, entao seria fixe aparecerem apenas mensagens tagadas com essa tag.
-
-- [ ] Tentar fazer com que a função que gera random colours para as tags, nao use cores muito carregadas e muito brancas.
-
-- [ ] Home page mais bonita..
-
-- [x] Botão open folder, do componente workspace, da pagina '/upload'
-   - [ ] Não abre em Docker..
-
-## Novos To-dos:
-
-- [ ] Ampliar width/tamanho geral da UI para melhor aproveitamento do espaço
-- [ ] Reduzir tamanho dos cartões na seção de tags
-- [ ] Implementar posicionamento do turn_id e user_id no canto superior esquerdo dos cartões
-- [ ] Implementar highlight de tags selecionadas com blur nas demais
-- [ ] Adicionar sistema de roles (admin/user normal)
-- [ ] Implementar funcionalidade de upload de CSV para admins
-- [ ] Adicionar datas de início e fim para tarefas
-- [ ] Implementar visualização de salas anotadas vs não anotadas
-- [ ] Adicionar referência "how to annotate" para cada sala
-- [ ] Implementar menu lateral esquerdo com lista de salas
-- [ ] Adicionar toggle para o menu lateral
-- [ ] Implementar indicadores de progresso nas salas (verde: concluído, amarelo: em progresso, vermelho: não iniciado)
-
-# Issues para resolver: 
-
-- [ ] Nomes dew ficheiros e pastas:
-   - [ ] 'files' -> 'workspace'
-   - [ ] 'chatRoom.js' e 'chatRoom.css' -> 'disentanglementChatRoom' ??
-   - [ ] 'ThreadMenu' -> 'TheadTagsMenu' ??? 
-   - [ ] '/upload' caminho -> '/manage-files' ou outra coisa ???
-- [ ] 'App.js' gigante, segregar coisas...
-   - Perceber melhor o route!!! (... from 'react-router-dom';)
-- [ ] Drag and drop do csv na pagina /upload nao da em Firefox, mas dá em Chrome..
-
-## Novas Issues para resolver:
-
-- [ ] Implementar sistema completo de gestão de utilizadores com login
-- [ ] Desenvolver backend para autenticação e autorização
-- [ ] Criar sistema de distribuição automática de tarefas
-- [ ] Implementar ferramentas de monitorização do progresso das anotações
-
-# Questões 
-
-- Como identificar os anotadores ao carregar os ficherios?
-   - Pelo nome da coluna Thead_<nome>?
-
-## Novas Questões:
-
-- Como implementar o sistema de indicadores de progresso nas salas?
-- Como estruturar a hierarquia de permissões entre admin e utilizador normal?
-- Como integrar o novo menu lateral com o design atual?
+1. [Configuração e Deployment](#configuração-e-deployment)
+2. [Execução Local](#execução-local)
+3. [Execução com Docker](#execução-com-docker)
+4. [Configuração para Acesso Remoto](#configuração-para-acesso-remoto)
+5. [Testing com Dados Reais](#testing-com-dados-reais)
+6. [Conversion Tools - Importação de Excel](#conversion-tools---importação-de-excel)
+7. [Credenciais de Acesso](#credenciais-de-acesso)
+8. [Funcionalidades](#funcionalidades)
+9. [Troubleshooting](#troubleshooting)
 
 ---
 
-# Tracking de Desenvolvimento
+## ⚙️ Configuração e Deployment
 
-## Início do Projeto
-- **Data de Início**: 7 de outubro de 2024
-- **Período de Desenvolvimento Inicial**: 7 de outubro - 8 de novembro de 2024
-- **Estado Atual**: Esboço funcional
-- **Escopo**: Desenvolvimento de template e funcionalidades base
+### Pré-requisitos
+- **Node.js** (versão 18+)
+- **npm** ou **yarn**
+- **Docker** e **Docker Compose** (para deployment com containers)
 
-## Tarefas Realizadas
-Formato de registro: 
-```
-[Data Início - Data Fim] Nome da Tarefa
-- Descrição breve
-- Esforço estimado (em horas)
-- Observações relevantes
-```
+### Configuração do Environment (.env)
 
-### Semana 1 (7-11 outubro/2024)
-- **[07/10 - 08/10] Setup Inicial do Projeto**
-  - Configuração base do projeto React
-  - Esforço: 5h
-  - Resultado: Estrutura inicial funcional
+**⚠️ IMPORTANTE**: Antes de executar a aplicação, **deve** criar um ficheiro `.env` para configurar a conexão com o backend.
 
-- **[09/10 - 10/10] Interface de Chat Base**
-  - Implementação do layout básico de chat
-  - Esforço: 6h
-  - Obs: Foco em estrutura básica funcional
+#### 1. Criar o ficheiro .env
 
-### Semana 2-3 (14-27 outubro/2024)
-- **[14/10 - 16/10] Sistema de Tags**
-  - Desenvolvimento do menu de gestão de tags
-  - Esforço: 8h (distribuídos em 3 dias)
-  - Obs: Implementação inicial com funcionalidades básicas
-
-- **[21/10 - 23/10] Gestão de Arquivos**
-  - Sistema de upload e processamento de CSVs
-  - Esforço: 9h (distribuídos em 3 dias)
-  - Obs: Inclui testes de diferentes abordagens
-
-### Semana 4-5 (28 outubro - 10 novembro/2024)
-- **[28/10 - 01/11] Avaliação e Testes**
-  - Testes de frameworks e viabilidade técnica de um backend. 
-  - Esforço: 20h
-  - Obs: Período de validação de escolhas técnicas
-
-- **[28/10 - 10/11] Melhorias e Ajustes**
-  - Melhorias gerais na interface e funcionalidades
-  - Esforço: 15h
-  - Obs: Foco em estabilidade e usabilidade
-
-## Métricas de Desenvolvimento
-- **Média de esforço diário**: 2-3 horas
-- **Tempo total investido**: FAZER APROXIMAÇÃO
-
-## Formato para Novas Entradas
-```markdown
-### [Período]
-- **[Data Início - Data Fim] Nome da Tarefa**
-  - Descrição clara e concisa
-  - Esforço: Xh
-  - Obs: Informações relevantes sobre desenvolvimento/implementação
+```bash
+# Na pasta annotation_ui/
+cp .env.example .env
 ```
 
-## Observações Gerais
-1. Projeto em fase de esboço funcional
-2. Desenvolvimento focado em provas de conceito
-3. Tarefas executadas de forma sequencial
-4. Estimativas baseadas no tempo de desenvolvimento
+#### 2. Configurar a URL da API
 
-## Próximas Etapas
-- [ ] Definição de arquitetura definitiva
-- [ ] Início de desenvolvimento avançado
-- [ ] Estabelecimento de padrões de código
-- [ ] Implementação de testes sistemáticos
+Edite o ficheiro `.env` conforme o seu ambiente:
 
-Nota: Este formato tem como objectivo servir como base para futura elaboração do gráfico Gantt.
+**Para desenvolvimento local** (backend na mesma máquina):
+```env
+REACT_APP_API_URL=http://localhost:8000
+```
+
+**Para acesso remoto** (backend noutra máquina):
+```env
+REACT_APP_API_URL=http://192.168.1.100:8000
+```
+> Substitua `192.168.1.100` pelo IP real da máquina onde o backend está a correr.
+
+#### 3. Exemplos de configuração por cenário
+
+| Cenário | Configuração |
+|---------|-------------|
+| **Desenvolvimento local** | `REACT_APP_API_URL=http://localhost:8000` |
+| **Server LAN** | `REACT_APP_API_URL=http://192.168.1.100:8000` |
+| **Server WiFi** | `REACT_APP_API_URL=http://10.0.0.50:8000` |
+| **VPN/Remote** | `REACT_APP_API_URL=http://172.16.0.10:8000` |
+
+---
+
+## 🚀 Execução Local
+
+### 1. Instalar dependências
+```bash
+   npm install
+   ```
+
+### 2. Configurar .env
+```bash
+cp .env.example .env
+# Editar .env conforme necessário (ver secção anterior)
+```
+
+### 3. Iniciar o servidor de desenvolvimento
+```bash
+npm start
+```
+
+A aplicação estará disponível em: **http://localhost:3721**
+
+---
+
+## 🐳 Execução com Docker
+
+### Deployment Local (mesma máquina)
+
+```bash
+# Na raiz do projeto
+docker compose up --build -d
+```
+
+### Deployment Remoto (acesso de outras máquinas)
+
+#### 1. Configurar IP do servidor
+
+Criar ficheiro `.env` na raiz do projeto:
+```bash
+cp .env.example .env
+```
+
+Editar `.env` e definir o IP da máquina:
+```env
+SERVER_IP=192.168.1.100  # Substitua pelo IP real
+```
+
+#### 2. Executar deployment
+```bash
+docker compose up --build -d
+```
+
+#### 3. Verificar o deployment
+```bash
+# Ver status dos containers
+docker compose ps
+
+# Ver logs
+docker compose logs -f frontend
+docker compose logs -f backend
+```
+
+### Acesso à aplicação
+
+- **Local**: http://localhost:3721
+- **Remoto**: http://IP_DO_SERVIDOR:3721 (ex: http://192.168.1.100:3721)
+
+---
+
+## 🌐 Configuração para Acesso Remoto
+
+### Cenário: Servidor numa máquina, utilizadores noutras máquinas
+
+#### 1. Descobrir o IP da máquina servidor
+```bash
+# Linux/Mac
+ip addr show | grep "inet " | grep -v "127.0.0.1"
+
+# Windows
+ipconfig
+
+# Exemplo de output: 192.168.1.100
+```
+
+#### 2. Configurar o deployment
+
+**Opção A: Com ficheiro .env (recomendado)**
+```bash
+# Na raiz do projeto
+echo "SERVER_IP=192.168.1.100" > .env
+docker compose up --build -d
+```
+
+**Opção B: Com variáveis de ambiente inline**
+```bash
+SERVER_IP=192.168.1.100 docker compose up --build -d
+```
+
+#### 3. Verificar conectividade
+
+```bash
+# Testar API do backend
+curl http://192.168.1.100:8000/
+
+# Deve retornar: {"name":"Annotation Backend","version":"1.0.0",...}
+```
+
+#### 4. Acesso pelos utilizadores
+
+Os utilizadores podem agora aceder via:
+- **Frontend**: http://192.168.1.100:3721
+- **API Docs**: http://192.168.1.100:8000/docs
+
+---
+
+## 🧪 Testing com Dados Reais
+
+### Workflow de Testing com Dados Anotados
+
+Para testar a aplicação com dados reais e calcular métricas de IAA:
+
+#### 1. Preparar dados de teste
+
+A aplicação funciona com ficheiros **Excel (.xlsx)** que contêm:
+- **Dados de chat** (mensagens, utilizadores, turnos)
+- **Anotações múltiplas** (diferentes anotadores, threads identificados)
+
+#### 2. Estrutura esperada dos ficheiros Excel
+
+Cada ficheiro Excel deve ter:
+- **Múltiplos sheets**: Um sheet por anotador
+- **Colunas obrigatórias**: `user_id`, `turn_id`, `turn_text`, `reply_to_turn`, `thread`
+- **Dados consistentes**: Mesmas mensagens em todos os sheets
+- **Anotações individuais**: Cada sheet com threads identificados pelo respectivo anotador
+
+**Exemplo de estrutura:**
+```
+arquivo_chat_anotado.xlsx
+├── thread_joao      # Anotações do João
+├── thread_maria     # Anotações da Maria  
+└── thread_pedro     # Anotações do Pedro
+```
+
+#### 3. Localização dos ficheiros de teste
+
+Coloque ficheiros Excel em qualquer destas pastas:
+```
+uploads/Archive/     # Pasta preferencial
+uploads/             # Pasta alternativa
+conversion_tools/excel_files/
+```
+
+---
+
+## 📊 Conversion Tools - Importação de Excel
+
+### Setup das Conversion Tools
+
+#### 1. Instalar dependências
+```bash
+cd conversion_tools
+pip install -r requirements.txt
+```
+
+#### 2. Configurar ligação à API
+```bash
+cp config.yaml.example config.yaml
+```
+
+Editar `config.yaml`:
+```yaml
+api:
+  base_url: "http://localhost:8000"  # Ou IP do servidor
+  admin_email: "admin@example.com"
+  admin_password: "admin"
+
+import:
+  email_domain: "research.pt"
+  default_user_password: "password"  # Password simplificada
+```
+
+#### 3. Executar importação
+```bash
+python import_excel.py
+```
+
+### Workflow de Importação
+
+1. **Detecção automática** de ficheiros Excel
+2. **Preview** dos dados a importar (anotadores, mensagens, anotações)
+3. **Seleção/criação** de projeto
+4. **Importação completa**:
+   - Criação de chat rooms
+   - Criação de utilizadores (emails simplificados: `joao@research.pt`)
+   - Importação de mensagens
+   - Importação de anotações de cada anotador
+5. **Relatório detalhado** dos resultados
+
+### Resultados da Importação
+
+Após importação bem-sucedida:
+- **Utilizadores criados** com emails limpos (ex: `maria@research.pt`)
+- **Passwords simples**: `password`
+- **Chat rooms** com mensagens importadas
+- **Anotações** associadas a cada utilizador
+- **Métricas IAA** calculáveis automaticamente
+
+---
+
+## 🔑 Credenciais de Acesso
+
+### Utilizador Administrador (pré-configurado)
+- **Email**: `admin@example.com`
+- **Password**: `admin`
+
+### Utilizadores Importados (via conversion tools)
+- **Formato email**: `[nome_anotador]@research.pt`
+- **Password**: `password`
+
+**Exemplos após importação:**
+- `joao@research.pt` / `password`
+- `maria@research.pt` / `password`
+- `pedro@research.pt` / `password`
+
+---
+
+## ✨ Funcionalidades
+
+### Para Administradores
+- **Gestão de projetos** e chat rooms
+- **Importação de dados** via CSV/Excel
+- **Visualização de métricas** de anotação
+- **Gestão de utilizadores**
+- **Cálculo de IAA** (Inter-Annotator Agreement)
+
+### Para Anotadores
+- **Interface de anotação** intuitiva e rápida
+- **Sistema de tags** para identificação de threads
+- **Navegação eficiente** entre mensagens
+- **Visualização de progresso**
+- **Resumo das anotações** realizadas
+
+### Funcionalidades Técnicas
+- **Autenticação JWT** com refresh tokens
+- **CORS configurado** para acesso remoto
+- **API RESTful** com documentação automática
+- **Base de dados SQLite** com migrações Alembic
+- **Docker deployment** com configuração flexível
+
+---
+
+## 🔧 Troubleshooting
+
+### Problemas Comuns
+
+#### ❌ "Failed to fetch" / Erro de conexão
+
+**Causa**: Frontend não consegue conectar ao backend
+
+**Solução**:
+1. Verificar se o backend está a correr:
+   ```bash
+   curl http://localhost:8000/
+   ```
+2. Verificar ficheiro `.env` no frontend:
+   ```bash
+   cat annotation_ui/.env
+   # Deve conter: REACT_APP_API_URL=http://localhost:8000
+   ```
+3. Para acesso remoto, usar IP correto:
+   ```env
+   REACT_APP_API_URL=http://192.168.1.100:8000
+   ```
+
+#### ❌ CORS errors no browser
+
+**Causa**: Backend não permite conexões do frontend
+
+**Solução**:
+1. Verificar configuração CORS no deployment:
+   ```bash
+   # Se usar Docker Compose com IP específico
+   SERVER_IP=192.168.1.100 docker compose up --build -d
+   ```
+
+#### ❌ Conversion tools não conectam
+
+**Causa**: Configuração incorreta da API
+
+**Solução**:
+1. Verificar `conversion_tools/config.yaml`:
+   ```yaml
+   api:
+     base_url: "http://IP_CORRETO:8000"
+   ```
+2. Testar conexão:
+   ```bash
+   curl http://IP_CORRETO:8000/docs
+   ```
+
+#### ❌ Login não funciona
+
+**Solução**:
+1. Usar credenciais correctas:
+   - Admin: `admin@example.com` / `admin`
+   - Importados: `[nome]@research.pt` / `password`
+
+### Logs e Debug
+
+```bash
+# Ver logs do Docker Compose
+docker compose logs -f
+
+# Ver apenas logs do frontend
+docker compose logs -f frontend
+
+# Ver apenas logs do backend  
+docker compose logs -f backend
+
+# Verificar containers ativos
+docker compose ps
+```
+
+### Reset completo
+
+```bash
+# Parar tudo
+docker compose down -v
+
+# Remover dados (CUIDADO: apaga base de dados)
+rm -rf data/
+
+# Reconstruir
+docker compose up --build -d
+```
+
+---
+
+## 📈 Estado do Desenvolvimento
+
+### Funcionalidades Implementadas ✅
+- Interface de anotação completa
+- Sistema de tags e threads
+- Autenticação e autorização
+- Importação de dados Excel
+- Cálculo de métricas IAA
+- Deployment com Docker
+- Configuração para acesso remoto
+
+### Em Desenvolvimento 🚧
+- Otimizações de performance
+- Melhorias na UI/UX
+- Funcionalidades de relatórios avançados
+- Sistema de notificações
+
+### Planeado 📅
+- Exportação de resultados
+- Dashboard analytics
+- Integração com ferramentas externas
+- Sistema de backup automático
+
+---
+
+**Última atualização**: Janeiro 2025  
+**Desenvolvido por**: Fábio Lopes | **Orientação**: ISCTE-IUL

@@ -198,6 +198,178 @@ user_id,turn_id,turn_text,reply_to_turn,thread
 - `reply_to_turn`: ID da mensagem à qual esta responde (opcional)
 - `thread`/`thread_id`: Identificador do thread de anotação
 
+## 🧪 Workflow de Testing com Dados Reais (Raw Annotated Data)
+
+### Objectivo: Testar a aplicação com dados anotados reais
+
+Este workflow permite testar todas as funcionalidades da aplicação usando ficheiros Excel que contêm **dados já anotados** por múltiplos anotadores, simulando um cenário real de investigação.
+
+#### 1. Preparar Dados de Teste (Raw Annotated Data)
+
+**Localização dos ficheiros**:
+```bash
+# Colocar ficheiros .xlsx em qualquer destas pastas:
+uploads/Archive/          # Pasta preferencial para dados de teste
+uploads/                  # Pasta alternativa
+conversion_tools/excel_files/  # Para testing directo
+```
+
+**Estrutura esperada dos ficheiros**:
+```
+chat_anotado_exemplo.xlsx
+├── thread_joao      # Anotações completas do João
+├── thread_maria     # Anotações completas da Maria  
+├── annotation_pedro # Anotações completas do Pedro
+└── anotacao_ana     # Anotações completas da Ana
+```
+
+#### 2. Setup das Conversion Tools
+
+```bash
+# Instalar dependências
+cd conversion_tools
+pip install -r requirements.txt
+
+# Configurar API (simplificado para testing)
+cp config.yaml.example config.yaml
+```
+
+**Configuração para testing (`config.yaml`)**:
+```yaml
+api:
+  base_url: "http://localhost:8000"  # Ou IP do servidor
+  admin_email: "admin@example.com"
+  admin_password: "admin"
+
+import:
+  email_domain: "research.pt"
+  default_user_password: "password"  # Password simplificada para testing
+  auto_confirm: false  # Para verificar dados antes de importar
+```
+
+#### 3. Executar Importação de Dados Reais
+
+```bash
+# Executar script de importação
+python import_excel.py
+```
+
+**O que acontece automaticamente**:
+1. **Detecção** de ficheiros Excel nas pastas
+2. **Preview** dos dados (quantos anotadores, mensagens, anotações)
+3. **Seleção** de projeto (criar novo ou usar existente)
+4. **Importação completa**:
+   - Criação de utilizadores com emails limpos: `joao@research.pt`, `maria@research.pt`
+   - Passwords simples: `password`
+   - Importação de mensagens e anotações de cada anotador
+   - Associação ao projeto selecionado
+
+#### 4. Verificar Importação na Aplicação
+
+**Login como administrador**:
+- URL: http://localhost:3721 (ou IP do servidor)
+- Email: `admin@example.com`
+- Password: `admin`
+
+**Verificações**:
+- ✅ Projeto criado/selecionado
+- ✅ Chat rooms importados com nomes descritivos
+- ✅ Utilizadores criados automaticamente
+- ✅ Mensagens importadas correctamente
+- ✅ Anotações associadas a cada utilizador
+
+**Login como anotador** (dados importados):
+- Email: `joao@research.pt` / Password: `password`
+- Email: `maria@research.pt` / Password: `password`
+- Email: `pedro@research.pt` / Password: `password`
+
+#### 5. Testar Funcionalidades com Dados Reais
+
+**Interface de Anotação**:
+- Navegar pelas mensagens importadas
+- Ver anotações existentes (threads identificados)
+- Testar sistema de tags
+- Verificar navegação entre mensagens
+
+**Métricas de IAA (Inter-Annotator Agreement)**:
+- Aceder secção de análise
+- Ver métricas calculadas automaticamente entre anotadores
+- Verificar consistency entre anotações
+- Examinar relatórios de agreement
+
+**Dashboard Administrativo**:
+- Ver estatísticas do projeto
+- Progresso dos anotadores
+- Distribuição de anotações
+- Métricas de qualidade
+
+#### 6. Resultados do Testing
+
+**Dados disponíveis após importação**:
+- **Chat rooms** com conversas reais anotadas
+- **Múltiplos anotadores** com different perspectives
+- **Métricas IAA** calculáveis automaticamente
+- **Interface funcional** com dados realísticos
+
+**Benefícios do testing com dados reais**:
+- Validação completa do workflow
+- Testing de performance com dados realísticos  
+- Verificação de métricas IAA com dados diversos
+- Identificação de edge cases reais
+- Demonstração de funcionalidades completas
+
+### Exemplo de Output da Importação
+
+```
+📊 IMPORT RESULTS SUMMARY
+=========================
+
+📁 Files processed: 2
+✅ Successful imports: 2
+❌ Failed imports: 0
+⏱️  Total time: 32.1 seconds
+
+📋 PROJECT: "Estudo Chat Disentanglement 2025"
+  └── Chat rooms created: 2
+  └── Users created: 6
+  └── Total messages: 150
+  └── Total annotations: 450
+
+📊 DETAILED RESULTS
+===================
+
+✅ chat_estudo_principal.xlsx
+   Chat room ID: 12
+   Chat room: "Estudo Principal - Multi-Annotator Study (4 annotators)"
+   Users created: 4 (joao@research.pt, maria@research.pt, pedro@research.pt, ana@research.pt)
+   Messages: 100
+   Annotations: 320
+   Annotators: joao, maria, pedro, ana
+
+✅ chat_piloto.xlsx
+   Chat room ID: 13
+   Chat room: "Piloto - Multi-Annotator Study (2 annotators)"
+   Users created: 2 (bruno@research.pt, carla@research.pt)
+   Messages: 50
+   Annotations: 130
+   Annotators: bruno, carla
+
+🎯 READY FOR TESTING:
+- Login admin: admin@example.com / admin
+- Login anotadores: [nome]@research.pt / password
+- URL: http://localhost:3721
+- Métricas IAA disponíveis para análise
+```
+
+### Vantagens dos Dados Reais para Testing
+
+1. **Validação Completa**: Testa todo o pipeline com dados realísticos
+2. **Métricas Verdadeiras**: IAA calculations com variabilidade real entre anotadores
+3. **Edge Cases**: Identifica problemas com dados reais (mensagens longas, caracteres especiais, etc.)
+4. **Performance**: Testa performance com quantidades realísticas de dados
+5. **User Experience**: Permite avaliar UX com dados reais em vez de dados dummy
+6. **Demo Ready**: Sistema fica pronto para demonstrações com dados convincentes
+
 ### Padrões de Nomes de Sheets
 
 O sistema detecta automaticamente nomes de anotadores usando padrões regex:

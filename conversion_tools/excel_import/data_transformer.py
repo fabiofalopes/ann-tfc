@@ -79,7 +79,8 @@ class ChatRoomDataTransformer:
         if not clean_name:
             clean_name = f"annotator{hash(annotator_name) % 10000}"
         
-        return f"anota{clean_name}@{self.default_email_domain}"
+        # Generate clean email without prefix
+        return f"{clean_name}@{self.default_email_domain}"
     
     def generate_user_display_name(self, annotator_name: str) -> str:
         """
@@ -172,7 +173,7 @@ class ChatRoomDataTransformer:
         return UserCreate(
             email=self.generate_user_email(annotator_name),
             name=self.generate_user_display_name(annotator_name),
-            password="ChangeMe123!",  # Default password - should be changed
+            password="password",  # Simple default password for testing
             is_admin=False
         )
     
