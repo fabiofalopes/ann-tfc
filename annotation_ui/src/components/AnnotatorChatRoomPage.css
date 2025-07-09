@@ -12,19 +12,51 @@
   color: var(--text-color-primary);
   padding: 0.25rem 1rem; /* Much smaller padding */
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 1.5rem; /* space between back-button, title, and controls */
   align-items: center;
   box-shadow: var(--card-shadow);
   position: sticky;
   top: 0;
   z-index: 100;
   border-bottom: 1px solid var(--border-color);
-  height: 35px; /* Much smaller height */
+  /* Reduced height for more compact header */
+  height: 32px; /* was 35px */
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto; /* push controls to the far right, increasing space from title */
+}
+
+.layout-toggle-btn {
+  /* More prominent toggle button styling */
+  background-color: var(--primary-color); /* make it stand out */
+  border: 1px solid var(--primary-color-dark);
+  color: #ffffff;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.3rem;
+  line-height: 1;
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.layout-toggle-btn:hover {
+  background-color: var(--primary-color-dark);
+  transform: scale(1.1);
+}
+
+.layout-toggle-btn:active {
+  transform: scale(1);
 }
 
 .chat-room-header h2 {
   margin: 0;
-  font-size: 1rem; /* Much smaller title */
+  font-size: 1.2rem; /* increased from 1rem */
   font-weight: 700;
   color: var(--text-color-primary);
   text-shadow: none;
@@ -358,9 +390,9 @@
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar for messages-content */
 .messages-content::-webkit-scrollbar {
-  width: 8px;
+  width: 22px;
 }
 
 .messages-content::-webkit-scrollbar-track {
@@ -371,6 +403,7 @@
 .messages-content::-webkit-scrollbar-thumb {
   background: var(--border-color);
   border-radius: var(--border-radius);
+  border: 4px solid var(--background-color-secondary); /* add padding around thumb */
 }
 
 .messages-content::-webkit-scrollbar-thumb:hover {
@@ -390,6 +423,34 @@
   overflow: visible; /* Crucial: Ensure content can expand freely without being clipped by the sidebar */
 }
 
+/* Constrained Layout Classes */
+.messages-container.constrained {
+  height: calc(100vh - 120px);
+  max-height: calc(100vh - 120px);
+  overflow: hidden;
+}
+
+.messages-content.constrained {
+  height: calc(100vh - 300px);
+  max-height: calc(100vh - 300px);
+  overflow-y: auto;
+  min-height: auto;
+}
+
+.threads-sidebar.constrained {
+  height: calc(100vh - 120px);
+  max-height: calc(100vh - 120px);
+  min-height: calc(100vh - 120px);
+  overflow: hidden;
+}
+
+.threads-overview.constrained {
+  height: calc(100vh - 220px);
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+  min-height: auto;
+}
+
 .threads-sidebar h3 {
   margin-top: 0;
   margin-bottom: 1.5rem;
@@ -403,7 +464,7 @@
 }
 
 .threads-overview {
-  padding: 1rem 0;
+  padding: 1rem 1rem 1rem 0; /* Added right padding for easier scrollbar interaction */
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -411,8 +472,9 @@
   min-height: 200px; /* Keep a reasonable min-height */
 }
 
+/* Thicker scrollbar for threads-overview */
 .threads-overview::-webkit-scrollbar {
-  width: 8px;
+  width: 22px;
 }
 
 .threads-overview::-webkit-scrollbar-track {
@@ -423,6 +485,7 @@
 .threads-overview::-webkit-scrollbar-thumb {
   background: var(--border-color);
   border-radius: var(--border-radius);
+  border: 4px solid var(--background-color-secondary); /* Add spacing around thumb */
 }
 
 .threads-overview::-webkit-scrollbar-thumb:hover {
@@ -492,6 +555,11 @@
     color: var(--text-color-primary);
   }
 
+  .header-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .stats {
     flex-wrap: wrap;
     gap: 0.5rem; /* Reduced spacing */
@@ -505,11 +573,28 @@
     min-height: calc(100vh - 200px); /* Adjusted for smaller header */
   }
 
+  .messages-content.constrained {
+    height: calc(100vh - 220px);
+    max-height: calc(100vh - 220px);
+  }
+
   .threads-sidebar {
     padding: 1.5rem;
     min-height: auto;
     max-height: none;
     overflow: visible;
+  }
+
+  .threads-sidebar.constrained {
+    height: calc(100vh - 180px);
+    max-height: calc(100vh - 180px);
+    min-height: calc(100vh - 180px);
+    overflow: hidden;
+  }
+
+  .threads-overview.constrained {
+    height: calc(100vh - 280px);
+    max-height: calc(100vh - 280px);
   }
 
   .threads-sidebar h3 {
@@ -542,4 +627,60 @@
 .highlight-example.thread-highlight {
   background-color: var(--background-color-tertiary); /* Use tertiary for thread highlight background */
   color: var(--primary-color);
+} 
+
+/* Scroll to Top Button */
+.scroll-to-top-btn {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem; /* Position in bottom-left as requested */
+  width: 3rem;
+  height: 3rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: var(--card-shadow);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.scroll-to-top-btn:hover {
+  background-color: var(--primary-color-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-to-top-btn:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive positioning for scroll-to-top button */
+@media (max-width: 768px) {
+  .scroll-to-top-btn {
+    bottom: 1rem;
+    left: 1rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.2rem;
+  }
 } 

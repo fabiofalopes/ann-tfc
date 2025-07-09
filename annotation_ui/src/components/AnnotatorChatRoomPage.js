@@ -1,18 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { projects as projectsApi, annotations as annotationsApi, auth } from '../utils/api';
 import MessageBubble from './MessageBubble';
 import SmartThreadCard from './SmartThreadCard';
 import './AnnotatorChatRoomPage.css';
 
-const parseApiError = (err) => {
-  if (err.response?.data?.detail) {
-    if (Array.isArray(err.response.data.detail)) {
-      return err.response.data.detail.map(d => d.msg).join(', ');
-    }
-    return err.response.data.detail;
+const parseApiError = (error) => {
+  if (error.response?.data?.detail) {
+    return error.response.data.detail;
   }
-  return err.message || 'An unknown error occurred.';
+  return error.message || 'An unexpected error occurred';
 };
 
 // Thread background colors - simple palette, text colors handled by CSS
@@ -34,6 +31,7 @@ const THREAD_COLORS = [
 const AnnotatorChatRoomPage = () => {
   const { projectId, roomId } = useParams();
   const navigate = useNavigate();
+  const messagesContentRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [annotationsMap, setAnnotationsMap] = useState({});
   const [allThreads, setAllThreads] = useState([]);
@@ -48,6 +46,8 @@ const AnnotatorChatRoomPage = () => {
   const [highlightedUserId, setHighlightedUserId] = useState(null);
   const [highlightedThreadId, setHighlightedThreadId] = useState(null);
   const [showInstructions, setShowInstructions] = useState(true);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const [useConstrainedLayout, setUseConstrainedLayout] = useState(false);
   const [statistics, setStatistics] = useState({
     totalMessages: 0,
     annotatedMessages: 0,
@@ -57,6 +57,31 @@ const AnnotatorChatRoomPage = () => {
     messagesPerThread: {},
     annotatorsPerThread: {}
   });
+
+  // Scroll position tracking
+  useEffect(() => {
+    const messagesContainer = messagesContentRef.current;
+    if (!messagesContainer) return;
+
+    const handleScroll = () => {
+      const scrollTop = messagesContainer.scrollTop;
+      const scrollThreshold = 300; // Show button after scrolling 300px
+      setShowScrollToTop(scrollTop > scrollThreshold);
+    };
+
+    messagesContainer.addEventListener('scroll', handleScroll);
+    return () => messagesContainer.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    if (messagesContentRef.current) {
+      messagesContentRef.current.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   // Assign colors to threads
   const assignThreadColors = useCallback((threads) => {
@@ -261,17 +286,26 @@ const AnnotatorChatRoomPage = () => {
           ← Back to Project
         </button>
         <h2>Chat Disentanglement Annotation</h2>
-        <div className="stats">
-          <span className="stat-item">{statistics.totalMessages} turns</span>
-          <span className="stat-item">{statistics.totalThreads} threads</span>
-          <span className="stat-item progress-stat">
-            {statistics.annotationPercentage}% annotated
-          </span>
+        <div className="header-controls">
+          <button 
+            className="layout-toggle-btn"
+            onClick={() => setUseConstrainedLayout(!useConstrainedLayout)}
+            title={useConstrainedLayout ? "Switch to unlimited scroll" : "Switch to constrained layout"}
+          >
+            {useConstrainedLayout ? "📜" : "📋"}
+          </button>
+          <div className="stats">
+            <span className="stat-item">{statistics.totalMessages} turns</span>
+            <span className="stat-item">{statistics.totalThreads} threads</span>
+            <span className="stat-item progress-stat">
+              {statistics.annotationPercentage}% annotated
+            </span>
+          </div>
         </div>
       </div>
 
       <div className="chat-room-content">
-        <div className="messages-container">
+        <div className={`messages-container ${useConstrainedLayout ? 'constrained' : ''}`}>
           <div className="messages-header">
             <div className="messages-header-top">
               <h3>Turns</h3>
@@ -389,7 +423,7 @@ const AnnotatorChatRoomPage = () => {
             )}
           </div>
           
-          <div className="messages-content">
+          <div className={`messages-content ${useConstrainedLayout ? 'constrained' : ''}`} ref={messagesContentRef}>
             {messages.map(message => {
               const messageAnnotations = annotationsMap[message.id] || [];
               const isUserHighlighted = highlightedUserId === message.user_id;
@@ -423,14 +457,14 @@ const AnnotatorChatRoomPage = () => {
           </div>
         </div>
 
-        <div className="threads-sidebar">
+        <div className={`threads-sidebar ${useConstrainedLayout ? 'constrained' : ''}`}>
           <h3>Chat Threads</h3>
           {allThreads.length === 0 ? (
             <p className="no-threads">
               No threads created yet. Start by adding threads to messages on the left.
             </p>
           ) : (
-            <div className="threads-overview">
+            <div className={`threads-overview ${useConstrainedLayout ? 'constrained' : ''}`}>
               <p className="threads-count">{allThreads.length} threads found:</p>
               <div className="threads-list">
                 {allThreads.map(threadId => {
@@ -456,6 +490,11 @@ const AnnotatorChatRoomPage = () => {
           )}
         </div>
       </div>
+      {showScrollToTop && (
+        <button className="scroll-to-top-btn" onClick={scrollToTop} title="Scroll to top">
+          ↑
+        </button>
+      )}
     </div>
   );
 };
