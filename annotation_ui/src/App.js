@@ -4,8 +4,6 @@ import './App.css';
 import AuthMenu from './components/AuthMenu';
 import AdminDashboard from './components/AdminDashboard';
 import AnnotatorDashboard from './components/AnnotatorDashboard';
-import ProjectPage from './components/ProjectPage';
-import ChatRoomPage from './components/ChatRoomPage';
 import AnnotatorProjectPage from './components/AnnotatorProjectPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AnnotatorChatRoomPage from './components/AnnotatorChatRoomPage';
@@ -14,6 +12,7 @@ import MyAnnotationsPage from './components/MyAnnotationsPage';
 import { useAuth } from './contexts/AuthContext';
 import LoginPage from './components/LoginPage'; 
 import AdminProjectPage from './components/AdminProjectPage';
+import AdminChatRoomView from './components/AdminChatRoomView';
 
 function App() {
     const [theme, setTheme] = useState('dark');
@@ -97,7 +96,7 @@ function App() {
                         path="/admin/projects/:projectId/chat-rooms/:roomId" 
                         element={
                             <ProtectedRoute adminOnly>
-                                <ChatRoomPage />
+                                <AdminChatRoomView />
                             </ProtectedRoute>
                         } 
                     />

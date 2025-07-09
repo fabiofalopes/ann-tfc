@@ -120,6 +120,34 @@
     background-color: #218838;
 }
 
+.action-button.view-button {
+    background-color: #007bff;
+    color: white;
+}
+
+.action-button.analyze-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.action-button.export-button {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.action-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.action-button:disabled:hover {
+    background-color: var(--background-color-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-color-secondary);
+}
+
 .assign-user-form {
     display: flex;
     gap: 1rem;
@@ -523,18 +551,17 @@
 
 /* Enhanced Actions Column */
 .actions-column {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-width: 220px;
-    padding: 0.75rem;
+    text-align: center;
+    padding: 1rem;
+    min-width: 200px;
 }
 
 .action-button-group {
     display: flex;
-    gap: 0.75rem;
-    align-items: center;
+    gap: 0.5rem;
     justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 /* Redesigned Action Buttons */
@@ -612,4 +639,33 @@
         font-size: 0.8rem;
         padding: 0.5rem 0.75rem;
     }
+} 
+
+/* Table Header Styling */
+.chat-rooms-table th {
+    text-align: center;
+    padding: 1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chat-rooms-table th:first-child {
+    text-align: left; /* Keep chat room name left-aligned */
+}
+
+.chat-rooms-table th:nth-child(2) {
+    text-align: center; /* Status column centered */
+}
+
+.chat-rooms-table th:nth-child(3) {
+    text-align: center; /* Annotators column centered */
+}
+
+.chat-rooms-table th:nth-child(4) {
+    text-align: center; /* Agreement column centered */
+}
+
+.chat-rooms-table th:nth-child(5) {
+    text-align: center; /* Actions column centered */
 } 

@@ -197,6 +197,10 @@ const AdminProjectPage = () => {
         }
     };
 
+    const handleViewChatRoom = (chatRoomId) => {
+        navigate(`/admin/projects/${projectId}/chat-rooms/${chatRoomId}`);
+    };
+
     const getStatusBadge = (status) => {
         const badges = {
             'Complete': { class: 'status-complete', text: 'Annotated' },
@@ -336,20 +340,27 @@ const AdminProjectPage = () => {
                                             </td>
                                             <td className="actions-column">
                                                 <div className="action-button-group">
-                                                    <button 
-                                                        onClick={() => navigate(`/admin/projects/${projectId}/analysis/${room.id}`)}
-                                                        className="action-button primary"
-                                                        disabled={!analytics.canAnalyze}
-                                                        title={!analytics.canAnalyze ? 'Analysis unavailable - need at least 2 completed annotators' : 'View detailed analysis'}
+                                                    <button
+                                                        onClick={() => handleViewChatRoom(room.id)}
+                                                        className="action-button view-button"
                                                     >
-                                                        📊 Analysis
+                                                        View Chat
+                                                    </button>
+                                                    <button
+                                                        onClick={() => navigate(`/admin/projects/${project.id}/analysis/${room.id}`)}
+                                                        className="action-button analyze-button"
+                                                        disabled={!chatRoomAnalytics[room.id]?.canAnalyze}
+                                                        title={!chatRoomAnalytics[room.id]?.canAnalyze ? "Not enough data for analysis" : "Analyze annotations"}
+                                                    >
+                                                        Analyze
                                                     </button>
                                                     <button 
-                                                        onClick={() => handleExportChatRoom(room.id, room.name, analytics)}
-                                                        className="action-button secondary"
-                                                        title="Export chat room data as JSON"
+                                                        onClick={() => handleExportChatRoom(room.id, room.name, chatRoomAnalytics[room.id])}
+                                                        className="action-button export-button"
+                                                        disabled={!chatRoomAnalytics[room.id]?.canAnalyze}
+                                                        title={!chatRoomAnalytics[room.id]?.canAnalyze ? "Not enough data to export" : "Export annotations"}
                                                     >
-                                                        📥 Export
+                                                        Export
                                                     </button>
                                                 </div>
                                             </td>

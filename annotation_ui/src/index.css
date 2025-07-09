@@ -10,29 +10,29 @@
   --error-background-color: rgba(239, 68, 68, 0.1);
   --success-color: #22c55e;
   
-  /* Light Theme Palette */
-  --background-color-primary-light: #f9fafb;     /* Main page background */
-  --background-color-secondary-light: #ffffff;     /* Card background */
-  --background-color-tertiary-light: #f3f4f6;      /* Input background */
-  --text-color-primary-light: #111827;            /* Main text, black for contrast */
-  --text-color-secondary-light: #6b7280;          /* Subtitles, labels */
-  --border-color-light: #e5e7eb;
+  /* Light Theme */
+  --theme-light-background-primary: #ffffff;
+  --theme-light-background-secondary: #f9fafb;
+  --theme-light-background-tertiary: #f3f4f6;
+  --theme-light-text-primary: #111827;
+  --theme-light-text-secondary: #374151;
+  --theme-light-border: #e5e7eb;
 
-  /* Dark Theme Palette */
-  --background-color-primary-dark: #111827;
-  --background-color-secondary-dark: #1f2937;
-  --background-color-tertiary-dark: #374151;
-  --text-color-primary-dark: #f9fafb;             /* Main text, off-white */
-  --text-color-secondary-dark: #9ca3af;
-  --border-color-dark: #374151;
+  /* Dark Theme */
+  --theme-dark-background-primary: #111827;
+  --theme-dark-background-secondary: #1f2937;
+  --theme-dark-background-tertiary: #374151;
+  --theme-dark-text-primary: #f9fafb;
+  --theme-dark-text-secondary: #9ca3af;
+  --theme-dark-border: #4b5563;
 
   /* Default to Light Theme */
-  --background-color-primary: var(--background-color-primary-light);
-  --background-color-secondary: var(--background-color-secondary-light);
-  --background-color-tertiary: var(--background-color-tertiary-light);
-  --text-color-primary: var(--text-color-primary-light);
-  --text-color-secondary: var(--text-color-secondary-light);
-  --border-color: var(--border-color-light);
+  --background-color: var(--theme-light-background-primary);
+  --background-color-secondary: var(--theme-light-background-secondary);
+  --background-color-tertiary: var(--theme-light-background-tertiary);
+  --text-color: var(--theme-light-text-primary);
+  --text-color-secondary: var(--theme-light-text-secondary);
+  --border-color: var(--theme-light-border);
 
   /* Global Style Tokens */
   --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
@@ -40,29 +40,29 @@
 }
 
 [data-theme="dark"] {
-  --background-color-primary: var(--background-color-primary-dark);
-  --background-color-secondary: var(--background-color-secondary-dark);
-  --background-color-tertiary: var(--background-color-tertiary-dark);
-  --text-color-primary: var(--text-color-primary-dark);
-  --text-color-secondary: var(--text-color-secondary-dark);
-  --border-color: var(--border-color-dark);
+  --background-color: var(--theme-dark-background-primary);
+  --background-color-secondary: var(--theme-dark-background-secondary);
+  --background-color-tertiary: var(--theme-dark-background-tertiary);
+  --text-color: var(--theme-dark-text-primary);
+  --text-color-secondary: var(--theme-dark-text-secondary);
+  --border-color: var(--theme-dark-border);
 }
 
 /* === GLOBAL BODY STYLES === */
 body {
   margin: 0;
-  background-color: var(--background-color-primary);
-  color: var(--text-color-primary);
+  background-color: var(--background-color);
+  color: var(--text-color);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    color: var(--text-color-primary);
+    color: var(--text-color);
 }
 
 p, span, div, td, th {
-    color: var(--text-color-secondary);
+    color: var(--text-color);
 }
 
 /* === COMMON COMPONENT STYLES === */
@@ -125,8 +125,7 @@ p, span, div, td, th {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
-    /* Solves the readability issue by using the primary text color */
-    color: var(--text-color-primary); 
+    color: var(--text-color); 
 }
 
 .table th {
@@ -202,7 +201,7 @@ button.secondary,
 .button.secondary {
     background-color: transparent;
     border-color: var(--border-color);
-    color: var(--text-color-primary);
+    color: var(--text-color);
 }
 
 button.secondary:hover,
