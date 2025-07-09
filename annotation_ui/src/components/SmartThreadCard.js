@@ -8,7 +8,7 @@ const SmartThreadCard = ({
   isHighlighted,
   onThreadClick,
   onMessageSelect,
-  threadColor = '#6B7280' // Default gray color
+  threadColor = '#6B7280' // Default gray color - simple background color only
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   
@@ -76,12 +76,13 @@ const SmartThreadCard = ({
     >
       <div 
         className="thread-card-header"
-        style={{ backgroundColor: threadColor }}
+        style={{ 
+          backgroundColor: threadColor
+        }}
       >
         <h4 className="thread-title">{threadId}</h4>
         <div className="thread-stats">
-          <span className="message-count">{messageCount} msg</span>
-          <span className="annotator-count">{annotatorsList.length} ann</span>
+          <span className="message-count">{messageCount} turns</span>
         </div>
       </div>
       
@@ -93,7 +94,7 @@ const SmartThreadCard = ({
                 key={message.id}
                 className="preview-message"
                 onClick={(e) => handleMessageClick(message.id, e)}
-                title="Click to scroll to this message"
+                title="Click to scroll to this turn"
               >
                 <div className="preview-header">
                   <span className="preview-turn">Turn {getNumericTurnId(message.turn_id)}</span>

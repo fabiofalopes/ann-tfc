@@ -115,8 +115,9 @@ const MessageBubble = ({
       data-message-id={message.id}
       style={{
         ...threadColor ? { 
-          borderLeft: `4px solid ${threadColor}`,
-          backgroundColor: `${threadColor}08` // Very subtle background tint
+          border: `3px solid ${threadColor}`,
+          backgroundColor: `${threadColor}15`, // More visible background tint
+          boxShadow: `0 2px 8px ${threadColor}40` // Colored shadow for more prominence
         } : {},
       }}>
       
@@ -128,7 +129,7 @@ const MessageBubble = ({
         <span 
           className="user-id"
           onClick={handleUserClick}
-          title={`Click to highlight all messages from ${message.user_id}`}
+          title={`Click to highlight all turns from ${message.user_id}`}
         >
           <span className="user-id-label">User</span>
           <span className="user-id-value">{message.user_id}</span>
@@ -143,7 +144,9 @@ const MessageBubble = ({
         {threadColor && currentUserAnnotation && (
           <span 
             className="thread-indicator"
-            style={{ backgroundColor: threadColor }}
+            style={{ 
+              backgroundColor: threadColor
+            }}
             title={`Thread: ${currentUserAnnotation.thread_id}`}
           >
             {currentUserAnnotation.thread_id}
@@ -209,8 +212,7 @@ const MessageBubble = ({
                       key={thread}
                       className="thread-chip"
                       style={{ 
-                        backgroundColor: threadColors[thread] || '#6B7280',
-                        color: 'white'
+                        backgroundColor: threadColors[thread] || '#6B7280'
                       }}
                       onClick={() => handleThreadSelect(thread)}
                     >

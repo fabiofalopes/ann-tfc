@@ -5,6 +5,7 @@ from fastapi import HTTPException
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from itertools import combinations
+from datetime import datetime
 
 # User CRUD operations
 def get_user(db: Session, user_id: int) -> Optional[models.User]:
@@ -655,4 +656,129 @@ def get_chat_room_iaa_analysis(db: Session, chat_room_id: int) -> Optional[schem
         completed_annotators=completed_annotators,
         pending_annotators=pending_annotators,
         pairwise_accuracies=pairwise_accuracies
-    ) 
+    )
+
+
+# EXPORT FUNCTIONALITY
+
+def export_chat_room_data(db: Session, chat_room_id: int) -> dict:
+    """
+    Export all annotated data from a chat room into a structured format.
+    
+    Returns a dictionary containing:
+    - Chat room metadata
+    - All messages with their annotations from all annotators
+    
+    Args:
+        db: Database session
+        chat_room_id: ID of the chat room to export
+        
+    Returns:
+        Dictionary with the export data structure
+    """
+    # Get chat room
+    chat_room = get_chat_room(db, chat_room_id)
+    if not chat_room:
+        raise HTTPException(status_code=404, detail="Chat room not found")
+    
+    # Get all messages in the chat room (ordered by ID for consistency)
+    messages = db.query(models.ChatMessage).filter(
+        models.ChatMessage.chat_room_id == chat_room_id
+    ).order_by(models.ChatMessage.id).all()
+    
+    # Get all annotations for this chat room with annotator information
+    annotations_query = (
+        db.query(models.Annotation, models.User.email)
+        .join(models.ChatMessage, models.Annotation.message_id == models.ChatMessage.id)
+        .join(models.User, models.Annotation.annotator_id == models.User.id)
+        .filter(models.ChatMessage.chat_room_id == chat_room_id)
+        .order_by(models.ChatMessage.id, models.Annotation.annotator_id)
+        .all()
+    )
+    
+    # Group annotations by message ID
+    annotations_by_message = {}
+    for annotation, annotator_email in annotations_query:
+        message_id = annotation.message_id
+        if message_id not in annotations_by_message:
+            annotations_by_message[message_id] = []
+        
+        annotations_by_message[message_id].append({
+            "id": annotation.id,
+            "thread_id": annotation.thread_id,
+            "annotator_email": annotator_email,
+            "created_at": annotation.created_at.isoformat(),
+            "updated_at": annotation.updated_at.isoformat() if annotation.updated_at else None
+        })
+    
+    # Get project assignment information for completion analysis
+    assigned_users = (
+        db.query(models.User)
+        .join(models.ProjectAssignment, models.User.id == models.ProjectAssignment.user_id)
+        .filter(models.ProjectAssignment.project_id == chat_room.project_id)
+        .all()
+    )
+    
+    # Calculate completion statistics
+    total_messages = len(messages)
+    total_annotators = len(assigned_users)
+    
+    # Count completed annotators (those who annotated all messages)
+    annotator_completion = {}
+    for annotation, annotator_email in annotations_query:
+        annotator_id = annotation.annotator_id
+        if annotator_id not in annotator_completion:
+            annotator_completion[annotator_id] = set()
+        annotator_completion[annotator_id].add(annotation.message_id)
+    
+    completed_annotators = sum(1 for message_set in annotator_completion.values() 
+                              if len(message_set) == total_messages)
+    
+    # Calculate completion percentage
+    completion_percentage = (completed_annotators / total_annotators * 100) if total_annotators > 0 else 0
+    
+    # Determine completion status
+    if completed_annotators == total_annotators and total_annotators > 0:
+        completion_status = "COMPLETE"
+    elif completed_annotators >= 2:
+        completion_status = "PARTIAL"
+    else:
+        completion_status = "INSUFFICIENT"
+    
+    # Count annotated messages
+    annotated_messages = len(annotations_by_message)
+    
+    # Build the export structure with enhanced metadata
+    export_data = {
+        "export_metadata": {
+            "chat_room_id": chat_room.id,
+            "chat_room_name": chat_room.name,
+            "project_id": chat_room.project_id,
+            "export_timestamp": datetime.now().isoformat(),
+            "completion_status": completion_status,
+            "completion_percentage": round(completion_percentage, 1),
+            "total_annotators": total_annotators,
+            "completed_annotators": completed_annotators,
+            "total_messages": total_messages,
+            "annotated_messages": annotated_messages,
+            "annotation_coverage": round((annotated_messages / total_messages * 100), 1) if total_messages > 0 else 0
+        },
+        "data": {
+            "messages": []
+        }
+    }
+    
+    # Add messages with their annotations
+    for message in messages:
+        message_data = {
+            "id": message.id,
+            "turn_id": message.turn_id,
+            "user_id": message.user_id,
+            "turn_text": message.turn_text,
+            "reply_to_turn": message.reply_to_turn,
+            "created_at": message.created_at.isoformat(),
+            "annotations": annotations_by_message.get(message.id, [])
+        }
+        export_data["data"]["messages"].append(message_data)
+    
+    return export_data

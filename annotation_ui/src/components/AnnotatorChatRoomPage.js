@@ -15,20 +15,20 @@ const parseApiError = (err) => {
   return err.message || 'An unknown error occurred.';
 };
 
-// Thread color palette - beautiful, distinguishable colors
+// Thread background colors - simple palette, text colors handled by CSS
 const THREAD_COLORS = [
-  '#90CAF9', // Light Blue
-  '#C5CAE9', // Light Indigo
-  '#FFCCBC', // Light Orange
-  '#FFECB3', // Light Amber
-  '#C8E6C9', // Light Green
-  '#FFE0B2', // Light Orange (softer)
-  '#BBDEFB', // Lighter Blue
-  '#F8BBD0', // Light Pink
-  '#E6EE9C', // Light Lime
-  '#B2EBF2', // Light Cyan
-  '#D7CCC8', // Light Brown
-  '#F5F5F5', // Lighter Gray
+  '#3B82F6', // Blue
+  '#8B5CF6', // Purple  
+  '#EF4444', // Red
+  '#10B981', // Green
+  '#F59E0B', // Orange
+  '#EC4899', // Pink
+  '#06B6D4', // Cyan
+  '#84CC16', // Lime
+  '#92400E', // Brown
+  '#6B7280', // Gray
+  '#7C3AED', // Violet
+  '#DC2626', // Rose
 ];
 
 const AnnotatorChatRoomPage = () => {
@@ -260,9 +260,9 @@ const AnnotatorChatRoomPage = () => {
         <button onClick={() => navigate(`/projects/${projectId}`)} className="back-button">
           ← Back to Project
         </button>
-        <h2>Chat Thread Annotation</h2>
+        <h2>Chat Disentanglement Annotation</h2>
         <div className="stats">
-          <span className="stat-item">{statistics.totalMessages} messages</span>
+          <span className="stat-item">{statistics.totalMessages} turns</span>
           <span className="stat-item">{statistics.totalThreads} threads</span>
           <span className="stat-item progress-stat">
             {statistics.annotationPercentage}% annotated
@@ -274,7 +274,7 @@ const AnnotatorChatRoomPage = () => {
         <div className="messages-container">
           <div className="messages-header">
             <div className="messages-header-top">
-              <h3>Messages</h3>
+              <h3>Turns</h3>
               <button 
                 className="dismiss-instructions-btn"
                 onClick={() => setShowInstructions(!showInstructions)}
@@ -286,21 +286,103 @@ const AnnotatorChatRoomPage = () => {
             
             {showInstructions && (
               <div className="instruction-panel">
-                <p className="instruction-text">
-                  <strong>💡 Quick Guide:</strong> Click "Add Thread" to annotate messages. 
-                  Click <span className="highlight-example user-highlight">User IDs</span> to highlight all messages from that user.
-                  Click thread cards on the right to highlight thread messages. Each thread has a unique color!
-                </p>
-                <div className="progress-details">
-                  <div className="progress-bar">
-                    <div 
-                      className="progress-fill"
-                      style={{ width: `${statistics.annotationPercentage}%` }}
-                    ></div>
+                <div className="manual-content">
+                  <div className="manual-section">
+                    <h4>📋 Chat Disentanglement Task</h4>
+                    <p>
+                      Your task is to read chat interactions <strong>turn by turn</strong> and identify which <strong>thread</strong> each turn belongs to.
+                      This process helps separate entangled conversations in group chats.
+                    </p>
                   </div>
-                  <div className="progress-text">
-                    {statistics.annotatedMessages} of {statistics.totalMessages} messages annotated 
-                    ({statistics.unannotatedMessages} remaining)
+
+                  <div className="manual-section">
+                    <h4>🔤 Key Definitions</h4>
+                    <ul>
+                      <li><strong>Turn:</strong> A set of sentences sent by the same participant (what you see as message bubbles)</li>
+                      <li><strong>Thread:</strong> A group of interconnected turns that share reply relations or the same topic</li>
+                      <li><strong>Chat Room:</strong> The entire conversation with all participants</li>
+                    </ul>
+                  </div>
+
+                  <div className="manual-section">
+                    <h4>🎯 How to Annotate</h4>
+                    <ol>
+                      <li><strong>Click "Add Thread"</strong> on any turn to assign it to a thread</li>
+                      <li><strong>Thread naming:</strong> You can use any labels (0, 1, 2, A, B, "topic1", etc.) - what matters is <strong>grouping turns consistently</strong></li>
+                      <li><strong>Group related turns</strong> - turns about the same topic should have the same thread identifier</li>
+                      <li><strong>Create new threads</strong> when topics change or new discussions emerge</li>
+                      <li><strong>Focus on logical grouping</strong> - the system measures agreement based on which turns you group together, not the specific names you use</li>
+                    </ol>
+                  </div>
+
+                  <div className="manual-section">
+                    <h4>📝 Annotation Guidelines</h4>
+                    <div className="guideline-grid">
+                      <div className="guideline-item">
+                        <strong>1. Check Reply Relationships</strong>
+                        <p>If a turn replies to another, they usually belong to the same thread (unless topic changes)</p>
+                      </div>
+                      <div className="guideline-item">
+                        <strong>2. Track User Sequences</strong>
+                        <p>Click <span className="highlight-example user-highlight">User IDs</span> to see all turns from the same user</p>
+                      </div>
+                      <div className="guideline-item">
+                        <strong>3. Read Turn Content</strong>
+                        <p>Check if the message relates to previous threads by topic</p>
+                      </div>
+                      <div className="guideline-item">
+                        <strong>4. Moderator Messages</strong>
+                        <p>Group administrative/encouragement messages into a single meta-thread</p>
+                      </div>
+                      <div className="guideline-item">
+                        <strong>5. Short Responses</strong>
+                        <p>"Yes", "I agree", "Exactly" → link to the thread they're responding to</p>
+                      </div>
+                      <div className="guideline-item">
+                        <strong>6. Unclear Messages</strong>
+                        <p>If you can't understand due to errors or can't connect to previous turns → create new thread</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="manual-section">
+                    <h4>🎨 Visual Helpers</h4>
+                    <ul>
+                      <li><strong>Thread Colors:</strong> Each thread has a unique color for easy identification</li>
+                      <li><strong>User Highlighting:</strong> Click user IDs to highlight all their turns</li>
+                      <li><strong>Thread Cards:</strong> Click thread cards on the right to highlight thread turns</li>
+                      <li><strong>Progress Tracking:</strong> See your annotation progress below</li>
+                    </ul>
+                  </div>
+
+                  <div className="manual-section">
+                    <h4>🔬 How Agreement is Measured</h4>
+                    <div className="agreement-explanation">
+                      <p>
+                        <strong>Important:</strong> The system uses the <strong>Hungarian algorithm</strong> to calculate inter-annotator agreement. 
+                        This means it measures how well annotators group the same turns together, regardless of what labels they use.
+                      </p>
+                      <div className="example-box">
+                        <strong>Example:</strong><br/>
+                        • Annotator A: turns 1-5 → "Thread 0", turns 6-10 → "Thread 1"<br/>
+                        • Annotator B: turns 1-5 → "Topic A", turns 6-10 → "Topic B"<br/>
+                        • Annotator C: turns 1-5 → "5", turns 6-10 → "7"<br/>
+                        <span className="result">→ <strong>100% agreement!</strong> All grouped the same turns together</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="progress-details">
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-fill"
+                        style={{ width: `${statistics.annotationPercentage}%` }}
+                      ></div>
+                    </div>
+                    <div className="progress-text">
+                      {statistics.annotatedMessages} of {statistics.totalMessages} turns annotated 
+                      ({statistics.unannotatedMessages} remaining)
+                    </div>
                   </div>
                 </div>
               </div>

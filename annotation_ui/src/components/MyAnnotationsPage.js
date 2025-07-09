@@ -11,6 +11,7 @@ const MyAnnotationsPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [groupedAnnotations, setGroupedAnnotations] = useState({});
+    const [expandedCards, setExpandedCards] = useState({});
     const [stats, setStats] = useState({
         totalAnnotations: 0,
         chatRoomsAnnotated: 0,
@@ -39,6 +40,13 @@ const MyAnnotationsPage = () => {
                 
                 setGroupedAnnotations(grouped);
                 
+                // Initialize all cards as expanded by default
+                const initialExpandedState = {};
+                Object.keys(grouped).forEach(chatRoomId => {
+                    initialExpandedState[chatRoomId] = true;
+                });
+                setExpandedCards(initialExpandedState);
+                
                 // Calculate statistics
                 const uniqueThreads = new Set(annotationsData.map(a => a.thread_id)).size;
                 setStats({
@@ -56,6 +64,13 @@ const MyAnnotationsPage = () => {
 
         fetchMyAnnotations();
     }, [projectId]);
+
+    const toggleCardExpansion = (chatRoomId) => {
+        setExpandedCards(prev => ({
+            ...prev,
+            [chatRoomId]: !prev[chatRoomId]
+        }));
+    };
 
     if (loading) return <LoadingSpinner message="Loading your annotations..." />;
     if (error) return (
@@ -103,29 +118,35 @@ const MyAnnotationsPage = () => {
                 </div>
             ) : (
                 <div className="annotations-content">
-                    {Object.values(groupedAnnotations).map(chatRoomGroup => (
-                        <div key={chatRoomGroup.chatRoomId} className="chat-room-group">
-                            <div className="chat-room-header">
-                                <div className="chat-room-title">
-                                    <h3>{chatRoomGroup.chatRoomName}</h3>
-                                    <span className="annotation-count">
-                                        {chatRoomGroup.annotations.length} annotations
-                                    </span>
+                    {Object.values(groupedAnnotations).map(chatRoomGroup => {
+                        const isExpanded = expandedCards[chatRoomGroup.chatRoomId];
+                        return (
+                            <div key={chatRoomGroup.chatRoomId} className={`chat-room-group ${isExpanded ? 'expanded' : 'collapsed'}`}>
+                                <div className="chat-room-header" onClick={() => toggleCardExpansion(chatRoomGroup.chatRoomId)}>
+                                    <div className="chat-room-title">
+                                        <button className="expand-toggle">
+                                            {isExpanded ? '▼' : '▶'}
+                                        </button>
+                                        <h3>{chatRoomGroup.chatRoomName}</h3>
+                                        <span className="annotation-count">
+                                            {chatRoomGroup.annotations.length} annotations
+                                        </span>
+                                    </div>
+                                    <div className="chat-room-actions" onClick={(e) => e.stopPropagation()}>
+                                        <Link 
+                                            to={`/projects/${projectId}/chat-rooms/${chatRoomGroup.chatRoomId}`}
+                                            className="continue-button"
+                                        >
+                                            📝 Continue Annotating
+                                        </Link>
+                                    </div>
                                 </div>
-                                <div className="chat-room-actions">
-                                    <Link 
-                                        to={`/projects/${projectId}/chat-rooms/${chatRoomGroup.chatRoomId}`}
-                                        className="continue-button"
-                                    >
-                                        📝 Continue Annotating
-                                    </Link>
-                                </div>
-                            </div>
-                            
-                            <div className="annotations-summary">
+                                
+                                {isExpanded && (
+                                    <div className="annotations-summary">
                                 <div className="summary-stats">
                                     <div className="stat-item">
-                                        <span className="stat-label">Messages Annotated:</span>
+                                        <span className="stat-label">Turns Annotated:</span>
                                         <span className="stat-value">{chatRoomGroup.annotations.length}</span>
                                     </div>
                                     <div className="stat-item">
@@ -144,46 +165,47 @@ const MyAnnotationsPage = () => {
                                 
                                 <div className="thread-distribution">
                                     <h4>Thread Distribution</h4>
-                                    <div className="thread-list">
+                                    <div className="thread-chart">
                                         {Object.entries(
                                             chatRoomGroup.annotations.reduce((acc, annotation) => {
                                                 acc[annotation.thread_id] = (acc[annotation.thread_id] || 0) + 1;
                                                 return acc;
                                             }, {})
-                                        ).map(([threadId, count]) => (
-                                            <div key={threadId} className="thread-item">
-                                                <span className="thread-name">Thread {threadId}</span>
-                                                <span className="thread-count">{count} messages</span>
-                                            </div>
-                                        ))}
+                                        )
+                                        .sort(([,a], [,b]) => b - a) // Sort by count descending
+                                        .map(([threadId, count]) => {
+                                            const maxCount = Math.max(...Object.values(
+                                                chatRoomGroup.annotations.reduce((acc, annotation) => {
+                                                    acc[annotation.thread_id] = (acc[annotation.thread_id] || 0) + 1;
+                                                    return acc;
+                                                }, {})
+                                            ));
+                                            const percentage = (count / maxCount) * 100;
+                                            
+                                            return (
+                                                <div key={threadId} className="thread-bar-item">
+                                                    <div className="thread-bar-header">
+                                                        <span className="thread-name">{threadId}</span>
+                                                        <span className="thread-count">{count} turns</span>
+                                                    </div>
+                                                    <div className="thread-bar-container">
+                                                        <div 
+                                                            className="thread-bar-fill"
+                                                            style={{ width: `${percentage}%` }}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                                 
-                                <div className="recent-activity">
-                                    <h4>Recent Activity</h4>
-                                    <div className="activity-list">
-                                        {chatRoomGroup.annotations
-                                            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-                                            .slice(0, 3)
-                                            .map(annotation => (
-                                                <div key={annotation.id} className="activity-item">
-                                                    <div className="activity-info">
-                                                        <span className="activity-thread">Thread {annotation.thread_id}</span>
-                                                        <span className="activity-message">
-                                                            {annotation.message_text}
-                                                        </span>
-                                                    </div>
-                                                    <span className="activity-date">
-                                                        {new Date(annotation.created_at).toLocaleDateString()}
-                                                    </span>
-                                                </div>
-                                            ))
-                                        }
+
                                     </div>
-                                </div>
+                                )}
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>

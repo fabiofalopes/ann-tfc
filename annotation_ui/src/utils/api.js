@@ -306,6 +306,63 @@ export const annotations = {
         const response = await api.get(`/admin/chat-rooms/${chatRoomId}/iaa`);
         return response.data;
     },
+    // EXPORT FUNCTIONALITY
+    exportChatRoom: async (chatRoomId) => {
+        try {
+            const response = await api.get(`/admin/chat-rooms/${chatRoomId}/export`, {
+                responseType: 'blob', // Important for file download
+            });
+            
+            // Create a blob URL and trigger download
+            const blob = new Blob([response.data], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            
+            // Extract filename from Content-Disposition header if available
+            const contentDisposition = response.headers['content-disposition'];
+            let filename = `chat_room_${chatRoomId}_export.json`;
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+                if (filenameMatch) {
+                    filename = filenameMatch[1];
+                }
+            }
+            
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            return true;
+        } catch (error) {
+            console.error('Export error:', error);
+            
+            if (!error.response) {
+                throw new Error('Network error or server is not responding. Please check your connection and try again.');
+            }
+            
+            if (error.response.status === 403) {
+                throw new Error('You do not have permission to export this chat room.');
+            }
+            
+            if (error.response.status === 404) {
+                throw new Error('Chat room not found.');
+            }
+            
+            if (error.response.status === 500) {
+                const errorDetail = error.response.data?.detail || error.response.data?.message;
+                throw new Error(`Server error: ${errorDetail || 'An unexpected error occurred'}`);
+            }
+            
+            throw new Error(
+                error.response.data?.message || 
+                error.response.data?.detail || 
+                'Failed to export chat room data. Please try again.'
+            );
+        }
+    },
 };
 
 export default api; 

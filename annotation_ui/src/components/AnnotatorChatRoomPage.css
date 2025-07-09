@@ -3,12 +3,14 @@
   min-height: 100vh;
   background: var(--background-color-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  margin: 0; /* Ensure no margin */
+  padding: 0; /* Ensure no padding */
 }
 
 .chat-room-header {
   background-color: var(--background-color-secondary);
   color: var(--text-color-primary);
-  padding: 1rem 2rem;
+  padding: 0.25rem 1rem; /* Much smaller padding */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -17,31 +19,33 @@
   top: 0;
   z-index: 100;
   border-bottom: 1px solid var(--border-color);
+  height: 35px; /* Much smaller height */
 }
 
 .chat-room-header h2 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1rem; /* Much smaller title */
   font-weight: 700;
-  text-shadow: none; /* Remove hardcoded text shadow */
+  color: var(--text-color-primary);
+  text-shadow: none;
 }
 
-/* UPDATED: Neutral back button */
+/* UPDATED: Much smaller back button */
 .back-button {
   background-color: var(--background-color-tertiary);
   border: 1px solid var(--border-color);
   color: var(--text-color-primary);
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 0.5rem; /* Much smaller padding */
   border-radius: var(--border-radius);
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.75rem; /* Smaller text */
   font-weight: 600;
   transition: all 0.3s ease;
   box-shadow: none;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem; /* Smaller gap */
 }
 
 .back-button:hover {
@@ -58,15 +62,15 @@
 
 .stats {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem; /* Reduced from 1rem for compactness */
   align-items: center;
 }
 
 .stat-item {
   background-color: var(--background-color-tertiary);
-  padding: 0.375rem 0.75rem;
+  padding: 0.15rem 0.4rem; /* Much smaller padding */
   border-radius: var(--border-radius);
-  font-size: 0.8rem;
+  font-size: 0.7rem; /* Smaller text */
   font-weight: 600;
   backdrop-filter: none;
   border: 1px solid var(--border-color);
@@ -84,7 +88,7 @@
   display: grid;
   grid-template-columns: 1fr 450px; /* Increased sidebar width from 350px to 450px */
   gap: 2rem;
-  padding: 2rem;
+  padding: 1.5rem; /* Reduced from 2rem to minimize spacing */
   max-width: 1600px; /* Increased max width to accommodate larger sidebar */
   margin: 0 auto;
 }
@@ -97,6 +101,8 @@
   backdrop-filter: none;
   border: 1px solid var(--border-color);
   overflow: hidden;
+  height: fit-content;
+  min-height: calc(100vh - 120px);
 }
 
 .messages-header {
@@ -164,6 +170,140 @@
   }
 }
 
+/* Enhanced Manual Content */
+.manual-content {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.manual-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.manual-content::-webkit-scrollbar-track {
+  background: var(--background-color-secondary);
+  border-radius: 3px;
+}
+
+.manual-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.manual-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-color-secondary);
+}
+
+.manual-section {
+  margin-bottom: 1.5rem;
+}
+
+.manual-section:last-child {
+  margin-bottom: 0;
+}
+
+.manual-section h4 {
+  margin: 0 0 0.75rem 0;
+  color: var(--primary-color);
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.manual-section p {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color-primary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.manual-section ul, .manual-section ol {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--text-color-primary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.manual-section li {
+  margin-bottom: 0.5rem;
+}
+
+.manual-section li:last-child {
+  margin-bottom: 0;
+}
+
+.guideline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.guideline-item {
+  background-color: var(--background-color-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.guideline-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.guideline-item strong {
+  display: block;
+  color: var(--primary-color);
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.guideline-item p {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--text-color-secondary);
+}
+
+/* Agreement Explanation */
+.agreement-explanation {
+  background-color: var(--background-color-secondary);
+  border: 1px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  margin-top: 0.5rem;
+}
+
+.agreement-explanation p {
+  margin: 0 0 1rem 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-color-primary);
+}
+
+.example-box {
+  background-color: var(--background-color-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.example-box .result {
+  color: var(--primary-color);
+  font-weight: 700;
+  margin-top: 0.5rem;
+  display: block;
+}
+
 .instruction-text {
   margin: 0 0 1rem 0;
   color: var(--text-color-primary);
@@ -213,7 +353,7 @@
 
 .messages-content {
   padding: 1.5rem;
-  max-height: calc(100vh - 300px);
+  min-height: calc(100vh - 300px);
   overflow-y: auto;
   scroll-behavior: smooth;
 }
@@ -342,31 +482,34 @@
   .chat-room-header {
     flex-direction: column;
     align-items: flex-start;
-    padding: 1rem;
+    padding: 0.5rem 1rem; /* More compact on mobile */
+    min-height: 50px; /* Even more compact on mobile */
   }
 
   .chat-room-header h2 {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem; /* Reduced from 0.5rem */
+    font-size: 1.1rem; /* Reduced from 1.2rem for compactness */
+    color: var(--text-color-primary);
   }
 
   .stats {
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.5rem; /* Reduced spacing */
   }
 
   .chat-room-content {
-    padding: 0.5rem;
+    padding: 1rem; /* Reduced from 0.5rem for better use of space */
   }
 
   .messages-content {
-    max-height: calc(100vh - 250px); /* Adjust for smaller header/stats */
+    min-height: calc(100vh - 200px); /* Adjusted for smaller header */
   }
 
   .threads-sidebar {
     padding: 1.5rem;
-    min-height: auto; /* Allow height to adjust on smaller screens */
-    max-height: none; /* Remove any potential max-height on mobile */
-    overflow: visible; /* Ensure content can expand freely on mobile */
+    min-height: auto;
+    max-height: none;
+    overflow: visible;
   }
 
   .threads-sidebar h3 {

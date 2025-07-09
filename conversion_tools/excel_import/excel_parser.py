@@ -24,6 +24,7 @@ class ExcelChatRoomParser:
     
     # Patterns to extract annotator names from sheet names
     ANNOTATOR_PATTERNS = [
+        r"anotação\s+(.+)",       # anotação zuil, anotação bruno (case-insensitive)
         r"thread_(.+)",           # thread_joao
         r"(.+)_annotations",      # joao_annotations
         r"(.+)_thread",          # joao_thread

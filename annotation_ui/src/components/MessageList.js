@@ -38,7 +38,7 @@ const MessageList = () => {
 
   return (
     <div className="message-list">
-      <h2>Messages</h2>
+      <h2>Turns</h2>
       <div className="messages-container">
         {messages.map((message) => (
           <div key={message.id} className="message-card">

@@ -29,7 +29,7 @@ const ThreadMenu = ({
                 <div className="thread-name">{thread.id}</div>
                 <div className="thread-stats">
                     <span className="stat-item">
-                        <span className="stat-label">Messages:</span>
+                        <span className="stat-label">Turns:</span>
                         <span className="stat-value">{thread.message_count}</span>
                     </span>
                     <span className="stat-item">

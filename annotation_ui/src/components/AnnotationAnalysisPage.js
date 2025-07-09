@@ -158,7 +158,7 @@ const AnnotationAnalysisPage = () => {
                         <p>{iaaData.chat_room_name}</p>
                     </div>
                     <div className="stat-card">
-                        <h3>Total Messages</h3>
+                        <h3>Total Turns</h3>
                         <p>{iaaData.message_count}</p>
                     </div>
                     <div className="stat-card">
@@ -193,13 +193,13 @@ const AnnotationAnalysisPage = () => {
                     <h2>No Analysis Available</h2>
                     <p>
                         Inter-annotator agreement analysis requires at least 2 annotators to have 
-                        completed annotating all messages in this chat room.
+                        completed annotating all turns in this chat room.
                     </p>
                     <div className="current-status">
                         <p><strong>Current Status:</strong></p>
                         <p>• {iaaData.completed_annotators.length} annotator(s) completed</p>
                         <p>• {iaaData.pending_annotators.length} annotator(s) pending</p>
-                        <p>• {iaaData.message_count} total messages to annotate</p>
+                        <p>• {iaaData.message_count} total turns to annotate</p>
                     </div>
                 </div>
             )}

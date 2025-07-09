@@ -5,6 +5,7 @@ import pandas as pd
 import io
 import os
 import json
+from datetime import datetime
 
 from .. import crud, models, schemas
 from ..dependencies import get_db
@@ -501,3 +502,57 @@ async def get_iaa_for_chat_room(
     """
     analysis = crud.get_chat_room_iaa_analysis(db=db, chat_room_id=chat_room_id)
     return analysis
+
+
+# EXPORT FUNCTIONALITY
+
+@router.get("/chat-rooms/{chat_room_id}/export")
+async def export_chat_room_data(
+    chat_room_id: int,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(get_current_admin_user)
+):
+    """
+    Export all annotated data from a chat room as a downloadable JSON file.
+    
+    This endpoint generates a structured JSON file containing:
+    - Chat room metadata (ID, name, project ID)
+    - All messages with their complete text and metadata
+    - All annotations from all annotators for each message
+    
+    Args:
+        chat_room_id: ID of the chat room to export
+    
+    Returns:
+        JSON file download with the complete annotated data
+    
+    Raises:
+        HTTPException: 404 if chat room not found
+    """
+    from fastapi.responses import JSONResponse
+    
+    # Get the export data
+    export_data = crud.export_chat_room_data(db=db, chat_room_id=chat_room_id)
+    
+    # Extract metadata for filename generation
+    metadata = export_data["export_metadata"]
+    chat_room_name = metadata["chat_room_name"].replace(" ", "_").replace("-", "_")
+    completion_status = metadata["completion_status"]
+    completion_percentage = metadata["completion_percentage"]
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    # Create filename based on completion status
+    if completion_status == "COMPLETE":
+        filename = f"chatroom_{chat_room_id}_{chat_room_name}_COMPLETE_{timestamp}.json"
+    elif completion_status == "PARTIAL":
+        filename = f"chatroom_{chat_room_id}_{chat_room_name}_PARTIAL_{completion_percentage}pct_{timestamp}.json"
+    else:
+        filename = f"chatroom_{chat_room_id}_{chat_room_name}_INSUFFICIENT_{timestamp}.json"
+    
+    # Return as downloadable JSON file
+    return JSONResponse(
+        content=export_data,
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}"
+        }
+    )

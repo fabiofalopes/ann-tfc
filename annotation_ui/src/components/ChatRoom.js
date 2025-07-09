@@ -62,7 +62,7 @@ const ChatRoom = ({ messages, onAnnotation, tags, isLoading, error, projectId })
     return (
         <div className="chat-room">
             <div className="chat-stats">
-                <span>Total Messages: {messages.length}</span>
+                <span>Total Turns: {messages.length}</span>
                 <span>Threads: {Object.keys(tags).length}</span>
                 {selectedUserId && (
                     <span>Selected User: {selectedUserId}</span>

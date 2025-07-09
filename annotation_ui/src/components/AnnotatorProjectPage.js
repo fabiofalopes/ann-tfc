@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { projects } from '../utils/api';
 import './AnnotatorProjectPage.css';
 
 const AnnotatorProjectPage = () => {
     const { projectId } = useParams();
+    const navigate = useNavigate();
     const [project, setProject] = useState(null);
     const [chatRooms, setChatRooms] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -36,7 +37,12 @@ const AnnotatorProjectPage = () => {
     return (
         <div className="annotator-project-page">
             <header className="project-page-header">
-                <h2>{project.name}</h2>
+                <div className="header-top">
+                    <button onClick={() => navigate('/dashboard')} className="back-button">
+                        ← Back to Dashboard
+                    </button>
+                    <h2>{project.name}</h2>
+                </div>
                 <p>{project.description}</p>
                 <div className="project-actions">
                     <Link 
@@ -49,22 +55,45 @@ const AnnotatorProjectPage = () => {
             </header>
             
             <h3>Available Chat Rooms for Annotation</h3>
-            <div className="chat-room-list">
+            <div className="chat-room-table-container">
                 {chatRooms.length === 0 ? (
-                    <p>No chat rooms available in this project.</p>
+                    <div className="empty-state">
+                        <p>No chat rooms available in this project.</p>
+                    </div>
                 ) : (
-                    chatRooms.map(room => (
-                        <Link 
-                            key={room.id}
-                            to={`/projects/${projectId}/chat-rooms/${room.id}`}
-                            className="chat-room-card-link"
-                        >
-                            <div className="chat-room-card">
-                                <h4>{room.name}</h4>
-                                <p>{room.description || 'No description'}</p>
-                            </div>
-                        </Link>
-                    ))
+                    <table className="chat-room-table">
+                        <thead>
+                            <tr>
+                                <th>Chat Room Name</th>
+                                <th>Description</th>
+                                <th>Created</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {chatRooms.map(room => (
+                                <tr key={room.id} className="chat-room-row">
+                                    <td className="room-name">
+                                        <strong>{room.name}</strong>
+                                    </td>
+                                    <td className="room-description">
+                                        {room.description || 'No description'}
+                                    </td>
+                                    <td className="room-created">
+                                        {new Date(room.created_at).toLocaleDateString()}
+                                    </td>
+                                    <td className="room-action">
+                                        <Link 
+                                            to={`/projects/${projectId}/chat-rooms/${room.id}`}
+                                            className="annotate-button"
+                                        >
+                                            🎯 Start Annotating
+                                        </Link>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 )}
             </div>
         </div>

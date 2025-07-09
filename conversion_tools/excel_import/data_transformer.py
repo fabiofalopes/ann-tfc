@@ -41,7 +41,7 @@ class UserCreate:
     """Schema for creating users."""
     email: str
     name: str
-    password: str = "ChangeMe123!"
+    password: str = "password"
     is_admin: bool = False
 
 
@@ -179,19 +179,17 @@ class ChatRoomDataTransformer:
     
     def create_chat_room_name(self, base_name: str, annotators: List[str]) -> str:
         """
-        Create a descriptive chat room name.
+        Create a simple chat room name using just the base name.
         
         Args:
             base_name: Base name from Excel file
-            annotators: List of annotator names
+            annotators: List of annotator names (not used, kept for compatibility)
             
         Returns:
-            Generated chat room name
+            Clean chat room name (just the base name)
         """
-        if len(annotators) == 1:
-            return f"{base_name} - {annotators[0].title()}'s Annotations"
-        else:
-            return f"{base_name} - Multi-Annotator Study ({len(annotators)} annotators)"
+        # Simply return the base name without any suffixes
+        return base_name
     
     def prepare_chat_room_import_data(self, 
                                       sheets_data: Dict[str, Dict[str, Any]], 

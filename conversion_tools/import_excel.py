@@ -22,6 +22,7 @@ import logging
 import argparse
 from pathlib import Path
 from typing import Dict, Any, Optional, List
+from datetime import datetime
 
 # Add the excel_import package to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -53,6 +54,9 @@ def print_banner():
     print("║  Imports Excel files with chat room annotations into the system  ║")
     print("╚═══════════════════════════════════════════════════════════════════╝")
     print()
+
+
+
 
 
 def find_excel_files(custom_folder: Optional[str] = None) -> List[str]:
@@ -217,9 +221,9 @@ def create_new_project(api_client: AnnotationAPIClient, config: Dict[str, Any]) 
     print("\n🆕 CREATE NEW PROJECT")
     print("=" * 50)
     
-    # Get project details
+    # Use configured default name
     default_name = config.get("project", {}).get("new_project", {}).get("name", "Excel Import Project")
-    default_desc = config.get("project", {}).get("new_project", {}).get("description", "")
+    default_desc = config.get("project", {}).get("new_project", {}).get("description", f"Project created from Excel import - {datetime.now().strftime('%Y-%m-%d')}")
     
     name = input(f"Project name [{default_name}]: ").strip() or default_name
     description = input(f"Project description [{default_desc}]: ").strip() or default_desc
@@ -246,7 +250,7 @@ def create_new_project(api_client: AnnotationAPIClient, config: Dict[str, Any]) 
         return None
 
 
-def manage_project_selection(api_client: AnnotationAPIClient, config: Dict[str, Any]) -> Optional[int]:
+def manage_project_selection(api_client: AnnotationAPIClient, config: Dict[str, Any], excel_files: List[str] = None) -> Optional[int]:
     """Handle project selection/creation based on config and user input."""
     mode = config.get("project", {}).get("mode", "select_existing")
     
@@ -268,7 +272,7 @@ def manage_project_selection(api_client: AnnotationAPIClient, config: Dict[str, 
         # Create new project with config details
         project_config = config.get("project", {}).get("new_project", {})
         name = project_config.get("name", "Excel Import Project")
-        description = project_config.get("description", "")
+        description = project_config.get("description", f"Project created from Excel import - {datetime.now().strftime('%Y-%m-%d')}")
         
         print(f"🆕 Creating new project: {name}")
         try:
@@ -539,7 +543,7 @@ def main():
         return 1
     
     # Handle project selection
-    project_id = manage_project_selection(api_client, config)
+    project_id = manage_project_selection(api_client, config, excel_files)
     if not project_id:
         print("❌ No project selected. Exiting.")
         return 1

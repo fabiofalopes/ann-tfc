@@ -245,7 +245,7 @@ const ProjectPage = () => {
                     <div className="room-meta">
                       <span>Created: {new Date(room.created_at).toLocaleDateString()}</span>
                       <span className="room-message-count">
-                        {room.message_count || 0} messages
+                        {room.message_count || 0} turns
                       </span>
                     </div>
                   </div>

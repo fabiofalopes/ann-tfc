@@ -195,7 +195,7 @@ const ChatRoomPage = () => {
       <div className="chat-room-content">
         <div className="messages-section">
           <div className="chat-room-stats">
-            <span>Total Messages: {messages.length}</span>
+            <span>Total Turns: {messages.length}</span>
             {selectedUserId && (
               <span>Selected User: {selectedUserId}</span>
             )}

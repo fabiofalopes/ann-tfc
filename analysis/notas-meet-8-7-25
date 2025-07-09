@@ -1,0 +1,50 @@
+### **Notas da Reunião e Plano de Ação**
+
+Este documento resume os próximos passos para o desenvolvimento da nossa plataforma de anotação, com base nas notas da última reunião. Os itens estão organizados por prioridade e área da aplicação.
+
+---
+
+### **1. Tarefas Críticas e de Alta Prioridade**
+
+Estas são as tarefas mais urgentes que bloqueiam funcionalidades essenciais ou impactam significativamente a usabilidade.
+
+#### **1.1. Exportação de Dados Anotados**
+
+O objetivo é criar uma funcionalidade para exportar os dados das *chat rooms* que já foram anotadas, de modo a poderem ser usadas para treinar modelos de Machine Learning.
+
+*   **Requisito Principal:** Exportar todas as anotações de uma *chat room* (mensagens, *turns* e *tags* associadas).
+*   **Formato Sugerido:** JSON. A estrutura deve ser bem definida para facilitar o *parsing* por *scripts* de treino.
+*   **Implementação:**
+    *   Adicionar um botão de "Exportar para JSON" na vista de administrador ou na vista de cada projeto/sala.
+    *   A lógica de exportação deve ser implementada no *backend* (API), que irá consultar a base de dados, construir o objeto JSON e devolver o ficheiro.
+
+#### **1.2. Correção Urgente na Interface de Anotação (Bug Crítico)**
+
+Existe um problema grave que impede a anotação eficiente de conversas longas.
+
+*   **Componente:** Menu de *tags* de mensagens (`Thread Tag Menu`).
+*   **Problema:** Ao passar o rato (*hover*) sobre uma mensagem para ver as *tags*, o menu que aparece **não é *scrollable***. Se uma mensagem tiver muitas *tags*, é impossível ver ou aceder a todas.
+*   **Ação:** Implementar uma barra de *scroll* (*scrollable*) no menu *hover* das *tags* para garantir que todas as opções sejam sempre visíveis e acessíveis.
+
+---
+
+### **2. Melhorias na Interface e Experiência de Utilizador (UI/UX)**
+
+#### **2.1. Vista do Anotador (`Annotator's View`)**
+
+*   **Navegação:** Na `ProjectView` (quando dentro de um projeto), adicionar um **botão para retroceder** para a lista de projetos.
+*   **Consistência Visual:** Tornar o *dashboard* do anotador mais apelativo e visualmente **semelhante ao *dashboard* do administrador**.
+*   **Terminologia:** Mudar a palavra "Messages" para "**Turns**" em toda a aplicação para manter a consistência com a terminologia do domínio.
+
+#### **2.2. Vista Pessoal de Anotações (`My Annotation View`)**
+
+*   **Reorganização:** Alterar a ordem dos elementos. A secção `Chat Rooms` deve aparecer **antes** da secção `Total Annotations`.
+*   **Métricas de Anotação:** Clarificar o cálculo das métricas:
+    *   **Total Annotations:** Deve ser calculado como a razão entre o **número de *turns* que o utilizador já anotou** e o **total de *turns* disponíveis para anotação** para esse utilizador.
+    *   **Messages Annotated:** Aplicar a mesma lógica do ponto anterior.
+*   **Interface:** Os cartões que representam cada sala de chat devem ser **colapsáveis (*collapsible*)**, para permitir que o utilizador esconda/mostre os detalhes de cada uma.
+
+#### **2.3. Vista do Administrador (`Admin's View`)**
+
+*   **Matriz de Concordância:** Adicionar view com a matriz que mostra o ***average agreement* (concordância média)** entre todos os anotadores que já completaram a anotação de um determinado item, o valor do average total entre os anaotadores que já terminaram a tarefa. Devemos realçar quais são os anotadores que contam para esta media. (Apenas os que já terminaram). 
+*   Aqui devemos validar se estamos a calcular a media total, se e so se ja tivermos pelo menos 2 anotadores com tudo anotado. Deste modo apenas queremos validar se o que temos implementado bate certo com o que estamos a dizer.

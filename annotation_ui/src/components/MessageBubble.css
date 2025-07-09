@@ -100,14 +100,19 @@
 .thread-indicator {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.5rem;
+  padding: 0.4rem 0.8rem; /* Increased padding for larger size */
   border-radius: var(--border-radius);
-  color: white;
-  font-size: 0.65rem;
-  font-weight: 600;
-  text-shadow: none;
-  box-shadow: none;
+  font-size: 0.75rem; /* Increased font size */
+  font-weight: 700; /* Bolder font weight */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Text shadow for better readability */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add subtle shadow for depth */
   margin-left: auto;
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border for better definition */
+  text-transform: uppercase; /* Make text more prominent */
+  letter-spacing: 0.025em; /* Slight letter spacing for readability */
+  min-width: 2rem; /* Minimum width for consistency */
+  text-align: center;
+  color: white; /* Always white text for readability on colored backgrounds */
 }
 
 /* Enhanced User ID with click functionality */
@@ -294,14 +299,14 @@
   padding: 0.3rem 0.6rem;
   border-radius: var(--border-radius);
   font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--text-color-primary);
-  background-color: var(--background-color-tertiary);
-  border: 1px solid var(--border-color);
+  font-weight: 600;
+  color: white; /* Always white text for readability on colored backgrounds */
+  border: 1px solid rgba(255, 255, 255, 0.3);
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Text shadow for better readability */
 }
 
 .thread-chip::before {

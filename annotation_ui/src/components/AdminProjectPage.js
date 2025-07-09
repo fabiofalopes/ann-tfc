@@ -130,7 +130,7 @@ const AdminProjectPage = () => {
             const response = await projectsApi.importCsv(projectId, selectedFile, (progress) => {
                 console.log(`Upload Progress: ${progress}%`);
             });
-            alert(`Import successful: ${response.import_details.imported_count} messages imported.`);
+            alert(`Import successful: ${response.import_details.imported_count} turns imported.`);
             setSelectedFile(null);
             document.getElementById('csv-file-input').value = ''; // Clear file input
             fetchData(); // Refresh chat room list
@@ -152,6 +152,48 @@ const AdminProjectPage = () => {
                 console.error("Failed to delete project:", err);
                 setError(err.response?.data?.detail || 'Failed to delete project.');
             }
+        }
+    };
+
+    const handleExportChatRoom = async (chatRoomId, chatRoomName, analytics) => {
+        try {
+            setError(null);
+            
+            // Show confirmation for partial exports
+            if (analytics.status === 'Partial') {
+                const confirmed = window.confirm(
+                    `This chat room is only partially annotated (${analytics.completedAnnotators}/${analytics.totalAnnotators} annotators completed).\n\n` +
+                    `The exported data will be marked as PARTIAL and may not be suitable for final analysis.\n\n` +
+                    `Do you want to proceed with the export?`
+                );
+                if (!confirmed) {
+                    return;
+                }
+            } else if (analytics.status === 'NotEnoughData') {
+                const confirmed = window.confirm(
+                    `This chat room has insufficient annotation data (less than 2 completed annotators).\n\n` +
+                    `The exported data will be marked as INSUFFICIENT and is not suitable for analysis.\n\n` +
+                    `Do you want to proceed with the export?`
+                );
+                if (!confirmed) {
+                    return;
+                }
+            }
+            
+            await annotationsApi.exportChatRoom(chatRoomId);
+            
+            // Show success message based on completion status
+            if (analytics.status === 'Complete') {
+                alert('✅ Complete annotation data exported successfully!');
+            } else if (analytics.status === 'Partial') {
+                alert('⚠️ Partial annotation data exported. Check filename for completion percentage.');
+            } else {
+                alert('⚠️ Insufficient annotation data exported. This data is not suitable for analysis.');
+            }
+            
+        } catch (err) {
+            console.error("Failed to export chat room:", err);
+            setError(err.message || 'Failed to export chat room data.');
         }
     };
 
@@ -292,15 +334,24 @@ const AdminProjectPage = () => {
                                             <td>
                                                 {analytics.averageAgreement ? `${analytics.averageAgreement}%` : 'N/A'}
                                             </td>
-                                            <td>
-                                                <button 
-                                                    onClick={() => navigate(`/admin/projects/${projectId}/analysis/${room.id}`)}
-                                                    className="action-button"
-                                                    disabled={!analytics.canAnalyze}
-                                                    title={!analytics.canAnalyze ? 'Analysis unavailable - need at least 2 completed annotators' : 'View detailed analysis'}
-                                                >
-                                                    📊 View Analysis
-                                                </button>
+                                            <td className="actions-column">
+                                                <div className="action-button-group">
+                                                    <button 
+                                                        onClick={() => navigate(`/admin/projects/${projectId}/analysis/${room.id}`)}
+                                                        className="action-button primary"
+                                                        disabled={!analytics.canAnalyze}
+                                                        title={!analytics.canAnalyze ? 'Analysis unavailable - need at least 2 completed annotators' : 'View detailed analysis'}
+                                                    >
+                                                        📊 Analysis
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleExportChatRoom(room.id, room.name, analytics)}
+                                                        className="action-button secondary"
+                                                        title="Export chat room data as JSON"
+                                                    >
+                                                        📥 Export
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     );
@@ -315,7 +366,7 @@ const AdminProjectPage = () => {
                 <h2>Danger Zone</h2>
                 <div className="danger-zone-content">
                     <p>
-                        Deleting a project is a permanent action. It will remove the project, all its chat rooms, messages, and annotations.
+                        Deleting a project is a permanent action. It will remove the project, all its chat rooms, turns, and annotations.
                     </p>
                     <button onClick={handleDeleteProject} className="action-button delete">
                         Delete This Project
