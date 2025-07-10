@@ -1,96 +1,105 @@
 \chapter{Especificação e Modelação}
+\label{cha:especificacao_modelacao}
+
+Neste capítulo, são detalhadas as especificações técnicas da solução desenvolvida. A análise de requisitos é apresentada em primeiro lugar, seguida pela modelação da arquitetura, da base de dados e da API, que em conjunto definem a estrutura e o comportamento do sistema.
 
 \section{Análise de Requisitos}
 
-\subsection{Requisitos Funcionais}
+A tabela seguinte resume os requisitos funcionais (RF) e não-funcionais (RNF) identificados para o projeto, juntamente com o estado final da sua implementação.
 
-\subsubsection{Requisitos Gerais de Anotação}
+% Tabela de Requisitos atualizada
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|p{0.1\textwidth}|p{0.5\textwidth}|p{0.15\textwidth}|p{0.15\textwidth}|}
+        \hline
+        \textbf{ID} & \textbf{Descrição} & \textbf{Estado} & \textbf{Notas} \\
+        \hline
+        \multicolumn{4}{|c|}{\textbf{Requisitos Funcionais}} \\
+        \hline
+        RF1 & Suporte à importação de dados (CSV, JSON) & Cumprido & Implementada importação de mensagens via CSV e anotações via JSON. \\
+        \hline
+        RF2 & Organização de dados por projetos & Cumprido & Estrutura central da aplicação. \\
+        \hline
+        RF3 & Exportação dos dados anotados (JSON) & Cumprido & Funcionalidade de exportação por sala de chat implementada. \\
+        \hline
+        RF4 & Interface de utilizador clara e funcional & Cumprido & Interface React desenvolvida com foco na usabilidade para anotação. \\
+        \hline
+        RF5 & Suporte a múltiplos anotadores por projeto & Cumprido & Sistema de atribuição de utilizadores a projetos. \\
+        \hline
+        RF6 & Gestão de atribuição de tarefas & Cumprido & Administradores podem atribuir/remover utilizadores de projetos. \\
+        \hline
+        RF7 & Interface especializada para chat disentanglement & Cumprido & Ecrã de anotação dedicado com gestão de threads. \\
+        \hline
+        RF8 & Sistema de tagging para classificação em threads & Cumprido & Funcionalidade nuclear da anotação. \\
+        \hline
+        RF9 & Visualização sequencial das mensagens & Cumprido & A sala de chat apresenta as mensagens por ordem. \\
+        \hline
+        RF10 & Armazenamento para cálculo de métricas & Cumprido & O modelo de dados permite o cálculo de IAA. \\
+        \hline
+        RF11 & Autenticação de utilizadores & Cumprido & Implementado com JWT (access e refresh tokens). \\
+        \hline
+        RF12 & Definição de roles (admin/anotador) & Cumprido & O modelo `User` contém o campo `is\_admin`. \\
+        \hline
+        RF13 & Controlo de acesso baseado em permissões & Cumprido & Endpoints da API protegidos com base no role. \\
+        \hline
+        \multicolumn{4}{|c|}{\textbf{Requisitos Não Funcionais}} \\
+        \hline
+        RNF1 & Tempo de resposta adequado & Cumprido & A API responde rapidamente a pedidos interactivos. \\
+        \hline
+        RNF2 & Processamento eficiente para múltiplos utilizadores & Parcialmente & A arquitetura suporta-o, mas não foram feitos testes de carga formais. \\
+        \hline
+        RNF3 & Interface responsiva & Parcialmente & O design é funcional mas não foi totalmente otimizado para todos os tamanhos de ecrã. \\
+        \hline
+        RNF4 & Feedback visual claro & Cumprido & A interface React fornece feedback sobre o estado (loading, error, success). \\
+        \hline
+        RNF5 & Interface simples e intuitiva & Cumprido & O design focou-se na simplicidade para a tarefa de anotação. \\
+        \hline
+        RNF6 & Backup automático de anotações & Não Cumprido & Não implementado. Requer uma solução de infraestrutura (e.g., cron jobs na base de dados). \\
+        \hline
+        RNF7 & Logging de atividades críticas & Parcialmente & O backend utiliza logging básico, mas não um sistema de logging estruturado e exaustivo. \\
+        \hline
+    \end{tabular}
+    \caption{Tabela de Requisitos e Estado de Implementação.}
+    \label{tab:requisitos}
+\end{table}
+
+\section{Modelação da Solução}
+
+A modelação da solução foi um processo iterativo que resultou numa arquitetura de três camadas, um modelo de dados relacional robusto e uma API RESTful bem definida.
+
+\subsection{Arquitetura da Solução}
+
+A plataforma segue uma arquitetura cliente-servidor moderna e desacoplada, composta por dois componentes principais:
 
 \begin{itemize}
-    \item \textbf{RF1:} Suporte à importação de dados em formato CSV (com extensibilidade futura planeada para outros formatos, e.g. JSON).
-    \item \textbf{RF2:} Sistema de organização de dados por projetos.
-    \item \textbf{RF3:} Exportação dos dados anotados num formato estruturado (e.g., JSON, CSV).
-    \item \textbf{RF4:} Interface de utilizador clara e funcional, otimizada para tarefas de anotação.
-    \item \textbf{RF5:} Suporte a múltiplos anotadores por projeto.
-    \item \textbf{RF6:} Gestão de atribuição de tarefas a anotadores.
+    \item \textbf{Frontend (Cliente):} Uma Single-Page Application (SPA) desenvolvida com a biblioteca \textbf{React}. É responsável exclusivamente pela apresentação da interface do utilizador e pela gestão do estado local da UI. Toda a lógica de negócio e manipulação de dados é delegada ao backend através de chamadas à API.
+    \item \textbf{Backend (Servidor):} Uma API RESTful desenvolvida com a framework \textbf{FastAPI} (Python). É responsável por toda a lógica de negócio, incluindo a autenticação de utilizadores, controlo de permissões, operações na base de dados (CRUD) e cálculos de métricas como o IAA.
 \end{itemize}
-
-\subsubsection{Requisitos Específicos - Módulo Disentanglement}
-
-\begin{itemize}
-    \item \textbf{RF7:} Interface especializada para \textit{chat disentanglement}.
-    \item \textbf{RF8:} Sistema de \textit{tagging} para classificação de mensagens em \textit{threads}.
-    \item \textbf{RF9:} Visualização sequencial dos turnos (mensagens).
-    \item \textbf{RF10:} Armazenamento das anotações de forma a possibilitar o cálculo futuro de métricas de qualidade e concordância.
-\end{itemize}
-
-\subsubsection{Gestão de Utilizadores}
-
-\begin{itemize}
-    \item \textbf{RF11:} Autenticação de utilizadores.
-    \item \textbf{RF12:} Definição de roles (administrador/anotador).
-    \item \textbf{RF13:} Controlo de acesso baseado em permissões.
-\end{itemize}
-
-\subsection{Requisitos Não Funcionais}
-
-\subsubsection{Performance}
-
-\begin{itemize}
-    \item \textbf{RNF1:} Tempo de resposta adequado para operações interativas
-    \item \textbf{RNF2:} Processamento eficiente para múltiplos utilizadores simultâneos
-\end{itemize}
-
-\subsubsection{Usabilidade}
-
-\begin{itemize}
-    \item \textbf{RNF3:} Interface responsiva e adaptável
-    \item \textbf{RNF4:} Ferramenta interativa dando feedback visual claro das ações ao utilizador
-    \item \textbf{RNF5:} Interface simples, minimalista e intuitiva
-\end{itemize}
-
-\subsubsection{Segurança}
-
-\begin{itemize}
-    \item \textbf{RNF6:} Backup automático de anotações
-    \item \textbf{RNF7:} Logging de atividades críticas
-\end{itemize}
-
-\section{Modelação}
+Esta separação estrita de responsabilidades (`separation of concerns`) garante uma maior manutenibilidade, escalabilidade e a possibilidade de desenvolver e testar os dois componentes de forma independente.
 
 \subsection{Modelo de Dados}
 
-O modelo de dados da plataforma é organizado em três componentes principais: gestão de utilizadores, gestão de dados e anotações. A estrutura completa, pode ser visualizada na Figura~\ref{fig:modelo-er}, que apresenta em detalhe as entidades e seus relacionamentos.
+O coração do backend é o seu modelo de dados relacional, implementado com \textbf{SQLAlchemy} como ORM (Object-Relational Mapper), que mapeia as classes Python para tabelas numa base de dados SQL. A Figura~\ref{fig:modelo-er} apresenta o Diagrama de Entidade-Relação (ERD) final do sistema.
 
-\subsubsection{Componentes Principais}
-
-\paragraph{Gestão de Utilizadores}
-O sistema mantém informações básicas dos utilizadores, incluindo credenciais e \textit{roles} (administrador/anotador). Cada utilizador pode ter acesso a diferentes projetos de anotação, dependendo das permissões atribuídas.
-
-\paragraph{Gestão de Dados e Anotações}
-Atualmente, a plataforma está focada no módulo de \textit{chat disentanglement} e suporta a importação de dados neste contexto a partir de ficheiros CSV. Os dados importados (mensagens/turnos, com atributos como \textit{timestamp}, autor, conteúdo) e as anotações realizadas (associação de turnos a \textit{threads}) são armazenados de forma estruturada numa base de dados relacional. A arquitetura prevê a possibilidade de evolução futura para suportar outros formatos de dados e tipos de tarefas de anotação.
-
-\subsubsection{Fluxo de Dados}
-
-O fluxo de dados na plataforma segue o seguinte padrão:
-\begin{enumerate}
-    \item Importação de dados (ficheiros CSV) por utilizador administrador.
-    \item Distribuição automática de tarefas aos anotadores.
-    \item Processo de anotação no módulo de \textit{disentanglement}.
-    \item Armazenamento contínuo das anotações via backend na base de dados.
-    \item Cálculo de métricas e análise das anotações.
-\end{enumerate}
-
-\subsubsection{Armazenamento}
-
-A solução implementada utiliza uma base de dados relacional, especificamente SQLite, gerida através do ORM (Object-Relational Mapper) SQLAlchemy no backend. Esta base de dados é responsável por persistir:
+As entidades centrais do modelo são:
 \begin{itemize}
-    \item Informação sobre utilizadores e seus papéis/permissões.
-    \item Estrutura dos projetos de anotação.
-    \item Os dados importados (e.g., mensagens de \textit{chat}).
-    \item As anotações realizadas pelos utilizadores (e.g., mapeamento mensagem-thread).
+    \item \textbf{User, Project, e ProjectAssignment:} que em conjunto gerem os utilizadores e as suas permissões de acesso aos diferentes projetos.
+    \item \textbf{ChatRoom e ChatMessage:} que estruturam os dados a serem anotados.
+    \item \textbf{Annotation:} a tabela principal que armazena a ligação entre uma mensagem, um anotador e um \textit{thread}, sendo a base para toda a análise posterior.
 \end{itemize}
-Esta abordagem garante a integridade e a gestão estruturada dos dados essenciais para o módulo de \textit{chat disentanglement}. Embora focada nas necessidades atuais, a utilização de um ORM como o SQLAlchemy facilita potenciais migrações ou extensões futuras do modelo de dados.
+A utilização do SQLAlchemy e do Alembic para migrações de base de dados permitiu uma evolução estruturada do esquema ao longo do desenvolvimento do projeto.
+
+\subsection{API RESTful}
+
+A comunicação entre o frontend e o backend é realizada através de uma API RESTful. A API expõe um conjunto de endpoints para todas as operações necessárias, desde a autenticação até ao cálculo de métricas. A API está documentada seguindo o standard OpenAPI, o que facilita a sua exploração e integração.
+
+Os endpoints estão logicamente agrupados por responsabilidade:
+\begin{itemize}
+    \item \textbf{Auth:} Gestão de autenticação e tokens.
+    \item \textbf{Projects:} Operações de utilizador normal sobre projetos e salas de chat.
+    \item \textbf{Annotations:} Criação e gestão de anotações.
+    \item \textbf{Admin:} Operações de administração, incluindo importação/exportação e cálculo de IAA.
+\end{itemize}
 
 \section{Protótipos de Interface}
 
@@ -145,7 +154,7 @@ O sistema mantém um salvamento automático do progresso, permitindo que os anot
 \begin{figure}[p]
     \centering
     \includegraphics[width=0.95\textwidth,height=0.95\textheight,keepaspectratio]{images/2A-ERT-B.drawio.png}
-    \caption{Modelo de Entidade-Relação do Sistema}
+    \caption{Modelo de Entidade-Relação final do Sistema.}
     \label{fig:modelo-er}
 \end{figure}
 
@@ -155,7 +164,7 @@ O sistema mantém um salvamento automático do progresso, permitindo que os anot
         \makebox[\textwidth][c]{%
             \includegraphics[width=0.8\paperheight, angle=0, keepaspectratio]{images/mapaDeNavegacaoSistema.drawio.png}
         }
-        \caption{Mapa de Navegação do Sistema}
+        \caption{Mapa de Navegação do Sistema.}
         \label{fig:mapa-navegacao}
     \end{figure}
 \end{landscape}

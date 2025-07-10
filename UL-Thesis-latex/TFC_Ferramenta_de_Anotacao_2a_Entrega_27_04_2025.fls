@@ -1,8 +1,8 @@
-PWD /Users/fabiofalopes/Documents/projetos/rascunhos/vit/UL-Thesis-latex
+PWD /Users/fabiofalopes/Documents/projetos/hub/ann-tfc/UL-Thesis-latex
 INPUT /usr/local/texlive/2025/texmf.cnf
 INPUT /usr/local/texlive/2025/texmf-dist/web2c/texmf.cnf
 INPUT /usr/local/texlive/2025/texmf-var/web2c/xetex/xelatex.fmt
-INPUT /Users/fabiofalopes/Documents/projetos/rascunhos/vit/UL-Thesis-latex/main.tex
+INPUT /Users/fabiofalopes/Documents/projetos/hub/ann-tfc/UL-Thesis-latex/main.tex
 OUTPUT TFC_Ferramenta_de_Anotacao_2a_Entrega_27_04_2025.log
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/base/report.cls
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/base/report.cls

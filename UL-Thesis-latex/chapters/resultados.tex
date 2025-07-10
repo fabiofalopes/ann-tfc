@@ -1,4 +1,63 @@
 \chapter{Resultados}
+\label{cha:resultados}
 
-% Este capítulo será desenvolvido nas fases posteriores do projeto,
-% quando houver resultados concretos para apresentar.
+Este capítulo apresenta os resultados concretos obtidos com o desenvolvimento da ferramenta de anotação. A apresentação está dividida em três áreas principais: uma visão geral da plataforma final, uma análise detalhada das funcionalidades chave implementadas, com especial destaque para o cálculo automático de métricas de concordância, e a documentação técnica produzida.
+
+\section{Apresentação da Plataforma}
+
+A solução desenvolvida é uma aplicação web completa que serve como um ambiente integrado para a anotação de diálogos de chat, especificamente para a tarefa de \textit{chat disentanglement}. A plataforma foi desenhada para servir dois perfis de utilizador distintos: o \textbf{Anotador}, focado na tarefa de anotação, e o \textbf{Administrador}, responsável pela gestão de projetos, utilizadores e pela análise dos dados.
+
+% TODO: Inserir aqui uma figura com o mapa de navegação do site (sitemap)
+% e descrever brevemente as principais vistas (Login, Dashboard Anotador,
+% Página de Anotação, Dashboard Admin, Página de Projeto Admin).
+% Usar os screenshots da pasta sitemap_screenshots como base.
+
+\section{Resultados da Implementação}
+
+Esta secção detalha as funcionalidades mais relevantes que foram implementadas, demonstrando o cumprimento dos requisitos definidos e respondendo ao feedback recebido.
+
+\subsection{Cálculo de Inter-Annotator Agreement (IAA)}
+
+Uma das funcionalidades centrais da plataforma é o cálculo automático da métrica de concordância entre anotadores (IAA), um requisito explícito do júri. Foi implementado o algoritmo \textbf{1-to-1 agreement}, que avalia a concordância estrutural entre os \textit{threads} criados por diferentes anotadores.
+
+O processo de cálculo para uma dada sala de chat segue os seguintes passos:
+\begin{enumerate}
+    \item \textbf{Agregação de Anotações:} O sistema agrupa todas as anotações por anotador.
+    \item \textbf{Cálculo Par a Par:} A concordância é calculada para cada par de anotadores (e.g., Anotador A vs. Anotador B).
+    \item \textbf{Média Global:} O valor final de IAA é a média aritmética dos scores de todos os pares.
+\end{enumerate}
+
+O núcleo do algoritmo reside na forma como a concordância entre dois anotadores é calculada. O sistema constrói uma matriz de custo onde a dissimilaridade entre um \textit{thread} do primeiro anotador e um \textit{thread} do segundo é calculada com base no \textbf{Índice de Jaccard}:
+\[ J(A, B) = \frac{|A \cap B|}{|A \cup B|} \]
+onde \(A\) e \(B\) são os conjuntos de mensagens que compõem cada \textit{thread}. A matriz de custo utiliza a dissimilaridade, dada por \(1 - J(A, B)\).
+
+Posteriormente, o \textbf{Algoritmo Húngaro} (implementado através da função `linear_sum_assignment` da biblioteca SciPy) é utilizado para encontrar a atribuição ótima que minimiza o custo total, ou seja, que maximiza a semelhança entre os \textit{threads} dos dois anotadores.
+
+% TODO: Inserir aqui uma figura do ecrã de Análise de IAA (AdminProjectPage)
+% que mostra a matriz de similaridade e o score final de IAA. Explicar o
+% que a figura representa.
+
+\subsection{Gestão de Projetos e Utilizadores}
+
+A plataforma fornece uma interface de administração robusta que permite a gestão completa do ciclo de vida de um projeto de anotação. As funcionalidades incluem:
+\begin{itemize}
+    \item Criação e remoção de projetos.
+    \item Criação e remoção de utilizadores.
+    \item Atribuição de utilizadores a projetos específicos, garantindo o isolamento dos dados.
+\end{itemize}
+
+\subsection{Importação e Exportação de Dados}
+
+Para facilitar a integração com outros fluxos de trabalho, foram desenvolvidas funcionalidades de importação e exportação de dados, um ponto também mencionado pelo júri.
+\begin{itemize}
+    \item \textbf{Importação de Mensagens:} Os administradores podem importar diálogos para uma nova sala de chat a partir de um ficheiro CSV.
+    \item \textbf{Importação de Anotações:} O sistema suporta a importação em lote de anotações a partir de um ficheiro JSON, onde cada anotação é corretamente atribuída ao seu anotador.
+    \item \textbf{Exportação de Projetos:} Todos os dados de uma sala de chat (mensagens e todas as anotações) podem ser exportados para um ficheiro JSON, facilitando a análise externa.
+\end{itemize}
+
+\section{Documentação Técnica da API}
+
+Como entregável técnico, foi produzida uma documentação completa da API RESTful da aplicação. A API foi desenhada seguindo os princípios REST e documentada utilizando o standard OpenAPI, o que permite a geração automática de clientes e coleções para ferramentas como o Postman. A documentação detalha todos os endpoints disponíveis, os seus parâmetros, os corpos das requisições e os possíveis códigos de resposta.
+
+% TODO: Inserir uma pequena tabela ou imagem que resuma os principais
+% grupos de endpoints (Auth, Projects, Annotations, Admin).
