@@ -77,7 +77,7 @@ uploads/
 *.csv
 !requirements.txt
 !test_api.sh
-analysis-/
+analysis/
 
 # Alembic
 alembic/versions/*.py
