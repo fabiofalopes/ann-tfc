@@ -7,9 +7,9 @@ import:
   default_user_password: password
   email_domain: research.pt
 project:
-  last_used_project_id: 22
+  last_used_project_id: 27
   mode: select_existing
   new_project:
-    description: Project created from Excel import tool
-    name: Excel Import Project
+    description: Annotated Chatrooms for visualization
+    name: VIO
   project_id: 1
