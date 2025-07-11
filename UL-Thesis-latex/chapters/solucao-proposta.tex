@@ -1,26 +1,25 @@
 \chapter{Solução Proposta}
 \label{cha:solucao_proposta}
 
-Este capítulo detalha a solução técnica implementada para responder aos requisitos especificados. A apresentação abrange a arquitetura global do sistema, as tecnologias e ferramentas selecionadas para o seu desenvolvimento, e uma descrição dos principais componentes do frontend e do backend.
+Este capítulo detalha a solução técnica implementada para responder aos requisitos especificados. O conteúdo abrange a arquitetura global do sistema, as tecnologias e ferramentas selecionadas para o seu desenvolvimento, e uma descrição dos principais componentes do frontend e do backend.
 
 \section{Arquitetura da Solução}
 
-A plataforma foi desenhada seguindo uma \textbf{arquitetura cliente-servidor desacoplada}, uma abordagem moderna que promove a separação de responsabilidades, a escalabilidade e a manutenibilidade. A solução é composta por dois sistemas independentes que comunicam através de uma API bem definida.
+A plataforma foi concebida seguindo uma \textbf{arquitetura cliente-servidor desacoplada}, uma abordagem que promove a separação de responsabilidades, a escalabilidade e a manutenibilidade. A solução é composta por dois sistemas independentes que comunicam através de uma API bem definida.
 
 \begin{itemize}
-    \item \textbf{Frontend (Cliente):} Uma \textit{Single-Page Application} (SPA) desenvolvida com a biblioteca \textbf{React}. A sua única responsabilidade é renderizar a interface do utilizador (UI) e gerir o estado da interação do utilizador. Toda a lógica de negócio, processamento de dados e autenticação são delegados ao backend através de chamadas a uma API RESTful. Esta abordagem de "cliente puro" garante que o frontend permanece focado na experiência do utilizador.
+    \item \textbf{Frontend (Cliente):} Uma \textit{Single-Page Application} (SPA) desenvolvida com a biblioteca \textbf{React}. A sua responsabilidade é renderizar a interface do utilizador (UI) e gerir o estado da interação do utilizador. A lógica de negócio, processamento de dados e autenticação são delegados ao backend através de chamadas a uma API RESTful. Esta abordagem de "cliente puro" garante que o frontend permanece focado na experiência do utilizador.
 
-    \item \textbf{Backend (Servidor):} Um servidor de API RESTful desenvolvido com a framework \textbf{FastAPI} em Python. Este componente é o cérebro da aplicação, responsável por:
+    \item \textbf{Backend (Servidor):} Um servidor de API RESTful desenvolvido com a framework \textbf{FastAPI} em Python. Este componente é responsável por:
     \begin{itemize}
-        \item Implementar toda a lógica de negócio.
+        \item Implementar a lógica de negócio.
         \item Gerir a autenticação e autorização de utilizadores.
-        \item Executar todas as operações de base de dados (CRUD - Create, Read, Update, Delete).
-        \item Realizar os cálculos computacionalmente intensivos, como o Inter-Annotator Agreement (IAA).
+        \item Executar as operações de base de dados (CRUD - Create, Read, Update, Delete).
+        \item Realizar os cálculos computacionalmente intensivos, como o \textit{Inter-Annotator Agreement} (IAA).
     \end{itemize}
 \end{itemize}
 
-A comunicação entre os dois componentes é feita exclusivamente através de requisições HTTP, com os dados a serem trocados no formato JSON.
-% TODO: Incluir um diagrama de arquitetura de alto nível que mostre os dois componentes (React App, FastAPI App), a base de dados, e o fluxo de comunicação via API REST.
+A comunicação entre os dois componentes é feita exclusivamente através de requisições HTTP, com a troca de dados em formato JSON.
 
 \section{Tecnologias e Ferramentas Utilizadas}
 
@@ -32,10 +31,10 @@ A seleção de tecnologias foi guiada por critérios de performance, maturidade,
         \hline
         \textbf{Componente} & \textbf{Tecnologia/Ferramenta} & \textbf{Justificação} \\
         \hline
-        \textbf{Frontend} & React 18 & Framework líder para SPAs, com um vasto ecossistema e gestão de estado eficiente através de Hooks e Context API. \\
+        \textbf{Frontend} & React 18 & Framework estabelecido para SPAs, com um vasto ecossistema e gestão de estado eficiente através de Hooks e Context API. \\
         & JavaScript (ES6+) & Linguagem padrão para desenvolvimento web. \\
-        & Axios & Cliente HTTP para realizar as chamadas à API RESTful de forma fiável e com gestão de intercetores. \\
-        & CSS3 & Estilização dos componentes para uma interface limpa e funcional. \\
+        & Axios & Cliente HTTP para realizar as chamadas à API RESTful de forma fiável e com gestão de interceptores. \\
+        & CSS & Estilização dos componentes para uma interface limpa e funcional. \\
         \hline
         \textbf{Backend} & Python 3.11 & Linguagem robusta com um forte ecossistema para ciência de dados e desenvolvimento web. \\
         & FastAPI & Framework web de alta performance com validação de dados automática e geração de documentação OpenAPI. \\
@@ -45,15 +44,27 @@ A seleção de tecnologias foi guiada por critérios de performance, maturidade,
         & SciPy & Biblioteca para computação científica, utilizada para o cálculo do IAA (Algoritmo Húngaro). \\
         & python-jose, passlib & Bibliotecas para a gestão de JWTs e hashing de passwords, garantindo a segurança. \\
         \hline
-        \textbf{Base de Dados} & PostgreSQL & SGBD relacional robusto e pronto para produção. \\
-        & SQLite & SGBD leve e baseado em ficheiro, ideal para desenvolvimento e testes locais. \\
+        \textbf{Base de Dados} & SQLite & SGBD relacional leve e baseado em ficheiro, adequado para o âmbito do projeto. \\
         \hline
-        \textbf{DevOps} & Docker & Plataforma de contentorização para criar ambientes de desenvolvimento e produção consistentes. \\
+        \textbf{DevOps} & Docker & Plataforma de contentorização para criar ambientes de desenvolvimento consistentes. \\
         \hline
     \end{tabular}
     \caption{Tecnologias e Ferramentas Utilizadas na Solução}
     \label{tab:tecnologias_utilizadas}
 \end{table}
+
+\section{Fluxo de Trabalho Suportado}
+
+A solução implementa um fluxo de trabalho estruturado para o processo de anotação de \textit{chat disentanglement}:
+
+\begin{enumerate}
+    \item \textbf{Configuração do Projeto:} O administrador cria um projeto e define os anotadores que irão participar.
+    \item \textbf{Importação de Dados:} O administrador importa o corpus de mensagens (formato CSV) para o sistema.
+    \item \textbf{Atribuição de Tarefas:} O sistema organiza as mensagens em salas de chat e atribui-as aos anotadores.
+    \item \textbf{Processo de Anotação:} Os anotadores acedem às suas salas atribuídas e realizam a tarefa de classificação em \textit{threads}.
+    \item \textbf{Cálculo de Métricas:} O administrador pode solicitar o cálculo automático do IAA para avaliar a concordância entre anotadores.
+    \item \textbf{Exportação de Resultados:} Os dados anotados e as métricas podem ser exportados para análise posterior.
+\end{enumerate}
 
 \section{Componentes da Solução}
 
@@ -62,9 +73,9 @@ A seleção de tecnologias foi guiada por critérios de performance, maturidade,
 O frontend foi estruturado para ser modular e de fácil manutenção, seguindo as melhores práticas do React.
 
 \begin{itemize}
-    \item \textbf{Componentes de Página:} Componentes de alto nível que representam uma vista completa (e.g., \texttt{AdminDashboard.js}, \texttt{AnnotatorChatRoomPage.js}). São estes componentes que contêm a lógica de \textit{data-fetching}, chamando a API para obter os dados necessários.
+    \item \textbf{Componentes de Página:} Componentes de alto nível que representam uma vista completa (e.g., \texttt{AdminDashboard.js}, \texttt{AnnotatorChatRoomPage.js}). Estes componentes contêm a lógica de \textit{data-fetching}, chamando a API para obter os dados necessários.
     \item \textbf{Componentes de UI:} Componentes mais pequenos e reutilizáveis (e.g., \texttt{MessageBubble.js}, \texttt{ProjectCard.js}) que são puramente presentacionais e recebem dados via \textit{props}.
-    \item \textbf{Gestão de API (\texttt{/src/utils/api.js}):} Módulo centralizador que exporta todas as funções de comunicação com o backend. Utiliza o \texttt{axios} e implementa intercetores para gerir automaticamente a injeção e o refrescamento de tokens de autenticação (JWT).
+    \item \textbf{Gestão de API (\texttt{/src/utils/api.js}):} Módulo centralizador que exporta as funções de comunicação com o backend. Utiliza o \texttt{axios} e implementa interceptores para gerir automaticamente a injeção e o refrescamento de tokens de autenticação (JWT).
     \item \textbf{Gestão de Estado (\texttt{/src/contexts}):} Para o estado global, como a informação do utilizador autenticado, foi utilizado o Context API do React. O \texttt{AuthContext} disponibiliza o estado de autenticação a qualquer componente que necessite, enquanto o hook \texttt{useState} é usado para o estado local.
 \end{itemize}
 
@@ -74,8 +85,8 @@ O backend está organizado por funcionalidades, seguindo as melhores práticas d
 
 \begin{itemize}
     \item \textbf{Routers da API (\texttt{/app/api}):} Os endpoints estão divididos em ficheiros modulares (\texttt{admin.py}, \texttt{projects.py}, etc.), cada um contendo um \texttt{APIRouter}, o que mantém o código organizado por domínio.
-    \item \textbf{Lógica de Negócio e Acesso a Dados (\texttt{/app/crud.py}):} Este ficheiro contém toda a lógica que interage com a base de dados, executando as queries (via SQLAlchemy), realizando cálculos (como o IAA) e implementando as regras de negócio.
+    \item \textbf{Lógica de Negócio e Acesso a Dados (\texttt{/app/crud.py}):} Este ficheiro contém a lógica que interage com a base de dados, executando as queries (via SQLAlchemy), realizando cálculos (como o IAA) e implementando as regras de negócio.
     \item \textbf{Modelos da Base de Dados (\texttt{/app/models.py}):} Define o esquema da base de dados através de classes Python que herdam do \texttt{Base} do SQLAlchemy.
-    \item \textbf{Esquemas da API (\texttt{/app/schemas.py}):} Contém os modelos Pydantic que definem a "forma" dos dados que entram e saem da API, garantindo a validação automática das requisições e a serialização das respostas.
+    \item \textbf{Esquemas da API (\texttt{/app/schemas.py}):} Contém os modelos Pydantic que definem a estrutura dos dados que entram e saem da API, garantindo a validação automática das requisições e a serialização das respostas.
     \item \textbf{Autenticação e Dependências (\texttt{/app/dependencies.py}):} Código de suporte para a segurança da API, implementando a lógica de validação de tokens JWT e criando dependências reutilizáveis para obter o utilizador atual ou verificar permissões.
 \end{itemize}

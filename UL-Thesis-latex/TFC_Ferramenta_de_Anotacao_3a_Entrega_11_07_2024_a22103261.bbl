@@ -91,6 +91,42 @@
       \verb https://doccano.github.io/doccano/developer_guide/
       \endverb
     \endentry
+    \entry{elsner2008you}{inproceedings}{}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=c9d57159379aba20fbf7b9a410381725}{%
+           family={Elsner},
+           familyi={E\bibinitperiod},
+           given={Micha},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=0fdf25cc625982a538938b5c9a3024f8}{%
+           family={Charniak},
+           familyi={C\bibinitperiod},
+           given={Eugene},
+           giveni={E\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{28051d5aece428e617bd07bd856b0db0}
+      \strng{fullhash}{28051d5aece428e617bd07bd856b0db0}
+      \strng{fullhashraw}{28051d5aece428e617bd07bd856b0db0}
+      \strng{bibnamehash}{28051d5aece428e617bd07bd856b0db0}
+      \strng{authorbibnamehash}{28051d5aece428e617bd07bd856b0db0}
+      \strng{authornamehash}{28051d5aece428e617bd07bd856b0db0}
+      \strng{authorfullhash}{28051d5aece428e617bd07bd856b0db0}
+      \strng{authorfullhashraw}{28051d5aece428e617bd07bd856b0db0}
+      \field{extraname}{1}
+      \field{sortinit}{E}
+      \field{sortinithash}{8da8a182d344d5b9047633dfc0cc9131}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the 46th Annual Meeting of the Association for Computational Linguistics on Human Language Technologies}
+      \field{title}{You talking to me? a corpus and algorithm for conversation disentanglement}
+      \field{year}{2008}
+      \field{pages}{834\bibrangedash 842}
+      \range{pages}{9}
+    \endentry
     \entry{elsner2010disentangling}{article}{}{}
       \name{author}{2}{}{%
         {{un=0,uniquepart=base,hash=c9d57159379aba20fbf7b9a410381725}{%
@@ -114,6 +150,7 @@
       \strng{authornamehash}{28051d5aece428e617bd07bd856b0db0}
       \strng{authorfullhash}{28051d5aece428e617bd07bd856b0db0}
       \strng{authorfullhashraw}{28051d5aece428e617bd07bd856b0db0}
+      \field{extraname}{2}
       \field{sortinit}{E}
       \field{sortinithash}{8da8a182d344d5b9047633dfc0cc9131}
       \field{extradatescope}{labelyear}

@@ -2384,6 +2384,10 @@
     <bcf:citekey order="6" intorder="2">brat-about</bcf:citekey>
     <bcf:citekey order="7" intorder="1">doccano-repo</bcf:citekey>
     <bcf:citekey order="7" intorder="2">doccano-docs</bcf:citekey>
+    <bcf:citekey order="8" intorder="1">elsner2008you</bcf:citekey>
+    <bcf:citekey order="9" intorder="1">elsner2008you</bcf:citekey>
+    <bcf:citekey order="10" intorder="1">elsner2008you</bcf:citekey>
+    <bcf:citekey order="11" intorder="1">elsner2008you</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nyt">
