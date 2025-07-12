@@ -460,14 +460,14 @@ ann-tfc/
 
 ```mermaid
 graph LR
-    A["1. Variáveis Ambiente<br/>export SERVER_IP=..."] --> B["2. Ficheiro .env<br/>SERVER_IP=..."]
-    B --> C["3. docker-compose.yml<br/>${SERVER_IP:-localhost}"]
-    C --> D["4. Defaults Hardcoded<br/>localhost"]
+    A["1 - Variáveis Ambiente (export SERVER_IP=...)"] --> B["2 - Ficheiro .env (SERVER_IP=...)"]
+    B --> C["3 - docker-compose.yml (${SERVER_IP:-localhost})"]
+    C --> D["4 - Defaults Hardcoded (localhost)"]
     
-    style A fill:#ff6b6b
-    style B fill:#4ecdc4
-    style C fill:#45b7d1
-    style D fill:#96ceb4
+    style A fill:#F9A825
+    style B fill:#29B6F6
+    style C fill:#66BB6A
+    style D fill:#BDBDBD
 ```
 
 **Como funciona a prioridade**:
