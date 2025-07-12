@@ -460,9 +460,9 @@ ann-tfc/
 
 ```mermaid
 graph LR
-    A[1. Variáveis Ambiente<br/>export SERVER_IP=...] --> B[2. Ficheiro .env<br/>SERVER_IP=...]
-    B --> C[3. docker-compose.yml<br/>${SERVER_IP:-localhost}]
-    C --> D[4. Defaults Hardcoded<br/>localhost]
+    A["1. Variáveis Ambiente<br/>export SERVER_IP=..."] --> B["2. Ficheiro .env<br/>SERVER_IP=..."]
+    B --> C["3. docker-compose.yml<br/>${SERVER_IP:-localhost}"]
+    C --> D["4. Defaults Hardcoded<br/>localhost"]
     
     style A fill:#ff6b6b
     style B fill:#4ecdc4
@@ -703,10 +703,3 @@ ip route | grep default
 - Sistema de backup automático
 - API webhooks para integrações
 - Mobile responsiveness avançado
-
----
-
-**📧 Suporte**: Para questões técnicas, consultar secção Troubleshooting ou logs do sistema.
-
-**🎓 Desenvolvido por**: Fábio Lopes | **Orientação**: ISCTE-IUL  
-**📅 Última actualização**: Janeiro 2025 
