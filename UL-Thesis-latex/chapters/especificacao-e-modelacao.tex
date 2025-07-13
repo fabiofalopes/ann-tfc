@@ -5,74 +5,7 @@ Neste capítulo, são detalhadas as especificações técnicas da solução dese
 
 \section{Análise de Requisitos}
 
-A tabela seguinte resume os requisitos funcionais (RF) e não-funcionais (RNF) identificados para o projeto, juntamente com o estado final da sua implementação.
-
-% Tabela de Requisitos atualizada
-\begin{longtable}{|p{0.08\textwidth}|p{0.48\textwidth}|p{0.12\textwidth}|p{0.25\textwidth}|}
-    \caption{Tabela de Requisitos e Estado de Implementação.} \label{tab:requisitos} \\
-    \hline
-    \textbf{ID} & \textbf{Descrição} & \textbf{Estado} & \textbf{Notas} \\
-    \hline
-    \endfirsthead
-    
-    \multicolumn{4}{c}%
-    {{\bfseries \tablename\ \thetable{} -- continuação da página anterior}} \\
-    \hline
-    \textbf{ID} & \textbf{Descrição} & \textbf{Estado} & \textbf{Notas} \\
-    \hline
-    \endhead
-    
-    \hline \multicolumn{4}{|r|}{{Continua na página seguinte...}} \\ \hline
-    \endfoot
-    
-    \hline
-    \endlastfoot
-    
-    \multicolumn{4}{|c|}{\textbf{Requisitos Funcionais}} \\
-    \hline
-    RF1 & Suporte à importação de dados (CSV, JSON) & Cumprido & Implementada importação de mensagens via CSV e anotações via JSON. \\
-    \hline
-    RF2 & Organização de dados por projetos & Cumprido & Estrutura central da aplicação. \\
-    \hline
-    RF3 & Exportação dos dados anotados (JSON) & Cumprido & Funcionalidade de exportação por sala de chat implementada. \\
-    \hline
-    RF4 & Interface de utilizador clara e funcional & Cumprido & Interface React desenvolvida com foco na usabilidade para anotação. \\
-    \hline
-    RF5 & Suporte a múltiplos anotadores por projeto & Cumprido & Sistema de atribuição de utilizadores a projetos. \\
-    \hline
-    RF6 & Gestão de atribuição de tarefas & Cumprido & Administradores podem atribuir/remover utilizadores de projetos. \\
-    \hline
-    RF7 & Interface especializada para chat disentanglement & Cumprido & Ecrã de anotação dedicado com gestão de threads. \\
-    \hline
-    RF8 & Sistema de tagging para classificação em threads & Cumprido & Funcionalidade nuclear da anotação. \\
-    \hline
-    RF9 & Visualização sequencial das mensagens & Cumprido & A sala de chat apresenta as mensagens por ordem. \\
-    \hline
-    RF10 & Armazenamento para cálculo de métricas & Cumprido & O modelo de dados permite o cálculo de IAA. \\
-    \hline
-    RF11 & Autenticação de utilizadores & Cumprido & Implementado com JWT (access e refresh tokens). \\
-    \hline
-    RF12 & Definição de roles (admin/anotador) & Cumprido & O modelo `User` contém o campo `is\_admin`. \\
-    \hline
-    RF13 & Controlo de acesso baseado em permissões & Cumprido & Endpoints da API protegidos com base no role. \\
-    \hline
-    \multicolumn{4}{|c|}{\textbf{Requisitos Não Funcionais}} \\
-    \hline
-    RNF1 & Tempo de resposta adequado & Cumprido & A API responde rapidamente a pedidos interativos. \\
-    \hline
-    RNF2 & Processamento eficiente para múltiplos utilizadores & Parcialmente & A arquitetura suporta-o, mas não foram feitos testes de carga formais. \\
-    \hline
-    RNF3 & Interface responsiva & Parcialmente & O design é funcional mas não foi totalmente otimizado para todos os tamanhos de ecrã. \\
-    \hline
-    RNF4 & Feedback visual claro & Cumprido & A interface React fornece feedback sobre o estado (loading, error, success). \\
-    \hline
-    RNF5 & Interface simples e intuitiva & Cumprido & O design focou-se na simplicidade para a tarefa de anotação. \\
-    \hline
-    RNF6 & Backup automático de anotações & Não Cumprido & Não implementado. Requer uma solução de infraestrutura (e.g., cron jobs na base de dados). \\
-    \hline
-    RNF7 & Logging de atividades críticas & Parcialmente & O backend utiliza logging básico, mas não um sistema de logging estruturado e exaustivo. \\
-    \hline
-\end{longtable}
+A análise de requisitos identificou os requisitos funcionais (RF) e não-funcionais (RNF) para o projeto, juntamente com o estado final da sua implementação. A tabela completa de requisitos e o seu estado de implementação encontra-se detalhada no final deste capítulo (ver Tabela~\ref{tab:requisitos} na página~\pageref{tab:requisitos}).
 
 \section{Modelação da Solução}
 
@@ -164,7 +97,7 @@ O sistema mantém uma gravação automática do progresso, permitindo que os ano
 
 \begin{figure}[p]
     \centering
-    \includegraphics[width=0.95\textwidth,height=0.95\textheight,keepaspectratio]{images/2A-ERT-B.drawio.png}
+    \includegraphics[width=0.95\textwidth,height=0.95\textheight,keepaspectratio]{images/3-modelo-de-entidade-relacao-final-do-sistema.png}
     \caption{Modelo de Entidade-Relação final do Sistema.}
     \label{fig:modelo-er}
 \end{figure}
@@ -172,10 +105,86 @@ O sistema mantém uma gravação automática do progresso, permitindo que os ano
 \begin{landscape}
     \begin{figure}[p]
         \centering
-        \makebox[\textwidth][c]{%
-            \includegraphics[width=0.8\paperheight, angle=0, keepaspectratio]{images/mapaDeNavegacaoSistema.drawio.png}
-        }
+        \includegraphics[width=0.9\linewidth, height=0.85\textheight, keepaspectratio]{images/3-mapa-de-navegacao-do-sistema.png}
         \caption{Mapa de Navegação do Sistema.}
         \label{fig:mapa-navegacao}
     \end{figure}
 \end{landscape}
+
+\begin{landscape}
+    \begin{figure}[p]
+        \centering
+        \includegraphics[width=0.9\linewidth, height=0.85\textheight, keepaspectratio]{images/3-fluxograma-de-navegacao-por-perfil.png}
+        \caption{Fluxograma de Navegação por Perfil.}
+        \label{fig:fluxograma-navegacao-perfil}
+    \end{figure}
+\end{landscape}
+
+\clearpage
+
+% Tabela de Requisitos movida para o final do capítulo
+\begin{longtable}{|p{0.08\textwidth}|p{0.50\textwidth}|p{0.15\textwidth}|p{0.22\textwidth}|}
+    \caption{Tabela de Requisitos e Estado de Implementação.} \label{tab:requisitos} \\
+    \hline
+    \textbf{ID} & \textbf{Descrição} & \textbf{Estado} & \textbf{Notas} \\
+    \hline
+    \endfirsthead
+    
+    \multicolumn{4}{c}%
+    {{\bfseries \tablename\ \thetable{} -- continuação da página anterior}} \\
+    \hline
+    \textbf{ID} & \textbf{Descrição} & \textbf{Estado} & \textbf{Notas} \\
+    \hline
+    \endhead
+    
+    \hline \multicolumn{4}{|r|}{{Continua na página seguinte...}} \\ \hline
+    \endfoot
+    
+    \hline
+    \endlastfoot
+    
+    \multicolumn{4}{|c|}{\textbf{Requisitos Funcionais}} \\
+    \hline
+    RF1 & Suporte à importação de dados (CSV, JSON) & Cumprido & Implementada importação de mensagens via CSV e anotações via JSON. \\
+    \hline
+    RF2 & Organização de dados por projetos & Cumprido & Estrutura central da aplicação. \\
+    \hline
+    RF3 & Exportação dos dados anotados (JSON) & Cumprido & Funcionalidade de exportação por sala de chat implementada. \\
+    \hline
+    RF4 & Interface de utilizador clara e funcional & Cumprido & Interface React desenvolvida com foco na usabilidade para anotação. \\
+    \hline
+    RF5 & Suporte a múltiplos anotadores por projeto & Cumprido & Sistema de atribuição de utilizadores a projetos. \\
+    \hline
+    RF6 & Gestão de atribuição de tarefas & Cumprido & Administradores podem atribuir/\-remover utilizadores de projetos. \\
+    \hline
+    RF7 & Interface especializada para chat disentanglement & Cumprido & Ecrã de anotação dedicado com gestão de threads. \\
+    \hline
+    RF8 & Sistema de tagging para classificação em threads & Cumprido & Funcionalidade nuclear da anotação. \\
+    \hline
+    RF9 & Visualização sequencial das mensagens & Cumprido & A sala de chat apresenta as mensagens por ordem. \\
+    \hline
+    RF10 & Armazenamento para cálculo de métricas & Cumprido & O modelo de dados permite o cálculo de IAA. \\
+    \hline
+    RF11 & Autenticação de utilizadores & Cumprido & Implementado com JWT (access e refresh tokens). \\
+    \hline
+    RF12 & Definição de roles (admin/\-anotador) & Cumprido & O modelo `User` contém o campo `is\_admin`. \\
+    \hline
+    RF13 & Controlo de acesso baseado em permissões & Cumprido & Endpoints da API protegidos com base no role. \\
+    \hline
+    \multicolumn{4}{|c|}{\textbf{Requisitos Não Funcionais}} \\
+    \hline
+    RNF1 & Tempo de resposta adequado & Cumprido & A API responde rapidamente a pedidos interativos. \\
+    \hline
+    RNF2 & Processamento eficiente para múltiplos utilizadores & Parcial\-mente & A arquitetura suporta-o, mas não foram feitos testes de carga formais. \\
+    \hline
+    RNF3 & Interface responsiva & Parcial\-mente & O design é funcional mas não foi totalmente otimizado para todos os tamanhos de ecrã. \\
+    \hline
+    RNF4 & Feedback visual claro & Cumprido & A interface React fornece feedback sobre o estado (loading, error, success). \\
+    \hline
+    RNF5 & Interface simples e intuitiva & Cumprido & O design focou-se na simplicidade para a tarefa de anotação. \\
+    \hline
+    RNF6 & Backup automático de anotações & Não Cumprido & Não implementado. Requer uma solução de infraestrutura (e.g., cron jobs na base de dados). \\
+    \hline
+    RNF7 & Logging de atividades críticas & Parcial\-mente & O backend utiliza logging básico, mas não um sistema de logging estruturado e exaustivo. \\
+    \hline
+\end{longtable}

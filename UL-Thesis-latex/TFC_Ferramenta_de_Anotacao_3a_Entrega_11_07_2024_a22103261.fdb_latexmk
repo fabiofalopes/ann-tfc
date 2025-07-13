@@ -1,18 +1,18 @@
 # Fdb version 4
-["biber TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261"] 1752209869.84963 "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.bcf" "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.bbl" "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261" 1752211785.74006 0
-  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.bcf" 1752211785.62439 109575 30947fd18174d8d9e0b91f918e26f980 "pdflatex"
+["biber TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261"] 1752209869.84963 "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.bcf" "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.bbl" "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261" 1752430150.3748 0
+  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.bcf" 1752430150.25053 109575 30947fd18174d8d9e0b91f918e26f980 "pdflatex"
   "bibliography.bib" 1752171161.38625 2268 af3319a9ab8944c9aa2a1b8c82804b72 ""
   (generated)
   "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.bbl"
   "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.blg"
   (rewritten before read)
-["makeindex TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.idx"] 1752211779.34136 "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.idx" "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.ind" "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261" 1752211785.73999 0
-  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.idx" 1752211784.58086 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+["makeindex TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.idx"] 1752211779.34136 "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.idx" "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.ind" "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261" 1752430150.37466 0
+  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.idx" 1752430148.18677 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
   (generated)
   "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.ilg"
   "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.ind"
   (rewritten before read)
-["pdflatex"] 1752211783.64852 "/Users/fabiofalopes/Documents/projetos/hub/ann-tfc/UL-Thesis-latex/main.tex" "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.pdf" "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261" 1752211785.74026 0
+["pdflatex"] 1752430147.18181 "/Users/fabiofalopes/Documents/projetos/hub/ann-tfc/UL-Thesis-latex/main.tex" "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.pdf" "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261" 1752430150.37503 0
   "/Users/fabiofalopes/Documents/projetos/hub/ann-tfc/UL-Thesis-latex/main.tex" 1752211779.14254 4132 ce65b06855abfa4a309d3386340c781d ""
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
@@ -222,30 +222,31 @@
   "/usr/local/texlive/2025/texmf-dist/web2c/texmf.cnf" 1739380943 42148 61becc7c670cd061bb319c643c27fdd4 ""
   "/usr/local/texlive/2025/texmf-var/web2c/xetex/xelatex.fmt" 1745772446 5639819 637c26849e6d52e629ffbbd1f163c053 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
-  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.aux" 1752211785.6181 16982 d26add2631861e1d421841b26baa7d29 "pdflatex"
+  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.aux" 1752430150.24452 17240 9495a055892ad1aab062c9792b9207c6 "pdflatex"
   "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.bbl" 1752209871.22705 7374 7ecf36b6e020a91818f94ad33a63ee70 "biber TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261"
   "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.gls" 0 -1 0 ""
   "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.ind" 1752211779.43615 0 d41d8cd98f00b204e9800998ecf8427e "makeindex TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.idx"
-  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.lof" 1752211785.62518 560 960bec1da763abb03f189110da08f062 "pdflatex"
-  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.lot" 1752211785.62522 578 6891b507b2db7bf239f544feb56db909 "pdflatex"
-  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.out" 1752211785.62213 14170 6ee9cfefc72febfce78b5c8b7f7f47f6 "pdflatex"
-  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.run.xml" 1752211785.62497 2729 4add8a7ff5bd2bcd73e1db2c26d71a10 "pdflatex"
-  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.toc" 1752211785.62511 7904 3437ca6114303675b829c0b48a12b595 "pdflatex"
+  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.lof" 1752430150.25127 672 1b8f783912486e4e7f12959112a5804e "pdflatex"
+  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.lot" 1752430150.25132 578 9573a47ffa17018d05e27f8ffeb92c10 "pdflatex"
+  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.out" 1752430150.24842 14170 6ee9cfefc72febfce78b5c8b7f7f47f6 "pdflatex"
+  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.run.xml" 1752430150.25108 2729 4add8a7ff5bd2bcd73e1db2c26d71a10 "pdflatex"
+  "TFC_Ferramenta_de_Anotacao_3a_Entrega_11_07_2024_a22103261.toc" 1752430150.2512 7904 20a004b48f324ea88f03c8753331691c "pdflatex"
   "abstract.tex" 1749557889.81373 997 2ec709e55b4b4fae7b9a4ed8684a3378 ""
-  "chapters/conclusao.tex" 1752210529.7358 6388 b3a79897700fa8d67cf4f6396633fe84 ""
-  "chapters/especificacao-e-modelacao.tex" 1752211721.40025 10890 b76b1a28e02ec90602903030a92f4ee4 ""
+  "chapters/conclusao.tex" 1752430148.84549 6399 95993e45276c8ee551acf29f97426c3d ""
+  "chapters/especificacao-e-modelacao.tex" 1752429936.67628 11445 b9cf331fc3b399b9d42fd9a575817501 ""
   "chapters/introducao.tex" 1752211565.78236 6849 bbefdc7813eaadbf1b1f2b80bb062efe ""
-  "chapters/metodo-e-planeamento.tex" 1752210872.94894 8557 1ebc9e0d33355c398f38ec7d21476233 ""
+  "chapters/metodo-e-planeamento.tex" 1752429617.11939 8552 9eeb6766db4c8da1bf8c2471f6e0bc9b ""
   "chapters/pertinencia-e-viabilidade.tex" 1752211765.26425 7218 dbdc50e17caea31282c6faacf38ee14a ""
   "chapters/resultados.tex" 1752209531.9438 9377 8bbf2606f41d14c63a121b7c230ba4a8 ""
   "chapters/solucao-proposta.tex" 1752211229.95012 7695 ef13b8f5c41e40c4f8fddbbee5d03333 ""
   "chapters/testes-e-validacao.tex" 1752211119.64426 9867 9fd3d3bb974204f38da8aa060ec84a22 ""
   "copyright.tex" 1749557889.81591 1073 a783cde72c541412fee53810152c5a7a ""
   "cover.tex" 1752194780.33444 681 f17fa5a014b48479e55e660cee5bdfaa ""
-  "images/2A-ERT-B.drawio.png" 1749557889.81802 466111 dbec0485662a9ba2aba3e9f2d16782e5 ""
-  "images/Gant.drawio.png" 1749557889.81851 157432 a7363d29ae4a74f7493821dce46e1a3f ""
+  "images/3-cronograma-detalhado-do-projeto-gantt-chart.png" 1752428875.5305 657638 794083ef589158f0c7271c4b8c7aba98 ""
+  "images/3-fluxograma-de-navegacao-por-perfil.png" 1752428456.745 97111 10028edd6954128fa476beec13230e79 ""
+  "images/3-mapa-de-navegacao-do-sistema.png" 1752428311.43753 128661 4dd8ab5f9a5283f79e1d84c9f962b731 ""
+  "images/3-modelo-de-entidade-relacao-final-do-sistema.png" 1752429394.16237 370995 8130d916ee7eefbc90d3613df78bd600 ""
   "images/home_background.jpg" 1749557889.82152 125404 2453ba8eec8d51d95ee291efd8a7b829 ""
-  "images/mapaDeNavegacaoSistema.drawio.png" 1749557889.82205 165079 4082e0539dadeb41eba31d3fe742fa46 ""
   "main.tex" 1752211779.14254 4132 ce65b06855abfa4a309d3386340c781d ""
   "resumo.tex" 1749557889.82436 1111 a339dcdddbfecb615e5174e24e8fa1bf ""
   "ul-version.sty" 1749557889.82442 107 6f8b1957815e6907b7ff4fc0b4b2e9df ""

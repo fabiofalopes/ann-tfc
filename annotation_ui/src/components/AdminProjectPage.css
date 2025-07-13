@@ -669,3 +669,51 @@
 .chat-rooms-table th:nth-child(5) {
     text-align: center; /* Actions column centered */
 } 
+
+/* Status Legend Styles */
+.status-legend {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: var(--background-color-secondary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.status-legend h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.legend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.legend-text {
+    font-size: 0.85rem;
+    color: var(--text-color-secondary);
+}
+
+/* Responsive design for legend */
+@media (max-width: 768px) {
+    .legend-item {
+        white-space: normal;
+    }
+    
+    .legend-text {
+        font-size: 0.8rem;
+    }
+}

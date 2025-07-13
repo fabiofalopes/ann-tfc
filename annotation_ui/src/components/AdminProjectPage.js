@@ -371,6 +371,27 @@ const AdminProjectPage = () => {
                         </table>
                     </div>
                 )}
+                
+                {/* Status Legend */}
+                {chatRooms.length > 0 && (
+                    <div className="status-legend">
+                        <h4>Status Legend:</h4>
+                        <div className="legend-items">
+                            <div className="legend-item">
+                                <span className="status-badge status-complete">Annotated</span>
+                                <span className="legend-text">All annotators completed all messages</span>
+                            </div>
+                            <div className="legend-item">
+                                <span className="status-badge status-partial">In Progress</span>
+                                <span className="legend-text">2+ annotators completed, but others still pending</span>
+                            </div>
+                            <div className="legend-item">
+                                <span className="status-badge status-insufficient">Insufficient Data</span>
+                                <span className="legend-text">Less than 2 annotators completed all messages</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
             
             <div className="management-section danger-zone">
